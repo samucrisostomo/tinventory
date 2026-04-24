@@ -12,8 +12,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
     NavigationMenu,
+    NavigationMenuContent,
+    NavigationMenuLink,
     NavigationMenuItem,
     NavigationMenuList,
+    NavigationMenuTrigger,
     navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 import {
@@ -73,6 +76,17 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
             href: dashboardUrl,
             icon: LayoutGrid,
         },
+    ];
+
+    const cadastrosNavItems: NavItem[] = [
+        {
+            title: 'Locais',
+            href: '/locais',
+        },
+        {
+            title: 'Perfis',
+            href: '/perfis',
+        },
         {
             title: 'Usuários',
             href: '/users',
@@ -128,6 +142,26 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                     <span>{item.title}</span>
                                                 </Link>
                                             ))}
+                                            <div className="space-y-2">
+                                                <p className="px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                                                    Cadastros
+                                                </p>
+                                                <div className="flex flex-col space-y-3">
+                                                    {cadastrosNavItems.map(
+                                                        (item) => (
+                                                            <Link
+                                                                key={item.title}
+                                                                href={item.href}
+                                                                className="flex items-center space-x-2 pl-1 font-medium"
+                                                            >
+                                                                <span>
+                                                                    {item.title}
+                                                                </span>
+                                                            </Link>
+                                                        ),
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div className="flex flex-col space-y-4">
@@ -190,6 +224,64 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         )}
                                     </NavigationMenuItem>
                                 ))}
+                                <NavigationMenuItem className="relative flex h-full items-center">
+                                    <NavigationMenuTrigger
+                                        className={cn(
+                                            whenCurrentUrl(
+                                                '/locais',
+                                                activeItemStyles,
+                                            ) ||
+                                                whenCurrentUrl(
+                                                '/perfis',
+                                                activeItemStyles,
+                                            ) ||
+                                                whenCurrentUrl(
+                                                '/users',
+                                                activeItemStyles,
+                                            ) ||
+                                                whenCurrentUrl(
+                                                    '/empresas',
+                                                    activeItemStyles,
+                                                ) ||
+                                                whenCurrentUrl(
+                                                    '/fornecedores',
+                                                    activeItemStyles,
+                                                ),
+                                            'h-9 cursor-pointer px-3',
+                                        )}
+                                    >
+                                        Cadastros
+                                    </NavigationMenuTrigger>
+                                    <NavigationMenuContent>
+                                        <ul className="grid w-[220px] gap-1 p-2">
+                                            {cadastrosNavItems.map((item) => (
+                                                <li key={item.title}>
+                                                    <NavigationMenuLink asChild>
+                                                        <Link
+                                                            href={item.href}
+                                                            className={cn(
+                                                                'block rounded-sm px-3 py-2 text-sm',
+                                                                whenCurrentUrl(
+                                                                    item.href,
+                                                                    'bg-accent/50 text-accent-foreground',
+                                                                ),
+                                                            )}
+                                                        >
+                                                            {item.title}
+                                                        </Link>
+                                                    </NavigationMenuLink>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </NavigationMenuContent>
+                                    {(isCurrentUrl('/users') ||
+                                        isCurrentUrl('/locais') ||
+                                        isCurrentUrl('/perfis') ||
+                                        isCurrentUrl('/empresas') ||
+                                        isCurrentUrl('/fornecedores')) && (
+                                        <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
+                                    )}
+                                </NavigationMenuItem>
                             </NavigationMenuList>
                         </NavigationMenu>
                     </div>

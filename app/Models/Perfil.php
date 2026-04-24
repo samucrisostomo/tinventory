@@ -6,33 +6,23 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Empresa extends Model
+class Perfil extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'perfis';
+
     protected $fillable = [
-        'codigo',
         'nome',
-        'cnpj',
-        'endereco',
-        'cidade',
-        'estado',
-        'cep',
-        'telefone',
-        'email',
-        'observacoes',
-        'ativa',
+        'slug',
+        'descricao',
+        'ativo',
     ];
 
     protected function casts(): array
     {
         return [
-            'ativa' => 'boolean',
+            'ativo' => 'boolean',
         ];
-    }
-
-    public function locais()
-    {
-        return $this->hasMany(Local::class);
     }
 }
