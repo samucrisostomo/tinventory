@@ -6,30 +6,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class TipoMaterial extends Model
+class Marca extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'tipos_materiais';
-
     protected $fillable = [
         'nome',
-        'mascara',
         'descricao',
+        'tipo_material_id',
         'ativo',
-        'rastreavel',
     ];
 
     protected function casts(): array
     {
         return [
             'ativo' => 'boolean',
-            'rastreavel' => 'boolean',
         ];
     }
 
-    public function marcas()
+    public function tipoMaterial()
     {
-        return $this->hasMany(Marca::class);
+        return $this->belongsTo(TipoMaterial::class);
     }
 }
