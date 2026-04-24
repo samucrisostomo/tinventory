@@ -1,5 +1,4 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -20,7 +19,8 @@ import {
 import { Switch } from '@/components/ui/switch';
 import type { BreadcrumbItem } from '@/types';
 import { EllipsisVertical, Pencil } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { toast } from 'sonner';
 
 type UserListItem = {
     id: number;
@@ -44,6 +44,16 @@ export default function UsersIndex({ users }: Props) {
     const [sheetMode, setSheetMode] = useState<'create' | 'edit'>('create');
     const [sheetOpen, setSheetOpen] = useState(false);
     const [editingUserId, setEditingUserId] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash?.success, flash?.error]);
 
     const form = useForm({
         name: '',
@@ -123,20 +133,6 @@ export default function UsersIndex({ users }: Props) {
                     <h1 className="text-lg font-semibold">Usuários</h1>
                     <Button onClick={openCreateSheet}>Novo usuário</Button>
                 </div>
-
-                {flash?.success && (
-                    <Alert className="mb-4">
-                        <AlertTitle>Sucesso</AlertTitle>
-                        <AlertDescription>{flash.success}</AlertDescription>
-                    </Alert>
-                )}
-
-                {flash?.error && (
-                    <Alert className="mb-4" variant="destructive">
-                        <AlertTitle>Atenção</AlertTitle>
-                        <AlertDescription>{flash.error}</AlertDescription>
-                    </Alert>
-                )}
 
                 <div className="overflow-hidden rounded-lg border border-border">
                     <table className="w-full text-left text-sm">

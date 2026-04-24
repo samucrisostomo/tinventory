@@ -77,6 +77,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
             title: 'Usuários',
             href: '/users',
         },
+        {
+            title: 'Empresas',
+            href: '/empresas',
+        },
     ];
 
     return (

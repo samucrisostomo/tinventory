@@ -14,7 +14,7 @@ class UserController extends Controller
 {
     public function index(): Response
     {
-        return Inertia::render('users/index', [
+        return Inertia::render('cadastros/users/index', [
             'users' => User::query()
                 ->select(['id', 'name', 'email', 'is_active', 'created_at'])
                 ->latest()

@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+
+Sempre que for criado os metodos das Controllers, deve-se criar o Services.
