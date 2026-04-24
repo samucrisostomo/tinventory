@@ -16,7 +16,15 @@ export default function Profile({
     mustVerifyEmail: boolean;
     status?: string;
 }) {
-    const { auth } = usePage().props;
+    const { auth } = usePage().props as unknown as {
+        auth: {
+            user: {
+                name: string;
+                email: string;
+                email_verified_at: string | null;
+            };
+        };
+    };
 
     return (
         <>
