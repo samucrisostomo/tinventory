@@ -1,6 +1,12 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -13,6 +19,7 @@ import {
 } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
 import type { BreadcrumbItem } from '@/types';
+import { EllipsisVertical, Pencil } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
 type UserListItem = {
@@ -162,13 +169,28 @@ export default function UsersIndex({ users }: Props) {
                                         )}
                                     </td>
                                     <td className="px-4 py-3">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => openEditSheet(user)}
-                                        >
-                                            Editar
-                                        </Button>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    aria-label={`Abrir ações de ${user.name}`}
+                                                >
+                                                    <EllipsisVertical className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem
+                                                    onClick={() =>
+                                                        openEditSheet(user)
+                                                    }
+                                                >
+                                                    <Pencil className="mr-2 h-4 w-4" />
+                                                    Editar
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </td>
                                 </tr>
                             ))}
