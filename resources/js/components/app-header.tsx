@@ -110,6 +110,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
             title: 'Marcas',
             href: '/config-estoque/marcas',
         },
+        {
+            title: 'Tipo Estoque',
+            href: '/config-estoque/tipos-estoque',
+        },
     ];
 
     return (
@@ -323,6 +327,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                 whenCurrentUrl(
                                                     '/config-estoque/marcas',
                                                     activeItemStyles,
+                                                ) ||
+                                                whenCurrentUrl(
+                                                    '/config-estoque/tipos-estoque',
+                                                    activeItemStyles,
                                                 ),
                                             'h-9 cursor-pointer px-3',
                                         )}
@@ -352,7 +360,8 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         </ul>
                                     </NavigationMenuContent>
                                     {(isCurrentUrl('/config-estoque/tipos-materiais') ||
-                                        isCurrentUrl('/config-estoque/marcas')) && (
+                                        isCurrentUrl('/config-estoque/marcas') ||
+                                        isCurrentUrl('/config-estoque/tipos-estoque')) && (
                                         <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
                                     )}
                                 </NavigationMenuItem>

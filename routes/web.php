@@ -5,6 +5,7 @@ use App\Http\Controllers\FornecedorController;
 use App\Http\Controllers\LocalController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\MarcaController;
+use App\Http\Controllers\TipoEstoqueController;
 use App\Http\Controllers\TipoMaterialController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +48,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('config-estoque/marcas/{marca}', [MarcaController::class, 'update'])->name('marcas.update');
     Route::patch('config-estoque/marcas/{marca}/status', [MarcaController::class, 'toggleStatus'])->name('marcas.toggle-status');
     Route::delete('config-estoque/marcas/{marca}', [MarcaController::class, 'destroy'])->name('marcas.destroy');
+    Route::get('config-estoque/tipos-estoque', [TipoEstoqueController::class, 'index'])->name('tipos-estoque.index');
+    Route::post('config-estoque/tipos-estoque', [TipoEstoqueController::class, 'store'])->name('tipos-estoque.store');
+    Route::patch('config-estoque/tipos-estoque/{tipoEstoque}', [TipoEstoqueController::class, 'update'])->name('tipos-estoque.update');
+    Route::patch('config-estoque/tipos-estoque/{tipoEstoque}/status', [TipoEstoqueController::class, 'toggleStatus'])->name('tipos-estoque.toggle-status');
+    Route::delete('config-estoque/tipos-estoque/{tipoEstoque}', [TipoEstoqueController::class, 'destroy'])->name('tipos-estoque.destroy');
 });
 
 require __DIR__ . '/settings.php';
