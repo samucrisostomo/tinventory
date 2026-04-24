@@ -37,4 +37,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('locais/{local}', [LocalController::class, 'destroy'])->name('locais.destroy');
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
