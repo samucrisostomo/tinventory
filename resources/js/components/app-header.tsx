@@ -99,6 +99,14 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
             title: 'Fornecedores',
             href: '/fornecedores',
         },
+        {
+            title: 'Tipo Colaborador',
+            href: '/tipos-colaborador',
+        },
+        {
+            title: 'Situação do Colaborador',
+            href: '/situacoes-colaborador',
+        },
     ];
 
     const configuracoesEstoqueNavItems: NavItem[] = [
@@ -281,6 +289,14 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                 whenCurrentUrl(
                                                     '/fornecedores',
                                                     activeItemStyles,
+                                                ) ||
+                                                whenCurrentUrl(
+                                                    '/tipos-colaborador',
+                                                    activeItemStyles,
+                                                ) ||
+                                                whenCurrentUrl(
+                                                    '/situacoes-colaborador',
+                                                    activeItemStyles,
                                                 ),
                                             'h-9 cursor-pointer px-3',
                                         )}
@@ -313,7 +329,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         isCurrentUrl('/locais') ||
                                         isCurrentUrl('/perfis') ||
                                         isCurrentUrl('/empresas') ||
-                                        isCurrentUrl('/fornecedores')) && (
+                                        isCurrentUrl('/fornecedores') ||
+                                        isCurrentUrl('/tipos-colaborador') ||
+                                        isCurrentUrl('/situacoes-colaborador')) && (
                                         <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
                                     )}
                                 </NavigationMenuItem>
