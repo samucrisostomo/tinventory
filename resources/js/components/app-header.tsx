@@ -81,6 +81,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
             title: 'Empresas',
             href: '/empresas',
         },
+        {
+            title: 'Fornecedores',
+            href: '/fornecedores',
+        },
     ];
 
     return (

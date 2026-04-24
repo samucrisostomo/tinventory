@@ -74,6 +74,13 @@ class EmpresaController extends Controller
         return back()->with('success', $message);
     }
 
+    public function destroy(Empresa $empresa): RedirectResponse
+    {
+        $empresa->delete();
+
+        return back()->with('success', 'Empresa excluída com sucesso.');
+    }
+
     private function rules(?Empresa $empresa = null): array
     {
         $empresaId = $empresa?->id;

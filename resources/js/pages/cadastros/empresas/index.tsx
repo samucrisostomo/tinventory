@@ -1,4 +1,17 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { EllipsisVertical, Pencil, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
+import { toast } from 'sonner';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -18,9 +31,6 @@ import {
 } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
 import type { BreadcrumbItem } from '@/types';
-import { EllipsisVertical, Pencil } from 'lucide-react';
-import { useEffect, useState, type FormEvent } from 'react';
-import { toast } from 'sonner';
 
 type EmpresaListItem = {
     id: number;
@@ -75,6 +85,9 @@ export default function EmpresasIndex({ empresas }: Props) {
     const [sheetMode, setSheetMode] = useState<'create' | 'edit'>('create');
     const [sheetOpen, setSheetOpen] = useState(false);
     const [editingEmpresaId, setEditingEmpresaId] = useState<number | null>(null);
+    const [empresaToDelete, setEmpresaToDelete] = useState<EmpresaListItem | null>(
+        null,
+    );
 
     useEffect(() => {
         if (flash?.success) {
@@ -168,6 +181,19 @@ export default function EmpresasIndex({ empresas }: Props) {
         );
     };
 
+    const confirmDeleteEmpresa = () => {
+        if (!empresaToDelete) {
+            return;
+        }
+
+        router.delete(`/empresas/${empresaToDelete.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setEmpresaToDelete(null);
+            },
+        });
+    };
+
     return (
         <>
             <Head title="Empresas" />
@@ -234,6 +260,15 @@ export default function EmpresasIndex({ empresas }: Props) {
                                                 >
                                                     <Pencil className="mr-2 h-4 w-4" />
                                                     Editar
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    className="text-destructive focus:text-destructive"
+                                                    onClick={() =>
+                                                        setEmpresaToDelete(empresa)
+                                                    }
+                                                >
+                                                    <Trash2 className="mr-2 h-4 w-4 text-red" />
+                                                    Deletar
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
@@ -418,6 +453,32 @@ export default function EmpresasIndex({ empresas }: Props) {
                     </form>
                 </SheetContent>
             </Sheet>
+
+            <AlertDialog
+                open={Boolean(empresaToDelete)}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setEmpresaToDelete(null);
+                    }
+                }}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            Tem certeza que deseja deletar esta empresa?
+                        </AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDeleteEmpresa}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            Sim, deletar
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }
