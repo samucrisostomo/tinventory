@@ -24,4 +24,9 @@ class TipoColaborador extends Model
             'ativo' => 'boolean',
         ];
     }
+
+    public function colaboradores()
+    {
+        return $this->hasMany(Colaborador::class, 'tipo_colaborador_id');
+    }
 }

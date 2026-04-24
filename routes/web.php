@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ColaboradorController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\FornecedorController;
 use App\Http\Controllers\LocalController;
@@ -50,6 +51,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('situacoes-colaborador/{situacaoColaborador}', [SituacaoColaboradorController::class, 'update'])->name('situacoes-colaborador.update');
     Route::patch('situacoes-colaborador/{situacaoColaborador}/status', [SituacaoColaboradorController::class, 'toggleStatus'])->name('situacoes-colaborador.toggle-status');
     Route::delete('situacoes-colaborador/{situacaoColaborador}', [SituacaoColaboradorController::class, 'destroy'])->name('situacoes-colaborador.destroy');
+    Route::get('colaboradores', [ColaboradorController::class, 'index'])->name('colaboradores.index');
+    Route::post('colaboradores', [ColaboradorController::class, 'store'])->name('colaboradores.store');
+    Route::patch('colaboradores/{colaborador}', [ColaboradorController::class, 'update'])->name('colaboradores.update');
+    Route::delete('colaboradores/{colaborador}', [ColaboradorController::class, 'destroy'])->name('colaboradores.destroy');
     Route::get('config-estoque/tipos-materiais', [TipoMaterialController::class, 'index'])->name('tipos-materiais.index');
     Route::post('config-estoque/tipos-materiais', [TipoMaterialController::class, 'store'])->name('tipos-materiais.store');
     Route::patch('config-estoque/tipos-materiais/{tipoMaterial}', [TipoMaterialController::class, 'update'])->name('tipos-materiais.update');

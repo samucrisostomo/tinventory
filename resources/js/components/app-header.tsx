@@ -107,6 +107,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
             title: 'Situação do Colaborador',
             href: '/situacoes-colaborador',
         },
+        {
+            title: 'Colaboradores',
+            href: '/colaboradores',
+        },
     ];
 
     const configuracoesEstoqueNavItems: NavItem[] = [
@@ -297,6 +301,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                 whenCurrentUrl(
                                                     '/situacoes-colaborador',
                                                     activeItemStyles,
+                                                ) ||
+                                                whenCurrentUrl(
+                                                    '/colaboradores',
+                                                    activeItemStyles,
                                                 ),
                                             'h-9 cursor-pointer px-3',
                                         )}
@@ -331,7 +339,8 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         isCurrentUrl('/empresas') ||
                                         isCurrentUrl('/fornecedores') ||
                                         isCurrentUrl('/tipos-colaborador') ||
-                                        isCurrentUrl('/situacoes-colaborador')) && (
+                                        isCurrentUrl('/situacoes-colaborador') ||
+                                        isCurrentUrl('/colaboradores')) && (
                                         <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
                                     )}
                                 </NavigationMenuItem>

@@ -32,4 +32,9 @@ class Local extends Model
     {
         return $this->belongsTo(Empresa::class);
     }
+
+    public function colaboradores()
+    {
+        return $this->hasMany(Colaborador::class);
+    }
 }

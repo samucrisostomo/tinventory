@@ -35,4 +35,9 @@ class Empresa extends Model
     {
         return $this->hasMany(Local::class);
     }
+
+    public function colaboradores()
+    {
+        return $this->hasMany(Colaborador::class);
+    }
 }
