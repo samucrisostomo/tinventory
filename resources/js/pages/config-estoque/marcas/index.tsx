@@ -8,6 +8,7 @@ import {
     AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
+    AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
@@ -40,6 +41,9 @@ import { Switch } from '@/components/ui/switch';
 import type { BreadcrumbItem } from '@/types';
 
 const MARCAS_BASE = '/config-estoque/marcas';
+
+/** Valor sentinela para o Select permanecer sempre controlado (evita undefined → string no Radix). */
+const SELECT_TIPO_MATERIAL_VAZIO = '__none__';
 
 type TipoMaterialOption = {
     id: number;
@@ -282,11 +286,16 @@ export default function MarcasIndex({ marcas, tiposMateriais }: Props) {
                                 <Select
                                     value={
                                         form.data.tipo_material_id === ''
-                                            ? undefined
+                                            ? SELECT_TIPO_MATERIAL_VAZIO
                                             : form.data.tipo_material_id
                                     }
                                     onValueChange={(value) =>
-                                        form.setData('tipo_material_id', value)
+                                        form.setData(
+                                            'tipo_material_id',
+                                            value === SELECT_TIPO_MATERIAL_VAZIO
+                                                ? ''
+                                                : value,
+                                        )
                                     }
                                 >
                                     <SelectTrigger
@@ -297,6 +306,12 @@ export default function MarcasIndex({ marcas, tiposMateriais }: Props) {
                                         <SelectValue placeholder="Selecione o tipo" />
                                     </SelectTrigger>
                                     <SelectContent position="popper">
+                                        <SelectItem
+                                            value={SELECT_TIPO_MATERIAL_VAZIO}
+                                            disabled
+                                        >
+                                            Selecione o tipo
+                                        </SelectItem>
                                         {tiposMateriais.map((tipo) => (
                                             <SelectItem
                                                 key={tipo.id}
@@ -342,6 +357,9 @@ export default function MarcasIndex({ marcas, tiposMateriais }: Props) {
                         <AlertDialogTitle>
                             Tem certeza que deseja deletar esta marca?
                         </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta ação não pode ser desfeita. A marca será removida do cadastro.
+                        </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>

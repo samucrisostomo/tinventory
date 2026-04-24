@@ -8,6 +8,7 @@ import {
     AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
+    AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
@@ -70,6 +71,9 @@ const normalizeDateForInput = (value: string) => {
     const dateOnly = value.split('T')[0];
     return /^\d{4}-\d{2}-\d{2}$/.test(dateOnly) ? dateOnly : '';
 };
+
+/** Valor sentinela para o Select permanecer sempre controlado (evita undefined → string no Radix). */
+const SELECT_EMPRESA_VAZIO = '__none__';
 
 export default function LocaisIndex({ locais, empresas }: Props) {
     const { flash } = usePage().props as {
@@ -330,11 +334,14 @@ export default function LocaisIndex({ locais, empresas }: Props) {
                                 <Select
                                     value={
                                         form.data.empresa_id === ''
-                                            ? undefined
+                                            ? SELECT_EMPRESA_VAZIO
                                             : form.data.empresa_id
                                     }
                                     onValueChange={(value) =>
-                                        form.setData('empresa_id', value)
+                                        form.setData(
+                                            'empresa_id',
+                                            value === SELECT_EMPRESA_VAZIO ? '' : value,
+                                        )
                                     }
                                 >
                                     <SelectTrigger
@@ -345,6 +352,12 @@ export default function LocaisIndex({ locais, empresas }: Props) {
                                         <SelectValue placeholder="Selecione a empresa" />
                                     </SelectTrigger>
                                     <SelectContent position="popper">
+                                        <SelectItem
+                                            value={SELECT_EMPRESA_VAZIO}
+                                            disabled
+                                        >
+                                            Selecione a empresa
+                                        </SelectItem>
                                         {empresas.map((empresa) => (
                                             <SelectItem
                                                 key={empresa.id}
@@ -410,6 +423,9 @@ export default function LocaisIndex({ locais, empresas }: Props) {
                         <AlertDialogTitle>
                             Tem certeza que deseja deletar este local?
                         </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta ação não pode ser desfeita. O local será removido do cadastro.
+                        </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>

@@ -8,6 +8,7 @@ import {
     AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
+    AlertDialogDescription,
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
@@ -77,8 +78,13 @@ export default function TiposMateriaisIndex({ tiposMateriais }: Props) {
         useState<TipoMaterialListItem | null>(null);
 
     useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
     }, [flash?.success, flash?.error]);
 
     const form = useForm({
@@ -118,10 +124,13 @@ export default function TiposMateriaisIndex({ tiposMateriais }: Props) {
                     setSheetOpen(false);
                 },
             });
+
             return;
         }
 
-        if (!editingTipoMaterialId) return;
+        if (!editingTipoMaterialId) {
+            return;
+        }
 
         form.patch(`${TIPOS_MATERIAIS_BASE}/${editingTipoMaterialId}`, {
             preserveScroll: true,
@@ -139,14 +148,18 @@ export default function TiposMateriaisIndex({ tiposMateriais }: Props) {
             {
                 preserveScroll: true,
                 onBefore: () => {
-                    if (checked === tipoMaterial.ativo) return false;
+                    if (checked === tipoMaterial.ativo) {
+                        return false;
+                    }
                 },
             },
         );
     };
 
     const confirmDeleteTipoMaterial = () => {
-        if (!tipoMaterialToDelete) return;
+        if (!tipoMaterialToDelete) {
+            return;
+        }
 
         router.delete(`${TIPOS_MATERIAIS_BASE}/${tipoMaterialToDelete.id}`, {
             preserveScroll: true,
@@ -344,7 +357,9 @@ export default function TiposMateriaisIndex({ tiposMateriais }: Props) {
             <AlertDialog
                 open={Boolean(tipoMaterialToDelete)}
                 onOpenChange={(open) => {
-                    if (!open) setTipoMaterialToDelete(null);
+                    if (!open) {
+                        setTipoMaterialToDelete(null);
+                    }
                 }}
             >
                 <AlertDialogContent>
@@ -352,6 +367,10 @@ export default function TiposMateriaisIndex({ tiposMateriais }: Props) {
                         <AlertDialogTitle>
                             Tem certeza que deseja deletar este tipo de material?
                         </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta ação não pode ser desfeita. O tipo de material será removido do
+                            cadastro.
+                        </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
