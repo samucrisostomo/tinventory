@@ -12,7 +12,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -22,13 +21,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import {
     Sheet,
     SheetContent,
@@ -40,38 +32,33 @@ import {
 import { Switch } from '@/components/ui/switch';
 import type { BreadcrumbItem } from '@/types';
 
-type LocalListItem = {
+type TipoMaterialListItem = {
     id: number;
-    empresa_id: number;
-    empresa: {
-        id: number;
-        nome: string;
-    };
-    codigo: string;
     nome: string;
-    data_limite: string;
+    mascara: string;
+    descricao: string | null;
     ativo: boolean;
+    rastreavel: boolean;
     created_at: string;
 };
 
-type EmpresaOption = {
-    id: number;
-    nome: string;
-};
-
 type Props = {
-    locais: LocalListItem[];
-    empresas: EmpresaOption[];
+    tiposMateriais: TipoMaterialListItem[];
 };
 
-const normalizeDateForInput = (value: string) => {
-    if (!value) return '';
+const generateMaskFromName = (name: string) => {
+    const normalized = name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toUpperCase()
+        .replace(/[^A-Z]/g, '');
 
-    const dateOnly = value.split('T')[0];
-    return /^\d{4}-\d{2}-\d{2}$/.test(dateOnly) ? dateOnly : '';
+    const prefix = normalized.slice(0, 4).padEnd(4, 'X');
+
+    return `${prefix}-0000`;
 };
 
-export default function LocaisIndex({ locais, empresas }: Props) {
+export default function TiposMateriaisIndex({ tiposMateriais }: Props) {
     const { flash } = usePage().props as {
         flash?: {
             success?: string;
@@ -81,8 +68,11 @@ export default function LocaisIndex({ locais, empresas }: Props) {
 
     const [sheetMode, setSheetMode] = useState<'create' | 'edit'>('create');
     const [sheetOpen, setSheetOpen] = useState(false);
-    const [editingLocalId, setEditingLocalId] = useState<number | null>(null);
-    const [localToDelete, setLocalToDelete] = useState<LocalListItem | null>(null);
+    const [editingTipoMaterialId, setEditingTipoMaterialId] = useState<number | null>(
+        null,
+    );
+    const [tipoMaterialToDelete, setTipoMaterialToDelete] =
+        useState<TipoMaterialListItem | null>(null);
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
@@ -90,28 +80,26 @@ export default function LocaisIndex({ locais, empresas }: Props) {
     }, [flash?.success, flash?.error]);
 
     const form = useForm({
-        empresa_id: '',
-        codigo: '',
         nome: '',
-        data_limite: '',
+        descricao: '',
+        rastreavel: false,
     });
 
     const openCreateSheet = () => {
         setSheetMode('create');
-        setEditingLocalId(null);
+        setEditingTipoMaterialId(null);
         form.reset();
         form.clearErrors();
         setSheetOpen(true);
     };
 
-    const openEditSheet = (local: LocalListItem) => {
+    const openEditSheet = (tipoMaterial: TipoMaterialListItem) => {
         setSheetMode('edit');
-        setEditingLocalId(local.id);
+        setEditingTipoMaterialId(tipoMaterial.id);
         form.setData({
-            empresa_id: String(local.empresa_id),
-            codigo: local.codigo,
-            nome: local.nome,
-            data_limite: normalizeDateForInput(local.data_limite),
+            nome: tipoMaterial.nome,
+            descricao: tipoMaterial.descricao ?? '',
+            rastreavel: tipoMaterial.rastreavel,
         });
         form.clearErrors();
         setSheetOpen(true);
@@ -121,7 +109,7 @@ export default function LocaisIndex({ locais, empresas }: Props) {
         event.preventDefault();
 
         if (sheetMode === 'create') {
-            form.post('/locais', {
+            form.post('/configuracoes/estoque/tipos-materiais', {
                 preserveScroll: true,
                 onSuccess: () => {
                     form.reset();
@@ -131,109 +119,101 @@ export default function LocaisIndex({ locais, empresas }: Props) {
             return;
         }
 
-        if (!editingLocalId) return;
+        if (!editingTipoMaterialId) return;
 
-        form.patch(`/locais/${editingLocalId}`, {
+        form.patch(`/configuracoes/estoque/tipos-materiais/${editingTipoMaterialId}`, {
             preserveScroll: true,
             onSuccess: () => setSheetOpen(false),
         });
     };
 
-    const toggleLocalStatus = (local: LocalListItem, checked: boolean) => {
+    const toggleTipoMaterialStatus = (
+        tipoMaterial: TipoMaterialListItem,
+        checked: boolean,
+    ) => {
         router.patch(
-            `/locais/${local.id}/status`,
+            `/configuracoes/estoque/tipos-materiais/${tipoMaterial.id}/status`,
             {},
             {
                 preserveScroll: true,
                 onBefore: () => {
-                    if (checked === local.ativo) {
-                        return false;
-                    }
+                    if (checked === tipoMaterial.ativo) return false;
                 },
             },
         );
     };
 
-    const confirmDeleteLocal = () => {
-        if (!localToDelete) return;
+    const confirmDeleteTipoMaterial = () => {
+        if (!tipoMaterialToDelete) return;
 
-        router.delete(`/locais/${localToDelete.id}`, {
-            preserveScroll: true,
-            onSuccess: () => setLocalToDelete(null),
-        });
+        router.delete(
+            `/configuracoes/estoque/tipos-materiais/${tipoMaterialToDelete.id}`,
+            {
+                preserveScroll: true,
+                onSuccess: () => setTipoMaterialToDelete(null),
+            },
+        );
     };
+
+    const maskPreview = generateMaskFromName(form.data.nome);
 
     return (
         <>
-            <Head title="Locais" />
+            <Head title="Tipo Material" />
 
             <div className="p-4">
                 <div className="mb-4 flex items-center justify-between gap-2">
-                    <h1 className="text-lg font-semibold">Locais</h1>
-                    <Button onClick={openCreateSheet}>Novo local</Button>
+                    <h1 className="text-lg font-semibold">Tipo Material</h1>
+                    <Button onClick={openCreateSheet}>Novo tipo material</Button>
                 </div>
 
                 <div className="overflow-hidden rounded-lg border border-border">
                     <table className="w-full text-left text-sm">
                         <thead className="bg-muted/50 text-muted-foreground">
                             <tr>
-                                <th className="px-4 py-3 font-medium">Código</th>
                                 <th className="px-4 py-3 font-medium">Nome</th>
-                                <th className="px-4 py-3 font-medium">Empresa</th>
-                                <th className="px-4 py-3 font-medium">
-                                    Data limite
-                                </th>
+                                <th className="px-4 py-3 font-medium">Máscara</th>
+                                <th className="px-4 py-3 font-medium">Descrição</th>
+                                <th className="px-4 py-3 font-medium">Rastreável</th>
                                 <th className="px-4 py-3 font-medium">Ativo</th>
+                                <th className="px-4 py-3 font-medium">Criado em</th>
                                 <th className="px-4 py-3 font-medium">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {locais.map((local) => {
-                                const normalizedDateLimit = normalizeDateForInput(
-                                    local.data_limite,
-                                );
-                                const localDateLimit = normalizedDateLimit
-                                    ? new Date(`${normalizedDateLimit}T00:00:00`)
-                                    : null;
-                                const isExpired =
-                                    Boolean(localDateLimit) &&
-                                    localDateLimit <
-                                    new Date(
-                                        new Date().toISOString().slice(0, 10) +
-                                            'T00:00:00',
-                                    );
-
-                                return (
-                                <tr key={local.id} className="border-t border-border">
-                                    <td className="px-4 py-3">{local.codigo}</td>
-                                    <td className="px-4 py-3">{local.nome}</td>
+                            {tiposMateriais.map((tipoMaterial) => (
+                                <tr
+                                    key={tipoMaterial.id}
+                                    className="border-t border-border"
+                                >
+                                    <td className="px-4 py-3">{tipoMaterial.nome}</td>
+                                    <td className="px-4 py-3">{tipoMaterial.mascara}</td>
                                     <td className="px-4 py-3">
-                                        {local.empresa?.nome ?? '-'}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <Badge
-                                            variant={isExpired ? 'default' : 'secondary'}
-                                            className={
-                                                isExpired
-                                                    ? 'border-0 bg-linear-to-r from-red-600 via-rose-600 to-pink-600 text-white shadow-sm'
-                                                    : undefined
-                                            }
-                                        >
-                                            {localDateLimit
-                                                ? localDateLimit.toLocaleDateString(
-                                                      'pt-BR',
-                                                  )
-                                                : '-'}
-                                        </Badge>
+                                        {tipoMaterial.descricao || '-'}
                                     </td>
                                     <td className="px-4 py-3">
                                         <Switch
-                                            checked={local.ativo}
-                                            onCheckedChange={(checked) =>
-                                                toggleLocalStatus(local, checked)
-                                            }
-                                            aria-label={`Alternar status do local ${local.codigo}`}
+                                            checked={tipoMaterial.rastreavel}
+                                            disabled
+                                            aria-label={`Rastreável de ${tipoMaterial.nome}`}
                                         />
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <Switch
+                                            checked={tipoMaterial.ativo}
+                                            onCheckedChange={(checked) =>
+                                                toggleTipoMaterialStatus(
+                                                    tipoMaterial,
+                                                    checked,
+                                                )
+                                            }
+                                            aria-label={`Alternar status do tipo de material ${tipoMaterial.nome}`}
+                                        />
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        {new Date(tipoMaterial.created_at).toLocaleString(
+                                            'pt-BR',
+                                        )}
                                     </td>
                                     <td className="px-4 py-3">
                                         <DropdownMenu>
@@ -242,7 +222,7 @@ export default function LocaisIndex({ locais, empresas }: Props) {
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8"
-                                                    aria-label={`Abrir ações de ${local.codigo}`}
+                                                    aria-label={`Abrir ações de ${tipoMaterial.nome}`}
                                                 >
                                                     <EllipsisVertical className="h-4 w-4" />
                                                 </Button>
@@ -250,7 +230,7 @@ export default function LocaisIndex({ locais, empresas }: Props) {
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuItem
                                                     onClick={() =>
-                                                        openEditSheet(local)
+                                                        openEditSheet(tipoMaterial)
                                                     }
                                                 >
                                                     <Pencil className="mr-2 h-4 w-4" />
@@ -259,56 +239,41 @@ export default function LocaisIndex({ locais, empresas }: Props) {
                                                 <DropdownMenuItem
                                                     className="text-destructive focus:text-destructive"
                                                     onClick={() =>
-                                                        setLocalToDelete(local)
+                                                        setTipoMaterialToDelete(
+                                                            tipoMaterial,
+                                                        )
                                                     }
                                                 >
-                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    <Trash2 className="mr-2 h-4 w-4 text-red" />
                                                     Deletar
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </td>
                                 </tr>
-                                );
-                            })}
+                            ))}
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-                <SheetContent side="right" className="w-full sm:max-w-xl">
+                <SheetContent side="right" className="w-full sm:max-w-lg">
                     <form onSubmit={submitForm} className="flex h-full flex-col">
                         <SheetHeader>
                             <SheetTitle>
                                 {sheetMode === 'create'
-                                    ? 'Criar local'
-                                    : 'Editar local'}
+                                    ? 'Criar tipo material'
+                                    : 'Editar tipo material'}
                             </SheetTitle>
                             <SheetDescription>
                                 {sheetMode === 'create'
-                                    ? 'Preencha os dados para criar um novo local.'
-                                    : 'Atualize os dados do local selecionado.'}
+                                    ? 'Cadastre um novo tipo de material para o estoque.'
+                                    : 'Atualize os dados do tipo de material selecionado.'}
                             </SheetDescription>
                         </SheetHeader>
 
                         <div className="flex-1 space-y-4 overflow-y-auto px-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="codigo">Código *</Label>
-                                <Input
-                                    id="codigo"
-                                    value={form.data.codigo}
-                                    onChange={(event) =>
-                                        form.setData('codigo', event.target.value)
-                                    }
-                                />
-                                {form.errors.codigo && (
-                                    <p className="text-xs text-destructive">
-                                        {form.errors.codigo}
-                                    </p>
-                                )}
-                            </div>
-
                             <div className="space-y-2">
                                 <Label htmlFor="nome">Nome *</Label>
                                 <Input
@@ -326,60 +291,38 @@ export default function LocaisIndex({ locais, empresas }: Props) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="empresa_id">Empresa *</Label>
-                                <Select
-                                    value={
-                                        form.data.empresa_id === ''
-                                            ? undefined
-                                            : form.data.empresa_id
-                                    }
-                                    onValueChange={(value) =>
-                                        form.setData('empresa_id', value)
-                                    }
-                                >
-                                    <SelectTrigger
-                                        id="empresa_id"
-                                        className="w-full"
-                                        aria-invalid={Boolean(form.errors.empresa_id)}
-                                    >
-                                        <SelectValue placeholder="Selecione a empresa" />
-                                    </SelectTrigger>
-                                    <SelectContent position="popper">
-                                        {empresas.map((empresa) => (
-                                            <SelectItem
-                                                key={empresa.id}
-                                                value={String(empresa.id)}
-                                            >
-                                                {empresa.nome}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {form.errors.empresa_id && (
-                                    <p className="text-xs text-destructive">
-                                        {form.errors.empresa_id}
-                                    </p>
-                                )}
+                                <Label htmlFor="mascara">Máscara</Label>
+                                <Input id="mascara" value={maskPreview} readOnly />
+                                <p className="text-xs text-muted-foreground">
+                                    Máscara automática no padrão XXXX-0000.
+                                </p>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="data_limite">Data limite *</Label>
+                                <Label htmlFor="descricao">Descrição</Label>
                                 <Input
-                                    id="data_limite"
-                                    type="date"
-                                    value={form.data.data_limite}
+                                    id="descricao"
+                                    value={form.data.descricao}
                                     onChange={(event) =>
-                                        form.setData(
-                                            'data_limite',
-                                            event.target.value,
-                                        )
+                                        form.setData('descricao', event.target.value)
                                     }
                                 />
-                                {form.errors.data_limite && (
-                                    <p className="text-xs text-destructive">
-                                        {form.errors.data_limite}
+                            </div>
+
+                            <div className="flex items-center justify-between rounded-md border px-3 py-2">
+                                <div>
+                                    <p className="text-sm font-medium">Rastreável</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Campo previsto para uso futuro.
                                     </p>
-                                )}
+                                </div>
+                                <Switch
+                                    checked={form.data.rastreavel}
+                                    onCheckedChange={(checked) =>
+                                        form.setData('rastreavel', checked)
+                                    }
+                                    aria-label="Definir se o tipo de material é rastreável"
+                                />
                             </div>
                         </div>
 
@@ -400,21 +343,21 @@ export default function LocaisIndex({ locais, empresas }: Props) {
             </Sheet>
 
             <AlertDialog
-                open={Boolean(localToDelete)}
+                open={Boolean(tipoMaterialToDelete)}
                 onOpenChange={(open) => {
-                    if (!open) setLocalToDelete(null);
+                    if (!open) setTipoMaterialToDelete(null);
                 }}
             >
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>
-                            Tem certeza que deseja deletar este local?
+                            Tem certeza que deseja deletar este tipo de material?
                         </AlertDialogTitle>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
                         <AlertDialogAction
-                            onClick={confirmDeleteLocal}
+                            onClick={confirmDeleteTipoMaterial}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                             Sim, deletar
@@ -426,11 +369,19 @@ export default function LocaisIndex({ locais, empresas }: Props) {
     );
 }
 
-LocaisIndex.layout = {
+TiposMateriaisIndex.layout = {
     breadcrumbs: [
         {
-            title: 'Locais',
-            href: '/locais',
+            title: 'Configurações',
+            href: '/configuracoes/estoque/tipos-materiais',
+        },
+        {
+            title: 'Estoque',
+            href: '/configuracoes/estoque/tipos-materiais',
+        },
+        {
+            title: 'Tipo Material',
+            href: '/configuracoes/estoque/tipos-materiais',
         },
     ] satisfies BreadcrumbItem[],
 };
