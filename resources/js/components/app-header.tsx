@@ -104,7 +104,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
     const configuracoesEstoqueNavItems: NavItem[] = [
         {
             title: 'Tipo Material',
-            href: '/configuracoes/estoque/tipos-materiais',
+            href: '/config-estoque/tipos-materiais',
         },
     ];
 
@@ -313,7 +313,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     <NavigationMenuTrigger
                                         className={cn(
                                             whenCurrentUrl(
-                                                '/configuracoes/estoque/tipos-materiais',
+                                                '/config-estoque/tipos-materiais',
                                                 activeItemStyles,
                                             ),
                                             'h-9 cursor-pointer px-3',
@@ -344,7 +344,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         </ul>
                                     </NavigationMenuContent>
                                     {isCurrentUrl(
-                                        '/configuracoes/estoque/tipos-materiais',
+                                        '/config-estoque/tipos-materiais',
                                     ) && (
                                         <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
                                     )}

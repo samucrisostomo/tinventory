@@ -36,11 +36,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('locais/{local}', [LocalController::class, 'update'])->name('locais.update');
     Route::patch('locais/{local}/status', [LocalController::class, 'toggleStatus'])->name('locais.toggle-status');
     Route::delete('locais/{local}', [LocalController::class, 'destroy'])->name('locais.destroy');
-    Route::get('configuracoes/estoque/tipos-materiais', [TipoMaterialController::class, 'index'])->name('tipos-materiais.index');
-    Route::post('configuracoes/estoque/tipos-materiais', [TipoMaterialController::class, 'store'])->name('tipos-materiais.store');
-    Route::patch('configuracoes/estoque/tipos-materiais/{tipoMaterial}', [TipoMaterialController::class, 'update'])->name('tipos-materiais.update');
-    Route::patch('configuracoes/estoque/tipos-materiais/{tipoMaterial}/status', [TipoMaterialController::class, 'toggleStatus'])->name('tipos-materiais.toggle-status');
-    Route::delete('configuracoes/estoque/tipos-materiais/{tipoMaterial}', [TipoMaterialController::class, 'destroy'])->name('tipos-materiais.destroy');
+    Route::get('config-estoque/tipos-materiais', [TipoMaterialController::class, 'index'])->name('tipos-materiais.index');
+    Route::post('config-estoque/tipos-materiais', [TipoMaterialController::class, 'store'])->name('tipos-materiais.store');
+    Route::patch('config-estoque/tipos-materiais/{tipoMaterial}', [TipoMaterialController::class, 'update'])->name('tipos-materiais.update');
+    Route::patch('config-estoque/tipos-materiais/{tipoMaterial}/status', [TipoMaterialController::class, 'toggleStatus'])->name('tipos-materiais.toggle-status');
+    Route::delete('config-estoque/tipos-materiais/{tipoMaterial}', [TipoMaterialController::class, 'destroy'])->name('tipos-materiais.destroy');
 });
 
 require __DIR__ . '/settings.php';

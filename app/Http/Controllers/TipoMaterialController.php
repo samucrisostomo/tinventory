@@ -17,7 +17,7 @@ class TipoMaterialController extends Controller
 
     public function index(): Response
     {
-        return Inertia::render('configuracoes/estoque/tipos-materiais/index', [
+        return Inertia::render('config-estoque/tipos-materiais/index', [
             'tiposMateriais' => $this->tipoMaterialService->list(),
         ]);
     }

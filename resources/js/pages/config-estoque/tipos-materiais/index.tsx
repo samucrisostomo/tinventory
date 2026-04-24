@@ -32,6 +32,8 @@ import {
 import { Switch } from '@/components/ui/switch';
 import type { BreadcrumbItem } from '@/types';
 
+const TIPOS_MATERIAIS_BASE = '/config-estoque/tipos-materiais';
+
 type TipoMaterialListItem = {
     id: number;
     nome: string;
@@ -109,7 +111,7 @@ export default function TiposMateriaisIndex({ tiposMateriais }: Props) {
         event.preventDefault();
 
         if (sheetMode === 'create') {
-            form.post('/configuracoes/estoque/tipos-materiais', {
+            form.post(TIPOS_MATERIAIS_BASE, {
                 preserveScroll: true,
                 onSuccess: () => {
                     form.reset();
@@ -121,7 +123,7 @@ export default function TiposMateriaisIndex({ tiposMateriais }: Props) {
 
         if (!editingTipoMaterialId) return;
 
-        form.patch(`/configuracoes/estoque/tipos-materiais/${editingTipoMaterialId}`, {
+        form.patch(`${TIPOS_MATERIAIS_BASE}/${editingTipoMaterialId}`, {
             preserveScroll: true,
             onSuccess: () => setSheetOpen(false),
         });
@@ -132,7 +134,7 @@ export default function TiposMateriaisIndex({ tiposMateriais }: Props) {
         checked: boolean,
     ) => {
         router.patch(
-            `/configuracoes/estoque/tipos-materiais/${tipoMaterial.id}/status`,
+            `${TIPOS_MATERIAIS_BASE}/${tipoMaterial.id}/status`,
             {},
             {
                 preserveScroll: true,
@@ -146,13 +148,10 @@ export default function TiposMateriaisIndex({ tiposMateriais }: Props) {
     const confirmDeleteTipoMaterial = () => {
         if (!tipoMaterialToDelete) return;
 
-        router.delete(
-            `/configuracoes/estoque/tipos-materiais/${tipoMaterialToDelete.id}`,
-            {
-                preserveScroll: true,
-                onSuccess: () => setTipoMaterialToDelete(null),
-            },
-        );
+        router.delete(`${TIPOS_MATERIAIS_BASE}/${tipoMaterialToDelete.id}`, {
+            preserveScroll: true,
+            onSuccess: () => setTipoMaterialToDelete(null),
+        });
     };
 
     const maskPreview = generateMaskFromName(form.data.nome);
@@ -373,15 +372,15 @@ TiposMateriaisIndex.layout = {
     breadcrumbs: [
         {
             title: 'Configurações',
-            href: '/configuracoes/estoque/tipos-materiais',
+            href: TIPOS_MATERIAIS_BASE,
         },
         {
             title: 'Estoque',
-            href: '/configuracoes/estoque/tipos-materiais',
+            href: TIPOS_MATERIAIS_BASE,
         },
         {
             title: 'Tipo Material',
-            href: '/configuracoes/estoque/tipos-materiais',
+            href: TIPOS_MATERIAIS_BASE,
         },
     ] satisfies BreadcrumbItem[],
 };
