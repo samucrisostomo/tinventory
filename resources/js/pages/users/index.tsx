@@ -251,7 +251,7 @@ export default function UsersIndex({ users }: Props) {
                             </div>
                         </div>
 
-                        <SheetFooter>
+                        <SheetFooter className="flex-row items-center justify-end gap-2">
                             <Button
                                 type="button"
                                 variant="outline"
