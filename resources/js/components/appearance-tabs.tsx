@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
-import { Monitor, Moon, Sun } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import type { HTMLAttributes } from 'react';
-import type { Appearance } from '@/hooks/use-appearance';
+import type { ResolvedAppearance } from '@/hooks/use-appearance';
 import { useAppearance } from '@/hooks/use-appearance';
 import { cn } from '@/lib/utils';
 
@@ -9,13 +9,21 @@ export default function AppearanceToggleTab({
     className = '',
     ...props
 }: HTMLAttributes<HTMLDivElement>) {
-    const { appearance, updateAppearance } = useAppearance();
+    const { appearance, resolvedAppearance, updateAppearance } =
+        useAppearance();
 
-    const tabs: { value: Appearance; icon: LucideIcon; label: string }[] = [
+    const tabs: {
+        value: ResolvedAppearance;
+        icon: LucideIcon;
+        label: string;
+    }[] = [
         { value: 'light', icon: Sun, label: 'Light' },
         { value: 'dark', icon: Moon, label: 'Dark' },
-        { value: 'system', icon: Monitor, label: 'System' },
     ];
+
+    const isTabSelected = (value: ResolvedAppearance) =>
+        appearance === value ||
+        (appearance === 'system' && resolvedAppearance === value);
 
     return (
         <div
@@ -31,7 +39,7 @@ export default function AppearanceToggleTab({
                     onClick={() => updateAppearance(value)}
                     className={cn(
                         'flex items-center rounded-md px-3.5 py-1.5 transition-colors',
-                        appearance === value
+                        isTabSelected(value)
                             ? 'bg-card text-card-foreground shadow-xs'
                             : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground',
                     )}

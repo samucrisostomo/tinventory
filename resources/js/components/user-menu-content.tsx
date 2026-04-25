@@ -1,18 +1,13 @@
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Monitor, Moon, Palette, Settings, Sun } from 'lucide-react';
+import { LogOut, Moon, Settings, Sun } from 'lucide-react';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
     DropdownMenuSeparator,
-    DropdownMenuSub,
-    DropdownMenuSubContent,
-    DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
-import { useAppearance, type Appearance } from '@/hooks/use-appearance';
+import { useAppearance } from '@/hooks/use-appearance';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
@@ -22,18 +17,85 @@ type Props = {
     user: User;
 };
 
+type ViewTransition = {
+    ready?: Promise<void>;
+    finished?: Promise<void>;
+};
+
+type ViewTransitionDocument = Document & {
+    startViewTransition?: (
+        callback: () => void,
+    ) => ViewTransition;
+};
+
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
-    const { appearance, updateAppearance } = useAppearance();
+    const { resolvedAppearance, updateAppearance } = useAppearance();
 
     const handleLogout = () => {
         cleanup();
         router.flushAll();
     };
 
-    const handleThemeChange = (value: string) => {
+    const toggleTheme = (target?: HTMLElement) => {
         cleanup();
-        updateAppearance(value as Appearance);
+        const nextTheme =
+            resolvedAppearance === 'dark' ? 'light' : 'dark';
+        const doc = document as ViewTransitionDocument;
+        const root = document.documentElement;
+
+        const applyTheme = () => updateAppearance(nextTheme);
+
+        if (!target || typeof doc.startViewTransition !== 'function') {
+            applyTheme();
+            return;
+        }
+
+        const viewportWidth =
+            window.visualViewport?.width ?? window.innerWidth;
+        const viewportHeight =
+            window.visualViewport?.height ?? window.innerHeight;
+
+        const { left, top, width, height } =
+            target.getBoundingClientRect();
+        const x = left + width / 2;
+        const y = top + height / 2;
+        const maxRadius = Math.hypot(
+            Math.max(x, viewportWidth - x),
+            Math.max(y, viewportHeight - y),
+        );
+
+        root.dataset.themeTransition = 'active';
+        root.style.setProperty(
+            '--theme-toggle-vt-duration',
+            '450ms',
+        );
+
+        const transition = doc.startViewTransition(() => {
+            applyTheme();
+        });
+
+        transition.finished?.finally(() => {
+            delete root.dataset.themeTransition;
+            root.style.removeProperty('--theme-toggle-vt-duration');
+        });
+
+        transition.ready?.then(() => {
+            document.documentElement.animate(
+                {
+                    clipPath: [
+                        `circle(0px at ${x}px ${y}px)`,
+                        `circle(${maxRadius}px at ${x}px ${y}px)`,
+                    ],
+                },
+                {
+                    duration: 450,
+                    easing: 'ease-in-out',
+                    fill: 'forwards',
+                    pseudoElement: '::view-transition-new(root)',
+                },
+            );
+        });
     };
 
     return (
@@ -56,31 +118,25 @@ export function UserMenuContent({ user }: Props) {
                         Settings
                     </Link>
                 </DropdownMenuItem>
-                <DropdownMenuSub>
-                    <DropdownMenuSubTrigger className="gap-2">
-                        <Palette className="size-4" />
-                        Alterar tema
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="min-w-44">
-                        <DropdownMenuRadioGroup
-                            value={appearance}
-                            onValueChange={handleThemeChange}
-                        >
-                            <DropdownMenuRadioItem value="light">
-                                <Sun className="size-4" />
-                                Claro
-                            </DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="dark">
-                                <Moon className="size-4" />
-                                Escuro
-                            </DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="system">
-                                <Monitor className="size-4" />
-                                Sistema
-                            </DropdownMenuRadioItem>
-                        </DropdownMenuRadioGroup>
-                    </DropdownMenuSubContent>
-                </DropdownMenuSub>
+                <DropdownMenuItem
+                    className="gap-2"
+                    onSelect={(e) => {
+                        e.preventDefault();
+                        toggleTheme(e.currentTarget as HTMLElement);
+                    }}
+                >
+                    {resolvedAppearance === 'dark' ? (
+                        <>
+                            <Sun className="size-4" />
+                            Modo claro
+                        </>
+                    ) : (
+                        <>
+                            <Moon className="size-4" />
+                            Modo escuro
+                        </>
+                    )}
+                </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
