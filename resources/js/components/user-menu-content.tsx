@@ -1,12 +1,18 @@
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, Monitor, Moon, Palette, Settings, Sun } from 'lucide-react';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
     DropdownMenuSeparator,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
+import { useAppearance, type Appearance } from '@/hooks/use-appearance';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
@@ -18,10 +24,16 @@ type Props = {
 
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
+    const { appearance, updateAppearance } = useAppearance();
 
     const handleLogout = () => {
         cleanup();
         router.flushAll();
+    };
+
+    const handleThemeChange = (value: string) => {
+        cleanup();
+        updateAppearance(value as Appearance);
     };
 
     return (
@@ -44,6 +56,31 @@ export function UserMenuContent({ user }: Props) {
                         Settings
                     </Link>
                 </DropdownMenuItem>
+                <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="gap-2">
+                        <Palette className="size-4" />
+                        Alterar tema
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="min-w-44">
+                        <DropdownMenuRadioGroup
+                            value={appearance}
+                            onValueChange={handleThemeChange}
+                        >
+                            <DropdownMenuRadioItem value="light">
+                                <Sun className="size-4" />
+                                Claro
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="dark">
+                                <Moon className="size-4" />
+                                Escuro
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="system">
+                                <Monitor className="size-4" />
+                                Sistema
+                            </DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                    </DropdownMenuSubContent>
+                </DropdownMenuSub>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
