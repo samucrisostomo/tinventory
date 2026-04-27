@@ -109,6 +109,13 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
         },
     ];
 
+    const operacoesEstoqueNavItems: NavItem[] = [
+        {
+            title: 'Estoques',
+            href: '/operacoes-estoque/estoques',
+        },
+    ];
+
     return (
         <>
             <div className="border-b border-sidebar-border/80">
@@ -188,6 +195,22 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                             </Link>
                                                         ),
                                                     )}
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <p className="px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                                                    Operações de Estoque
+                                                </p>
+                                                <div className="flex flex-col space-y-3">
+                                                    {operacoesEstoqueNavItems.map((item) => (
+                                                        <Link
+                                                            key={item.title}
+                                                            href={item.href}
+                                                            className="flex items-center space-x-2 pl-1 font-medium"
+                                                        >
+                                                            <span>{item.title}</span>
+                                                        </Link>
+                                                    ))}
                                                 </div>
                                             </div>
                                         </div>
@@ -354,6 +377,44 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     {(isCurrentUrl('/config-estoque/tipos-materiais') ||
                                         isCurrentUrl('/config-estoque/marcas') ||
                                         isCurrentUrl('/config-estoque/tipos-estoque')) && (
+                                        <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-primary"></div>
+                                    )}
+                                </NavigationMenuItem>
+                                <NavigationMenuItem className="relative flex h-full items-center">
+                                    <NavigationMenuTrigger
+                                        className={cn(
+                                            whenCurrentUrl(
+                                                '/operacoes-estoque/estoques',
+                                                activeItemStyles,
+                                            ),
+                                            'h-9 cursor-pointer px-3',
+                                        )}
+                                    >
+                                        Operações de Estoque
+                                    </NavigationMenuTrigger>
+                                    <NavigationMenuContent>
+                                        <ul className="grid w-[220px] gap-1 p-2">
+                                            {operacoesEstoqueNavItems.map((item) => (
+                                                <li key={item.title}>
+                                                    <NavigationMenuLink asChild>
+                                                        <Link
+                                                            href={item.href}
+                                                            className={cn(
+                                                                'block rounded-sm px-3 py-2 text-sm',
+                                                                whenCurrentUrl(
+                                                                    item.href,
+                                                                    'bg-accent/50 text-accent-foreground',
+                                                                ),
+                                                            )}
+                                                        >
+                                                            {item.title}
+                                                        </Link>
+                                                    </NavigationMenuLink>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </NavigationMenuContent>
+                                    {isCurrentUrl('/operacoes-estoque/estoques') && (
                                         <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-primary"></div>
                                     )}
                                 </NavigationMenuItem>

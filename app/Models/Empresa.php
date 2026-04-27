@@ -40,4 +40,9 @@ class Empresa extends Model
     {
         return $this->hasMany(Colaborador::class);
     }
+
+    public function estoques()
+    {
+        return $this->hasMany(Estoque::class);
+    }
 }

@@ -51,4 +51,9 @@ class Colaborador extends Model
     {
         return $this->belongsTo(SituacaoColaborador::class, 'situacao_id');
     }
+
+    public function estoques()
+    {
+        return $this->hasMany(Estoque::class);
+    }
 }

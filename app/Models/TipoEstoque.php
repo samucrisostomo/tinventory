@@ -24,4 +24,9 @@ class TipoEstoque extends Model
             'ativo' => 'boolean',
         ];
     }
+
+    public function estoques()
+    {
+        return $this->hasMany(Estoque::class, 'tipos_estoque_id');
+    }
 }
