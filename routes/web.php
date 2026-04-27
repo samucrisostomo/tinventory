@@ -2,13 +2,14 @@
 
 use App\Http\Controllers\ColaboradorController;
 use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\EntradaLoteController;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\FornecedorController;
 use App\Http\Controllers\LocalController;
+use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\SituacaoColaboradorController;
 use App\Http\Controllers\TipoColaboradorController;
-use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\TipoEstoqueController;
 use App\Http\Controllers\TipoMaterialController;
 use App\Http\Controllers\UserController;
@@ -75,6 +76,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('operacoes-estoque/estoques', [EstoqueController::class, 'store'])->name('estoques.store');
     Route::patch('operacoes-estoque/estoques/{estoque}', [EstoqueController::class, 'update'])->name('estoques.update');
     Route::delete('operacoes-estoque/estoques/{estoque}', [EstoqueController::class, 'destroy'])->name('estoques.destroy');
+    Route::get('operacoes-estoque/entradas-lote', [EntradaLoteController::class, 'index'])->name('entradas-lote.index');
+    Route::get('operacoes-estoque/entradas-lote/nova', [EntradaLoteController::class, 'create'])->name('entradas-lote.create');
+    Route::post('operacoes-estoque/entradas-lote', [EntradaLoteController::class, 'store'])->name('entradas-lote.store');
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

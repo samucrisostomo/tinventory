@@ -48,7 +48,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
         };
     };
     const getInitials = useInitials();
-    const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+    const { isCurrentUrl, isCurrentOrParentUrl, whenCurrentUrl } = useCurrentUrl();
     const dashboardUrl = dashboard();
 
     const mainNavItems: NavItem[] = [
@@ -113,6 +113,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
         {
             title: 'Estoques',
             href: '/operacoes-estoque/estoques',
+        },
+        {
+            title: 'Entradas em lote',
+            href: '/operacoes-estoque/entradas-lote',
         },
     ];
 
@@ -386,7 +390,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                             whenCurrentUrl(
                                                 '/operacoes-estoque/estoques',
                                                 activeItemStyles,
-                                            ),
+                                            ) ||
+                                                (isCurrentOrParentUrl('/operacoes-estoque/entradas-lote')
+                                                    ? activeItemStyles
+                                                    : null),
                                             'h-9 cursor-pointer px-3',
                                         )}
                                     >
@@ -414,7 +421,8 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                             ))}
                                         </ul>
                                     </NavigationMenuContent>
-                                    {isCurrentUrl('/operacoes-estoque/estoques') && (
+                                    {(isCurrentUrl('/operacoes-estoque/estoques') ||
+                                        isCurrentOrParentUrl('/operacoes-estoque/entradas-lote')) && (
                                         <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-primary"></div>
                                     )}
                                 </NavigationMenuItem>

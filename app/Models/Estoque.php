@@ -39,4 +39,14 @@ class Estoque extends Model
     {
         return $this->belongsTo(Local::class);
     }
+
+    public function movimentacoes()
+    {
+        return $this->hasMany(Movimentacao::class);
+    }
+
+    public function itensEstoque()
+    {
+        return $this->hasMany(ItemEstoque::class);
+    }
 }

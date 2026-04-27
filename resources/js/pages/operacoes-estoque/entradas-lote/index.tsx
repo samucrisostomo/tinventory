@@ -1,0 +1,177 @@
+import { Head, Link, usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import type { BreadcrumbItem } from '@/types';
+
+const BASE = '/operacoes-estoque/entradas-lote';
+
+type CondicaoOption = { value: string; label: string };
+
+type EntradaRow = {
+    id: number;
+    condicao_entrada: string;
+    total_quantidade: string;
+    total_valor: string;
+    created_at: string;
+    estoque: { id: number; nome: string } | null;
+    user: { id: number; name: string } | null;
+};
+
+type Props = {
+    estatisticas: {
+        entradas_no_mes: number;
+        quantidade_total_mes: number;
+        valor_total_mes: number;
+    };
+    entradasRecentes: EntradaRow[];
+    condicoesEntrada: CondicaoOption[];
+};
+
+const labelCondicao = (value: string, opcoes: CondicaoOption[]) =>
+    opcoes.find((o) => o.value === value)?.label ?? value;
+
+const formatBrl = (n: number) =>
+    n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+export default function EntradasLoteIndex({
+    estatisticas,
+    entradasRecentes,
+    condicoesEntrada,
+}: Props) {
+    const { flash } = usePage().props as {
+        flash?: { success?: string; error?: string };
+    };
+
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash?.success, flash?.error]);
+
+    return (
+        <>
+            <Head title="Entradas em lote" />
+
+            <div className="space-y-6 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h1 className="text-lg font-semibold">Entradas em lote</h1>
+                        <p className="text-sm text-muted-foreground">
+                            Registre entradas com vários itens, nota fiscal quando aplicável e
+                            anexos por item.
+                        </p>
+                    </div>
+                    <Button asChild>
+                        <Link href={`${BASE}/nova`}>Nova entrada</Link>
+                    </Button>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Entradas no mês
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-2xl font-semibold">{estatisticas.entradas_no_mes}</p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Quantidade (mês)
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-2xl font-semibold">
+                                {estatisticas.quantidade_total_mes.toLocaleString('pt-BR', {
+                                    maximumFractionDigits: 4,
+                                })}
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Valor total (mês)
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-2xl font-semibold">
+                                {formatBrl(estatisticas.valor_total_mes)}
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Entradas recentes</CardTitle>
+                        <CardDescription>Últimas movimentações registradas.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="overflow-x-auto p-0">
+                        <table className="w-full text-left text-sm">
+                            <thead className="bg-muted/50 text-muted-foreground">
+                                <tr>
+                                    <th className="px-4 py-3 font-medium">Data</th>
+                                    <th className="px-4 py-3 font-medium">Estoque</th>
+                                    <th className="px-4 py-3 font-medium">Condição</th>
+                                    <th className="px-4 py-3 font-medium">Qtd</th>
+                                    <th className="px-4 py-3 font-medium">Valor</th>
+                                    <th className="px-4 py-3 font-medium">Usuário</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {entradasRecentes.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan={6}
+                                            className="px-4 py-8 text-center text-muted-foreground"
+                                        >
+                                            Nenhuma entrada registrada ainda.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    entradasRecentes.map((e) => (
+                                        <tr key={e.id} className="border-t border-border">
+                                            <td className="px-4 py-3">
+                                                {new Date(e.created_at).toLocaleString('pt-BR')}
+                                            </td>
+                                            <td className="px-4 py-3">{e.estoque?.nome ?? '-'}</td>
+                                            <td className="px-4 py-3">
+                                                {labelCondicao(e.condicao_entrada, condicoesEntrada)}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {Number(e.total_quantidade).toLocaleString('pt-BR', {
+                                                    maximumFractionDigits: 4,
+                                                })}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {formatBrl(Number(e.total_valor))}
+                                            </td>
+                                            <td className="px-4 py-3">{e.user?.name ?? '-'}</td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </CardContent>
+                </Card>
+            </div>
+        </>
+    );
+}
+
+EntradasLoteIndex.layout = {
+    breadcrumbs: [
+        { title: 'Operações', href: BASE },
+        { title: 'Estoque', href: BASE },
+        { title: 'Entradas em lote', href: BASE },
+    ] satisfies BreadcrumbItem[],
+};
