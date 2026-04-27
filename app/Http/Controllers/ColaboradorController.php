@@ -52,7 +52,7 @@ class ColaboradorController extends Controller
         $this->mergeNormalizedInput($request);
 
         $data = $request->validate(
-            $this->rules(),
+            $this->rules(request: $request),
             $this->messages(),
             $this->attributes(),
         );
@@ -67,7 +67,7 @@ class ColaboradorController extends Controller
         $this->mergeNormalizedInput($request);
 
         $data = $request->validate(
-            $this->rules($colaborador),
+            $this->rules(colaborador: $colaborador, request: $request),
             $this->messages(),
             $this->attributes(),
         );
@@ -99,9 +99,10 @@ class ColaboradorController extends Controller
         ]);
     }
 
-    private function rules(?Colaborador $colaborador = null): array
+    private function rules(?Colaborador $colaborador = null, ?Request $request = null): array
     {
         $colaboradorId = $colaborador?->id;
+        $empresaId = $request?->input('empresa_id');
 
         return [
             'nome' => ['required', 'string', 'max:255'],
@@ -118,8 +119,8 @@ class ColaboradorController extends Controller
             'local_id' => [
                 'required',
                 'integer',
-                Rule::exists('locais', 'id')->where(function ($query) use ($request) {
-                    $query->where('empresa_id', $request->input('empresa_id'));
+                Rule::exists('locais', 'id')->where(function ($query) use ($empresaId) {
+                    $query->where('empresa_id', $empresaId);
                 }),
             ],
             'data_admissao' => ['required', 'date'],
