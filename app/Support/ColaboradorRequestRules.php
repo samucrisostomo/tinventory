@@ -11,7 +11,12 @@ class ColaboradorRequestRules
      * @param  array<string, array{visible: bool, required: bool}>  $schema
      * @return array<string, mixed>
      */
-    public static function build(array $schema, ?int $colaboradorId, mixed $empresaId): array
+    public static function build(
+        array $schema,
+        ?int $colaboradorId,
+        mixed $empresaId,
+        mixed $matricula,
+    ): array
     {
         $rules = [
             'tipo_colaborador_id' => ['required', 'integer', 'exists:tipos_colaborador,id'],
@@ -53,14 +58,22 @@ class ColaboradorRequestRules
                         'string',
                         'size:11',
                         'regex:/^[0-9]{11}$/',
-                        Rule::unique('colaboradores', 'cpf')->ignore($colaboradorId),
+                        Rule::unique('colaboradores', 'cpf')
+                            ->where(function ($query) use ($matricula) {
+                                $query->where('matricula', $matricula);
+                            })
+                            ->ignore($colaboradorId),
                     ]
                     : [
                         'nullable',
                         'string',
                         'size:11',
                         'regex:/^[0-9]{11}$/',
-                        Rule::unique('colaboradores', 'cpf')->ignore($colaboradorId),
+                        Rule::unique('colaboradores', 'cpf')
+                            ->where(function ($query) use ($matricula) {
+                                $query->where('matricula', $matricula);
+                            })
+                            ->ignore($colaboradorId),
                     ];
 
                 continue;
