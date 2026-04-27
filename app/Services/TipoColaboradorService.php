@@ -14,6 +14,7 @@ class TipoColaboradorService
                 'id',
                 'nome',
                 'descricao',
+                'configuracao_formulario',
                 'ativo',
                 'created_at',
                 'updated_at',

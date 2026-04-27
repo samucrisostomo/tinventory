@@ -31,6 +31,8 @@ class TipoColaboradorController extends Controller
             $this->attributes(),
         );
 
+        $data = $this->normalizeFormularioConfig($data);
+
         $this->tipoColaboradorService->create($data);
 
         return back()->with('success', 'Tipo de colaborador criado com sucesso.');
@@ -43,6 +45,8 @@ class TipoColaboradorController extends Controller
             $this->messages(),
             $this->attributes(),
         );
+
+        $data = $this->normalizeFormularioConfig($data);
 
         $this->tipoColaboradorService->update($tipoColaborador, $data);
 
@@ -79,6 +83,7 @@ class TipoColaboradorController extends Controller
                 Rule::unique('tipos_colaborador', 'nome')->ignore($tipoColaboradorId),
             ],
             'descricao' => ['nullable', 'string'],
+            'configuracao_formulario' => ['nullable', 'array'],
         ];
     }
 
@@ -96,6 +101,26 @@ class TipoColaboradorController extends Controller
         return [
             'nome' => 'nome',
             'descricao' => 'descrição',
+            'configuracao_formulario' => 'configuração do formulário',
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function normalizeFormularioConfig(array $data): array
+    {
+        if (! array_key_exists('configuracao_formulario', $data) || $data['configuracao_formulario'] === null) {
+            $data['configuracao_formulario'] = null;
+
+            return $data;
+        }
+
+        $data['configuracao_formulario'] = TipoColaborador::normalizeFormularioInput(
+            $data['configuracao_formulario'],
+        );
+
+        return $data;
     }
 }

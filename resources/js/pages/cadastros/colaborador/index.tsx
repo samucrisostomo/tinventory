@@ -38,6 +38,12 @@ import {
     SheetTitle,
 } from '@/components/ui/sheet';
 import type { BreadcrumbItem } from '@/types';
+import {
+    COLABORADOR_FORMULARIO_CAMPOS,
+    COLABORADOR_FORMULARIO_LABELS,
+    type ColaboradorFormularioCampo,
+    mergeColaboradorFormularioSchema,
+} from '@/lib/colaborador-formulario';
 
 const COLABORADORES_BASE = '/colaboradores';
 
@@ -88,6 +94,12 @@ type Option = {
     nome: string;
 };
 
+type TipoColaboradorOption = {
+    id: number;
+    nome: string;
+    configuracao_formulario: unknown | null;
+};
+
 type LocalOption = {
     id: number;
     nome: string;
@@ -99,13 +111,13 @@ type ColaboradorListItem = {
     id: number;
     nome: string;
     tipo_colaborador_id: number;
-    matricula: string;
-    cpf: string;
-    empresa_id: number;
-    local_id: number;
-    data_admissao: string;
+    matricula: string | null;
+    cpf: string | null;
+    empresa_id: number | null;
+    local_id: number | null;
+    data_admissao: string | null;
     data_afastamento: string | null;
-    situacao_id: number;
+    situacao_id: number | null;
     tipo_colaborador: { id: number; nome: string };
     empresa: { id: number; nome: string };
     local: { id: number; nome: string; codigo: string };
@@ -115,7 +127,7 @@ type ColaboradorListItem = {
 
 type Props = {
     colaboradores: ColaboradorListItem[];
-    tiposColaborador: Option[];
+    tiposColaborador: TipoColaboradorOption[];
     situacoesColaborador: Option[];
     empresas: Option[];
     locais: LocalOption[];
@@ -174,6 +186,64 @@ export default function ColaboradoresIndex({
         );
     }, [form.data.empresa_id, locais]);
 
+    const selectedTipoColaborador = useMemo(() => {
+        if (form.data.tipo_colaborador_id === '') {
+            return undefined;
+        }
+
+        return tiposColaborador.find(
+            (t) => String(t.id) === String(form.data.tipo_colaborador_id),
+        );
+    }, [form.data.tipo_colaborador_id, tiposColaborador]);
+
+    const formularioSchema = useMemo(
+        () => mergeColaboradorFormularioSchema(selectedTipoColaborador?.configuracao_formulario),
+        [selectedTipoColaborador],
+    );
+
+    const isCampoVisivel = (campo: ColaboradorFormularioCampo) => {
+        if (form.data.tipo_colaborador_id === '') {
+            return false;
+        }
+
+        return formularioSchema[campo]?.visible ?? false;
+    };
+
+    const isCampoObrigatorio = (campo: ColaboradorFormularioCampo) => {
+        if (form.data.tipo_colaborador_id === '') {
+            return false;
+        }
+
+        return formularioSchema[campo]?.required ?? false;
+    };
+
+    useEffect(() => {
+        if (form.data.tipo_colaborador_id === '') {
+            return;
+        }
+
+        const tipo = tiposColaborador.find(
+            (t) => String(t.id) === String(form.data.tipo_colaborador_id),
+        );
+        const schema = mergeColaboradorFormularioSchema(tipo?.configuracao_formulario);
+
+        form.setData((previous) => {
+            const next = { ...previous };
+            for (const campo of COLABORADOR_FORMULARIO_CAMPOS) {
+                if (!schema[campo].visible) {
+                    if (campo === 'data_afastamento') {
+                        next.data_afastamento = '';
+                    } else {
+                        (next as Record<string, string>)[campo] = '';
+                    }
+                }
+            }
+
+            return next;
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- apenas ao mudar o tipo
+    }, [form.data.tipo_colaborador_id, tiposColaborador]);
+
     const openCreateSheet = () => {
         setSheetMode('create');
         setEditingColaboradorId(null);
@@ -188,13 +258,15 @@ export default function ColaboradoresIndex({
         form.setData({
             nome: colaborador.nome,
             tipo_colaborador_id: String(colaborador.tipo_colaborador_id),
-            matricula: colaborador.matricula,
-            cpf: formatCpf(colaborador.cpf),
-            empresa_id: String(colaborador.empresa_id),
-            local_id: String(colaborador.local_id),
+            matricula: colaborador.matricula ?? '',
+            cpf: formatCpf(colaborador.cpf ?? ''),
+            empresa_id:
+                colaborador.empresa_id != null ? String(colaborador.empresa_id) : '',
+            local_id: colaborador.local_id != null ? String(colaborador.local_id) : '',
             data_admissao: normalizeDateForInput(colaborador.data_admissao),
             data_afastamento: normalizeDateForInput(colaborador.data_afastamento),
-            situacao_id: String(colaborador.situacao_id),
+            situacao_id:
+                colaborador.situacao_id != null ? String(colaborador.situacao_id) : '',
         });
         form.clearErrors();
         setSheetOpen(true);
@@ -299,8 +371,10 @@ export default function ColaboradoresIndex({
                                     <td className="px-4 py-3">
                                         {colaborador.tipo_colaborador?.nome ?? '-'}
                                     </td>
-                                    <td className="px-4 py-3">{colaborador.matricula}</td>
-                                    <td className="px-4 py-3">{formatCpf(colaborador.cpf)}</td>
+                                    <td className="px-4 py-3">{colaborador.matricula ?? '-'}</td>
+                                    <td className="px-4 py-3">
+                                        {colaborador.cpf ? formatCpf(colaborador.cpf) : '-'}
+                                    </td>
                                     <td className="px-4 py-3">{colaborador.empresa?.nome ?? '-'}</td>
                                     <td className="px-4 py-3">{colaborador.local?.nome ?? '-'}</td>
                                     <td className="px-4 py-3">
@@ -356,24 +430,12 @@ export default function ColaboradoresIndex({
                                 {sheetMode === 'create' ? 'Novo colaborador' : 'Editar colaborador'}
                             </SheetTitle>
                             <SheetDescription>
-                                Preencha os dados do colaborador. CPF é salvo apenas com números (11
-                                dígitos).
+                                Os campos exibidos dependem do tipo de colaborador. CPF é salvo
+                                apenas com números (11 dígitos), quando informado.
                             </SheetDescription>
                         </SheetHeader>
 
                         <div className="flex-1 space-y-4 px-4 py-2">
-                            <div className="space-y-2">
-                                <Label htmlFor="nome">Nome *</Label>
-                                <Input
-                                    id="nome"
-                                    value={form.data.nome}
-                                    onChange={(e) => form.setData('nome', e.target.value)}
-                                />
-                                {form.errors.nome && (
-                                    <p className="text-xs text-destructive">{form.errors.nome}</p>
-                                )}
-                            </div>
-
                             <div className="space-y-2">
                                 <Label htmlFor="tipo_colaborador_id">Tipo de colaborador *</Label>
                                 <Select
@@ -381,7 +443,7 @@ export default function ColaboradoresIndex({
                                     onValueChange={(v) => onSelectChange('tipo_colaborador_id', v)}
                                 >
                                     <SelectTrigger id="tipo_colaborador_id" className="w-full">
-                                        <SelectValue placeholder="Selecione" />
+                                        <SelectValue placeholder="Selecione o tipo primeiro" />
                                     </SelectTrigger>
                                     <SelectContent position="popper">
                                         <SelectItem value={SELECT_VAZIO} disabled>
@@ -401,154 +463,217 @@ export default function ColaboradoresIndex({
                                 )}
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="matricula">Matrícula *</Label>
-                                <Input
-                                    id="matricula"
-                                    value={form.data.matricula}
-                                    onChange={(e) => form.setData('matricula', e.target.value)}
-                                />
-                                {form.errors.matricula && (
-                                    <p className="text-xs text-destructive">
-                                        {form.errors.matricula}
-                                    </p>
-                                )}
-                            </div>
+                            {form.data.tipo_colaborador_id === '' && (
+                                <p className="text-sm text-muted-foreground">
+                                    Selecione o tipo de colaborador para exibir os campos do
+                                    formulário.
+                                </p>
+                            )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="cpf">CPF *</Label>
-                                <Input
-                                    id="cpf"
-                                    inputMode="numeric"
-                                    autoComplete="off"
-                                    value={form.data.cpf}
-                                    onChange={(e) => form.setData('cpf', formatCpf(e.target.value))}
-                                    placeholder="000.000.000-00"
-                                />
-                                {form.errors.cpf && (
-                                    <p className="text-xs text-destructive">{form.errors.cpf}</p>
-                                )}
-                            </div>
+                            {isCampoVisivel('nome') && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="nome">
+                                        {COLABORADOR_FORMULARIO_LABELS.nome}
+                                        {isCampoObrigatorio('nome') ? ' *' : ''}
+                                    </Label>
+                                    <Input
+                                        id="nome"
+                                        value={form.data.nome}
+                                        onChange={(e) => form.setData('nome', e.target.value)}
+                                    />
+                                    {form.errors.nome && (
+                                        <p className="text-xs text-destructive">{form.errors.nome}</p>
+                                    )}
+                                </div>
+                            )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="empresa_id">Empresa *</Label>
-                                <Select
-                                    value={selectValue(form.data.empresa_id)}
-                                    onValueChange={(v) => onSelectChange('empresa_id', v)}
-                                >
-                                    <SelectTrigger id="empresa_id" className="w-full">
-                                        <SelectValue placeholder="Selecione" />
-                                    </SelectTrigger>
-                                    <SelectContent position="popper">
-                                        <SelectItem value={SELECT_VAZIO} disabled>
-                                            Selecione a empresa
-                                        </SelectItem>
-                                        {empresas.map((e) => (
-                                            <SelectItem key={e.id} value={String(e.id)}>
-                                                {e.nome}
+                            {isCampoVisivel('matricula') && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="matricula">
+                                        {COLABORADOR_FORMULARIO_LABELS.matricula}
+                                        {isCampoObrigatorio('matricula') ? ' *' : ''}
+                                    </Label>
+                                    <Input
+                                        id="matricula"
+                                        value={form.data.matricula}
+                                        onChange={(e) => form.setData('matricula', e.target.value)}
+                                    />
+                                    {form.errors.matricula && (
+                                        <p className="text-xs text-destructive">
+                                            {form.errors.matricula}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
+                            {isCampoVisivel('cpf') && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="cpf">
+                                        {COLABORADOR_FORMULARIO_LABELS.cpf}
+                                        {isCampoObrigatorio('cpf') ? ' *' : ''}
+                                    </Label>
+                                    <Input
+                                        id="cpf"
+                                        inputMode="numeric"
+                                        autoComplete="off"
+                                        value={form.data.cpf}
+                                        onChange={(e) =>
+                                            form.setData('cpf', formatCpf(e.target.value))
+                                        }
+                                        placeholder="000.000.000-00"
+                                    />
+                                    {form.errors.cpf && (
+                                        <p className="text-xs text-destructive">{form.errors.cpf}</p>
+                                    )}
+                                </div>
+                            )}
+
+                            {isCampoVisivel('empresa_id') && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="empresa_id">
+                                        {COLABORADOR_FORMULARIO_LABELS.empresa_id}
+                                        {isCampoObrigatorio('empresa_id') ? ' *' : ''}
+                                    </Label>
+                                    <Select
+                                        value={selectValue(form.data.empresa_id)}
+                                        onValueChange={(v) => onSelectChange('empresa_id', v)}
+                                    >
+                                        <SelectTrigger id="empresa_id" className="w-full">
+                                            <SelectValue placeholder="Selecione" />
+                                        </SelectTrigger>
+                                        <SelectContent position="popper">
+                                            <SelectItem value={SELECT_VAZIO} disabled>
+                                                Selecione a empresa
                                             </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {form.errors.empresa_id && (
-                                    <p className="text-xs text-destructive">
-                                        {form.errors.empresa_id}
-                                    </p>
-                                )}
-                            </div>
+                                            {empresas.map((e) => (
+                                                <SelectItem key={e.id} value={String(e.id)}>
+                                                    {e.nome}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {form.errors.empresa_id && (
+                                        <p className="text-xs text-destructive">
+                                            {form.errors.empresa_id}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="local_id">Local *</Label>
-                                <Select
-                                    value={selectValue(form.data.local_id)}
-                                    onValueChange={(v) => onSelectChange('local_id', v)}
-                                    disabled={form.data.empresa_id === ''}
-                                >
-                                    <SelectTrigger id="local_id" className="w-full">
-                                        <SelectValue
-                                            placeholder={
-                                                form.data.empresa_id === ''
-                                                    ? 'Selecione a empresa primeiro'
-                                                    : 'Selecione o local'
-                                            }
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent position="popper">
-                                        <SelectItem value={SELECT_VAZIO} disabled>
-                                            Selecione o local
-                                        </SelectItem>
-                                        {locaisFiltrados.map((l) => (
-                                            <SelectItem key={l.id} value={String(l.id)}>
-                                                {l.nome} ({l.codigo})
+                            {isCampoVisivel('local_id') && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="local_id">
+                                        {COLABORADOR_FORMULARIO_LABELS.local_id}
+                                        {isCampoObrigatorio('local_id') ? ' *' : ''}
+                                    </Label>
+                                    <Select
+                                        value={selectValue(form.data.local_id)}
+                                        onValueChange={(v) => onSelectChange('local_id', v)}
+                                        disabled={form.data.empresa_id === ''}
+                                    >
+                                        <SelectTrigger id="local_id" className="w-full">
+                                            <SelectValue
+                                                placeholder={
+                                                    form.data.empresa_id === ''
+                                                        ? 'Selecione a empresa primeiro'
+                                                        : 'Selecione o local'
+                                                }
+                                            />
+                                        </SelectTrigger>
+                                        <SelectContent position="popper">
+                                            <SelectItem value={SELECT_VAZIO} disabled>
+                                                Selecione o local
                                             </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {form.errors.local_id && (
-                                    <p className="text-xs text-destructive">{form.errors.local_id}</p>
-                                )}
-                            </div>
+                                            {locaisFiltrados.map((l) => (
+                                                <SelectItem key={l.id} value={String(l.id)}>
+                                                    {l.nome} ({l.codigo})
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {form.errors.local_id && (
+                                        <p className="text-xs text-destructive">
+                                            {form.errors.local_id}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="data_admissao">Data de admissão *</Label>
-                                <Input
-                                    id="data_admissao"
-                                    type="date"
-                                    value={form.data.data_admissao}
-                                    onChange={(e) =>
-                                        form.setData('data_admissao', e.target.value)
-                                    }
-                                />
-                                {form.errors.data_admissao && (
-                                    <p className="text-xs text-destructive">
-                                        {form.errors.data_admissao}
-                                    </p>
-                                )}
-                            </div>
+                            {isCampoVisivel('data_admissao') && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="data_admissao">
+                                        {COLABORADOR_FORMULARIO_LABELS.data_admissao}
+                                        {isCampoObrigatorio('data_admissao') ? ' *' : ''}
+                                    </Label>
+                                    <Input
+                                        id="data_admissao"
+                                        type="date"
+                                        value={form.data.data_admissao}
+                                        onChange={(e) =>
+                                            form.setData('data_admissao', e.target.value)
+                                        }
+                                    />
+                                    {form.errors.data_admissao && (
+                                        <p className="text-xs text-destructive">
+                                            {form.errors.data_admissao}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="data_afastamento">Data de afastamento</Label>
-                                <Input
-                                    id="data_afastamento"
-                                    type="date"
-                                    value={form.data.data_afastamento}
-                                    onChange={(e) =>
-                                        form.setData('data_afastamento', e.target.value)
-                                    }
-                                />
-                                {form.errors.data_afastamento && (
-                                    <p className="text-xs text-destructive">
-                                        {form.errors.data_afastamento}
-                                    </p>
-                                )}
-                            </div>
+                            {isCampoVisivel('data_afastamento') && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="data_afastamento">
+                                        {COLABORADOR_FORMULARIO_LABELS.data_afastamento}
+                                        {isCampoObrigatorio('data_afastamento') ? ' *' : ''}
+                                    </Label>
+                                    <Input
+                                        id="data_afastamento"
+                                        type="date"
+                                        value={form.data.data_afastamento}
+                                        onChange={(e) =>
+                                            form.setData('data_afastamento', e.target.value)
+                                        }
+                                    />
+                                    {form.errors.data_afastamento && (
+                                        <p className="text-xs text-destructive">
+                                            {form.errors.data_afastamento}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="situacao_id">Situação *</Label>
-                                <Select
-                                    value={selectValue(form.data.situacao_id)}
-                                    onValueChange={(v) => onSelectChange('situacao_id', v)}
-                                >
-                                    <SelectTrigger id="situacao_id" className="w-full">
-                                        <SelectValue placeholder="Selecione" />
-                                    </SelectTrigger>
-                                    <SelectContent position="popper">
-                                        <SelectItem value={SELECT_VAZIO} disabled>
-                                            Selecione a situação
-                                        </SelectItem>
-                                        {situacoesColaborador.map((s) => (
-                                            <SelectItem key={s.id} value={String(s.id)}>
-                                                {s.nome}
+                            {isCampoVisivel('situacao_id') && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="situacao_id">
+                                        {COLABORADOR_FORMULARIO_LABELS.situacao_id}
+                                        {isCampoObrigatorio('situacao_id') ? ' *' : ''}
+                                    </Label>
+                                    <Select
+                                        value={selectValue(form.data.situacao_id)}
+                                        onValueChange={(v) => onSelectChange('situacao_id', v)}
+                                    >
+                                        <SelectTrigger id="situacao_id" className="w-full">
+                                            <SelectValue placeholder="Selecione" />
+                                        </SelectTrigger>
+                                        <SelectContent position="popper">
+                                            <SelectItem value={SELECT_VAZIO} disabled>
+                                                Selecione a situação
                                             </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {form.errors.situacao_id && (
-                                    <p className="text-xs text-destructive">
-                                        {form.errors.situacao_id}
-                                    </p>
-                                )}
-                            </div>
+                                            {situacoesColaborador.map((s) => (
+                                                <SelectItem key={s.id} value={String(s.id)}>
+                                                    {s.nome}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {form.errors.situacao_id && (
+                                        <p className="text-xs text-destructive">
+                                            {form.errors.situacao_id}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <SheetFooter className="flex-row items-center justify-end gap-2 border-t pt-4">

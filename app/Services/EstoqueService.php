@@ -40,9 +40,14 @@ class EstoqueService
 
     /**
      * Cria o estoque padrão do colaborador (tipo COLABORADOR), após o cadastro do colaborador.
+     * Retorna null quando empresa/local não estão definidos (ex.: tipo com formulário reduzido).
      */
-    public function createDefaultForColaborador(Colaborador $colaborador): Estoque
+    public function createDefaultForColaborador(Colaborador $colaborador): ?Estoque
     {
+        if (! $colaborador->empresa_id || ! $colaborador->local_id) {
+            return null;
+        }
+
         $tipo = TipoEstoque::query()
             ->where('codigo', TipoEstoque::CODIGO_COLABORADOR)
             ->where('ativo', true)

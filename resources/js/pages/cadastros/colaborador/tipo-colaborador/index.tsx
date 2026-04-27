@@ -20,6 +20,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -32,6 +33,14 @@ import {
 } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
 import type { BreadcrumbItem } from '@/types';
+import {
+    COLABORADOR_FORMULARIO_CAMPOS,
+    COLABORADOR_FORMULARIO_LABELS,
+    type ColaboradorFormularioCampo,
+    type ColaboradorFormularioSchema,
+    defaultColaboradorFormularioSchema,
+    mergeColaboradorFormularioSchema,
+} from '@/lib/colaborador-formulario';
 
 const TIPOS_COLABORADOR_BASE = '/tipos-colaborador';
 
@@ -39,6 +48,7 @@ type TipoColaboradorListItem = {
     id: number;
     nome: string;
     descricao: string | null;
+    configuracao_formulario: unknown | null;
     ativo: boolean;
     created_at: string;
     updated_at: string;
@@ -77,6 +87,7 @@ export default function TipoColaboradorIndex({ tiposColaborador }: Props) {
     const form = useForm({
         nome: '',
         descricao: '',
+        configuracao_formulario: defaultColaboradorFormularioSchema(),
     });
 
     const openCreateSheet = () => {
@@ -93,6 +104,9 @@ export default function TipoColaboradorIndex({ tiposColaborador }: Props) {
         form.setData({
             nome: tipoColaborador.nome,
             descricao: tipoColaborador.descricao ?? '',
+            configuracao_formulario: mergeColaboradorFormularioSchema(
+                tipoColaborador.configuracao_formulario,
+            ),
         });
         form.clearErrors();
         setSheetOpen(true);
@@ -139,6 +153,30 @@ export default function TipoColaboradorIndex({ tiposColaborador }: Props) {
                 },
             },
         );
+    };
+
+    const setFormularioCampo = (
+        campo: ColaboradorFormularioCampo,
+        patch: Partial<{ visible: boolean; required: boolean }>,
+    ) => {
+        const atual = form.data.configuracao_formulario[campo];
+        let visible = patch.visible ?? atual.visible;
+        let required = patch.required ?? atual.required;
+        if (campo === 'nome') {
+            visible = true;
+            required = true;
+        } else {
+            if (!visible) {
+                required = false;
+            }
+            if (required) {
+                visible = true;
+            }
+        }
+        form.setData('configuracao_formulario', {
+            ...form.data.configuracao_formulario,
+            [campo]: { visible, required },
+        });
     };
 
     const confirmDeleteTipoColaborador = () => {
@@ -290,6 +328,64 @@ export default function TipoColaboradorIndex({ tiposColaborador }: Props) {
                                         form.setData('descricao', event.target.value)
                                     }
                                 />
+                            </div>
+
+                            <div className="space-y-3 rounded-md border border-border p-3">
+                                <p className="text-sm font-medium">
+                                    Formulário de colaboradores (criar / editar)
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    Defina quais campos aparecem e quais são obrigatórios. O nome
+                                    permanece sempre visível e obrigatório.
+                                </p>
+                                <div className="space-y-2">
+                                    {COLABORADOR_FORMULARIO_CAMPOS.map((campo) => {
+                                        const cfg = form.data.configuracao_formulario[campo];
+                                        const isNome = campo === 'nome';
+
+                                        return (
+                                            <div
+                                                key={campo}
+                                                className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 py-2 last:border-0"
+                                            >
+                                                <span className="text-sm font-medium">
+                                                    {COLABORADOR_FORMULARIO_LABELS[campo]}
+                                                </span>
+                                                <div className="flex items-center gap-4">
+                                                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                                                        <Checkbox
+                                                            checked={cfg.visible}
+                                                            disabled={isNome}
+                                                            onCheckedChange={(v) =>
+                                                                setFormularioCampo(campo, {
+                                                                    visible: v === true,
+                                                                })
+                                                            }
+                                                        />
+                                                        Visível
+                                                    </label>
+                                                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                                                        <Checkbox
+                                                            checked={cfg.required}
+                                                            disabled={isNome || !cfg.visible}
+                                                            onCheckedChange={(v) =>
+                                                                setFormularioCampo(campo, {
+                                                                    required: v === true,
+                                                                })
+                                                            }
+                                                        />
+                                                        Obrigatório
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                {form.errors.configuracao_formulario && (
+                                    <p className="text-xs text-destructive">
+                                        {form.errors.configuracao_formulario}
+                                    </p>
+                                )}
                             </div>
                         </div>
 

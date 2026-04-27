@@ -8,9 +8,9 @@ use App\Models\Local;
 use App\Models\SituacaoColaborador;
 use App\Models\TipoColaborador;
 use App\Services\ColaboradorService;
+use App\Support\ColaboradorRequestRules;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,7 +25,7 @@ class ColaboradorController extends Controller
         return Inertia::render('cadastros/colaborador/index', [
             'colaboradores' => $this->colaboradorService->list(),
             'tiposColaborador' => TipoColaborador::query()
-                ->select(['id', 'nome'])
+                ->select(['id', 'nome', 'configuracao_formulario'])
                 ->where('ativo', true)
                 ->orderBy('nome')
                 ->get(),
@@ -49,13 +49,21 @@ class ColaboradorController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $schema = $this->resolveSchemaFromRequest($request);
+        $this->stripHiddenInputs($request, $schema);
         $this->mergeNormalizedInput($request);
 
         $data = $request->validate(
-            $this->rules(request: $request),
+            ColaboradorRequestRules::build(
+                $schema,
+                null,
+                $request->input('empresa_id'),
+            ),
             $this->messages(),
             $this->attributes(),
         );
+
+        $data = $this->finalizeColaboradorDataForCreate($data, $schema);
 
         $this->colaboradorService->create($data);
 
@@ -64,13 +72,21 @@ class ColaboradorController extends Controller
 
     public function update(Request $request, Colaborador $colaborador): RedirectResponse
     {
+        $schema = $this->resolveSchemaFromRequest($request, $colaborador);
+        $this->stripHiddenInputs($request, $schema);
         $this->mergeNormalizedInput($request);
 
         $data = $request->validate(
-            $this->rules(colaborador: $colaborador, request: $request),
+            ColaboradorRequestRules::build(
+                $schema,
+                $colaborador->id,
+                $request->input('empresa_id'),
+            ),
             $this->messages(),
             $this->attributes(),
         );
+
+        $data = $this->finalizeColaboradorDataForUpdate($data, $schema);
 
         $this->colaboradorService->update($colaborador, $data);
 
@@ -84,9 +100,33 @@ class ColaboradorController extends Controller
         return back()->with('success', 'Colaborador excluído com sucesso.');
     }
 
+    /**
+     * @return array<string, array{visible: bool, required: bool}>
+     */
+    private function resolveSchemaFromRequest(Request $request, ?Colaborador $colaborador = null): array
+    {
+        $tipoId = (int) ($request->input('tipo_colaborador_id') ?: $colaborador?->tipo_colaborador_id);
+        $tipo = TipoColaborador::query()->find($tipoId);
+
+        return $tipo ? $tipo->resolvedFormulario() : TipoColaborador::defaultFormulario();
+    }
+
+    /**
+     * @param  array<string, array{visible: bool, required: bool}>  $schema
+     */
+    private function stripHiddenInputs(Request $request, array $schema): void
+    {
+        foreach (TipoColaborador::formularioCamposChaves() as $field) {
+            if (! ($schema[$field]['visible'] ?? false)) {
+                $request->merge([$field => null]);
+            }
+        }
+    }
+
     private function mergeNormalizedInput(Request $request): void
     {
         $cpfDigits = preg_replace('/\D/', '', (string) $request->input('cpf', '')) ?? '';
+        $cpfNormalized = $cpfDigits === '' ? null : $cpfDigits;
 
         $dataAfastamento = $request->input('data_afastamento');
         $dataAfastamentoNormalized = ($dataAfastamento === null || $dataAfastamento === '')
@@ -94,39 +134,47 @@ class ColaboradorController extends Controller
             : $dataAfastamento;
 
         $request->merge([
-            'cpf' => $cpfDigits,
+            'cpf' => $cpfNormalized,
             'data_afastamento' => $dataAfastamentoNormalized,
         ]);
     }
 
-    private function rules(?Colaborador $colaborador = null, ?Request $request = null): array
+    /**
+     * @param  array<string, mixed>  $data
+     * @param  array<string, array{visible: bool, required: bool}>  $schema
+     * @return array<string, mixed>
+     */
+    private function finalizeColaboradorDataForCreate(array $data, array $schema): array
     {
-        $colaboradorId = $colaborador?->id;
-        $empresaId = $request?->input('empresa_id');
+        foreach (TipoColaborador::formularioCamposChaves() as $field) {
+            if (! ($schema[$field]['visible'] ?? false)) {
+                $data[$field] = null;
 
-        return [
-            'nome' => ['required', 'string', 'max:255'],
-            'tipo_colaborador_id' => ['required', 'integer', 'exists:tipos_colaborador,id'],
-            'matricula' => ['required', 'string', 'max:255'],
-            'cpf' => [
-                'required',
-                'string',
-                'size:11',
-                'regex:/^[0-9]{11}$/',
-                Rule::unique('colaboradores', 'cpf')->ignore($colaboradorId),
-            ],
-            'empresa_id' => ['required', 'integer', 'exists:empresas,id'],
-            'local_id' => [
-                'required',
-                'integer',
-                Rule::exists('locais', 'id')->where(function ($query) use ($empresaId) {
-                    $query->where('empresa_id', $empresaId);
-                }),
-            ],
-            'data_admissao' => ['required', 'date'],
-            'data_afastamento' => ['nullable', 'date', 'after_or_equal:data_admissao'],
-            'situacao_id' => ['required', 'integer', 'exists:situacoes_colaborador,id'],
-        ];
+                continue;
+            }
+
+            if (array_key_exists($field, $data) && $data[$field] === '') {
+                $data[$field] = null;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @param  array<string, array{visible: bool, required: bool}>  $schema
+     * @return array<string, mixed>
+     */
+    private function finalizeColaboradorDataForUpdate(array $data, array $schema): array
+    {
+        foreach (TipoColaborador::formularioCamposChaves() as $field) {
+            if (! ($schema[$field]['visible'] ?? false)) {
+                unset($data[$field]);
+            }
+        }
+
+        return $data;
     }
 
     private function messages(): array
