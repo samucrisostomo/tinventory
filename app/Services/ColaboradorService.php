@@ -4,9 +4,14 @@ namespace App\Services;
 
 use App\Models\Colaborador;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class ColaboradorService
 {
+    public function __construct(
+        private readonly EstoqueService $estoqueService,
+    ) {}
+
     public function list(): Collection
     {
         return Colaborador::query()
@@ -36,7 +41,12 @@ class ColaboradorService
 
     public function create(array $data): Colaborador
     {
-        return Colaborador::create($data);
+        return DB::transaction(function () use ($data) {
+            $colaborador = Colaborador::create($data);
+            $this->estoqueService->createDefaultForColaborador($colaborador);
+
+            return $colaborador;
+        });
     }
 
     public function update(Colaborador $colaborador, array $data): void

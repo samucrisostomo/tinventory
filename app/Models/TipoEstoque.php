@@ -10,6 +10,9 @@ class TipoEstoque extends Model
 {
     use HasFactory, SoftDeletes;
 
+    /** Código do tipo usado para estoque automático ao cadastrar colaborador. */
+    public const CODIGO_COLABORADOR = 'COLABORADOR';
+
     protected $table = 'tipos_estoque';
 
     protected $fillable = [
