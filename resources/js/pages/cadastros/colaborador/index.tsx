@@ -254,10 +254,11 @@ export default function ColaboradoresIndex({
             );
             const keepLocal =
                 form.data.local_id !== '' && allowedIds.has(form.data.local_id);
-            form.setData({
+            form.setData((previousData) => ({
+                ...previousData,
                 empresa_id: next,
-                local_id: keepLocal ? form.data.local_id : '',
-            });
+                local_id: keepLocal ? previousData.local_id : '',
+            }));
 
             return;
         }
