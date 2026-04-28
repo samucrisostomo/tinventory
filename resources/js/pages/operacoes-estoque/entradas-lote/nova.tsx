@@ -39,7 +39,6 @@ import {
 } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import type { BreadcrumbItem } from '@/types';
 
 const BASE = '/operacoes-estoque/entradas-lote';
 const POST_URL = `${BASE}`;
@@ -2350,11 +2349,3 @@ export default function NovaEntradaLote({
     );
 }
 
-NovaEntradaLote.layout = {
-    breadcrumbs: [
-        { title: 'Operações', href: BASE },
-        { title: 'Estoque', href: BASE },
-        { title: 'Entradas em lote', href: BASE },
-        { title: 'Nova', href: `${BASE}/nova` },
-    ] satisfies BreadcrumbItem[],
-};

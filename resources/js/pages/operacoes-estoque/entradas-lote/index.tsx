@@ -18,7 +18,6 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import NovaEntradaLote, { type NovaEntradaLoteProps } from './nova';
-import type { BreadcrumbItem } from '@/types';
 
 const BASE = '/operacoes-estoque/entradas-lote';
 const ENTRY_VIEW_MODE_STORAGE_KEY = 'entradas-lote:view-mode';
@@ -294,10 +293,3 @@ export default function EntradasLoteIndex({
     );
 }
 
-EntradasLoteIndex.layout = {
-    breadcrumbs: [
-        { title: 'Operações', href: BASE },
-        { title: 'Estoque', href: BASE },
-        { title: 'Entradas em lote', href: BASE },
-    ] satisfies BreadcrumbItem[],
-};
