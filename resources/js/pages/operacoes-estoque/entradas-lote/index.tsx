@@ -239,7 +239,7 @@ export default function EntradasLoteIndex({
             </div>
 
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-                <DialogContent className="grid h-[92vh] max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-none grid-rows-[auto_minmax(0,1fr)] overflow-hidden sm:w-[calc(100vw-4rem)] sm:max-w-none lg:w-[calc(100vw-8rem)]">
+                <DialogContent className="grid h-[97vh] max-h-[97vh] w-[calc(100vw-1.5rem)] max-w-none grid-rows-[auto_minmax(0,1fr)] overflow-hidden sm:w-[calc(100vw-4rem)] sm:max-w-none lg:w-[calc(100vw-8rem)]">
                     <DialogHeader>
                         <DialogTitle>Nova entrada em lote</DialogTitle>
                         <div className="flex items-center justify-between gap-3">
