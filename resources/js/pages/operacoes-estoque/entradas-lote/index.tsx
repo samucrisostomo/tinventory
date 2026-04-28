@@ -241,8 +241,12 @@ export default function EntradasLoteIndex({
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogContent className="grid h-[92vh] max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-none grid-rows-[auto_minmax(0,1fr)] overflow-hidden sm:w-[calc(100vw-4rem)] sm:max-w-none lg:w-[calc(100vw-8rem)]">
                     <DialogHeader>
+                        <DialogTitle>Nova entrada em lote</DialogTitle>
                         <div className="flex items-center justify-between gap-3">
-                            <DialogTitle>Nova entrada em lote</DialogTitle>
+                            <DialogDescription>
+                                Cadastre uma nova entrada sem sair da tela de
+                                listagem.
+                            </DialogDescription>
                             <div className="inline-flex items-center gap-1 rounded-md border border-input p-1">
                                 <Button
                                     type="button"
@@ -268,10 +272,6 @@ export default function EntradasLoteIndex({
                                 </Button>
                             </div>
                         </div>
-                        <DialogDescription>
-                            Cadastre uma nova entrada sem sair da tela de
-                            listagem.
-                        </DialogDescription>
                     </DialogHeader>
 
                     <div className="min-h-0 overflow-hidden">

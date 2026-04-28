@@ -301,7 +301,9 @@ export default function NovaEntradaLote({
                     embedded
                         ? cn(
                               'h-full w-full space-y-6 p-0',
-                              isCarouselMode ? 'overflow-hidden' : 'overflow-y-auto pr-1',
+                              isCarouselMode
+                                  ? 'overflow-hidden'
+                                  : 'overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/70',
                           )
                         : 'mx-auto max-w-5xl space-y-6 p-4'
                 }
@@ -350,7 +352,7 @@ export default function NovaEntradaLote({
                     {isCarouselMode ? (
                         <div className="grid h-full min-h-0 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
                             <div className="min-h-0 min-w-0 space-y-4">
-                                <div className="grid h-[70vh] items-stretch gap-2 md:grid-cols-[60px_minmax(0,1fr)]">
+                                <div className="grid h-[70vh] items-stretch gap-2 md:grid-cols-[40px_minmax(0,1fr)]">
                                     <div className="flex h-full flex-col items-center justify-center gap-2">
                                         {etapasCarousel.map((etapa, index) => (
                                             <button
@@ -370,7 +372,7 @@ export default function NovaEntradaLote({
                                         ))}
                                     </div>
 
-                                    <div className="h-full min-h-0 min-w-0 overflow-y-auto pr-1 flex flex-col gap-4">
+                                    <div className="h-full min-h-0 min-w-0 overflow-y-auto pr-1 flex flex-col gap-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/70">
                                         {etapaVisivel(idxCondicao) && (
                                             <div className={classeAnimacaoEtapa(idxCondicao)}>
                                                 <Card>
@@ -926,7 +928,7 @@ export default function NovaEntradaLote({
                                         <CardTitle>Resumo da entrada</CardTitle>
                                         <CardDescription>Informações consolidadas em tempo real.</CardDescription>
                                     </CardHeader>
-                                    <CardContent className="space-y-4 overflow-y-auto text-sm">
+                                    <CardContent className="space-y-4 overflow-y-auto text-sm [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/70">
                                         <div className="space-y-1">
                                             <p className="text-muted-foreground">Condição</p>
                                             <p className="font-medium">
