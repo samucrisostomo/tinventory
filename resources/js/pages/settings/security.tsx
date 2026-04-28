@@ -10,7 +10,6 @@ import TwoFactorSetupModal from '@/components/two-factor-setup-modal';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
-import { edit } from '@/routes/security';
 import { disable, enable } from '@/routes/two-factor';
 
 type Props = {
@@ -243,7 +242,7 @@ Security.layout = {
     breadcrumbs: [
         {
             title: 'Security settings',
-            href: edit(),
+            href: '/settings/security',
         },
     ],
 };

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,6 +13,10 @@ use Inertia\Response;
 
 class UserController extends Controller
 {
+    public function __construct(
+        private readonly UserService $userService,
+    ) {}
+
     public function index(): Response
     {
         return Inertia::render('cadastros/users/index', [
@@ -67,5 +72,16 @@ class UserController extends Controller
             : 'Usuário inativado com sucesso.';
 
         return back()->with('success', $message);
+    }
+
+    public function destroy(User $user): RedirectResponse
+    {
+        try {
+            $this->userService->delete($user);
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return back()->with('success', 'Usuário excluído com sucesso.');
     }
 }

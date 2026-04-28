@@ -154,7 +154,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
     return (
         <>
-            <div className="border-b border-sidebar-border/80">
+            <div className="border-b border-sidebar-border/10">
                 <div className="flex h-16 w-full items-center px-4">
                     {/* Mobile Menu */}
                     <div className="lg:hidden">

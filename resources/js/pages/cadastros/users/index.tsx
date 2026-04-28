@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
 import type { BreadcrumbItem } from '@/types';
-import { EllipsisVertical, Pencil } from 'lucide-react';
+import { EllipsisVertical, Pencil, Trash2 } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { toast } from 'sonner';
 
@@ -124,6 +124,20 @@ export default function UsersIndex({ users }: Props) {
         );
     };
 
+    const deleteUser = (user: UserListItem) => {
+        const shouldDelete = window.confirm(
+            `Deseja realmente excluir o usuário ${user.name}?`,
+        );
+
+        if (!shouldDelete) {
+            return;
+        }
+
+        router.delete(`/users/${user.id}`, {
+            preserveScroll: true,
+        });
+    };
+
     return (
         <>
             <Head title="Usuários" />
@@ -184,6 +198,14 @@ export default function UsersIndex({ users }: Props) {
                                                 >
                                                     <Pencil className="mr-2 h-4 w-4" />
                                                     Editar
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() =>
+                                                        deleteUser(user)
+                                                    }
+                                                >
+                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    Excluir
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>

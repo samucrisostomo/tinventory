@@ -23,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('users', [UserController::class, 'store'])->name('users.store');
     Route::patch('users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::patch('users/{user}/status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::get('empresas', [EmpresaController::class, 'index'])->name('empresas.index');
     Route::post('empresas', [EmpresaController::class, 'store'])->name('empresas.store');
     Route::patch('empresas/{empresa}', [EmpresaController::class, 'update'])->name('empresas.update');
