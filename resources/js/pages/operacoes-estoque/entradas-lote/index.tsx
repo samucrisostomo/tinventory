@@ -1,5 +1,6 @@
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { Columns2, GalleryVerticalEnd } from 'lucide-react';
 import { toast } from 'sonner';
 import {
     Dialog,
@@ -20,6 +21,7 @@ import NovaEntradaLote, { type NovaEntradaLoteProps } from './nova';
 import type { BreadcrumbItem } from '@/types';
 
 const BASE = '/operacoes-estoque/entradas-lote';
+const ENTRY_VIEW_MODE_STORAGE_KEY = 'entradas-lote:view-mode';
 
 type EntradaRow = {
     id: number;
@@ -61,6 +63,7 @@ export default function EntradasLoteIndex({
         flash?: { success?: string; error?: string };
     };
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [entryViewMode, setEntryViewMode] = useState<'carousel' | 'normal'>('carousel');
 
     useEffect(() => {
         if (flash?.success) {
@@ -70,6 +73,18 @@ export default function EntradasLoteIndex({
             toast.error(flash.error);
         }
     }, [flash?.success, flash?.error]);
+
+    useEffect(() => {
+        const savedMode = window.localStorage.getItem(ENTRY_VIEW_MODE_STORAGE_KEY);
+
+        if (savedMode === 'carousel' || savedMode === 'normal') {
+            setEntryViewMode(savedMode);
+        }
+    }, []);
+
+    useEffect(() => {
+        window.localStorage.setItem(ENTRY_VIEW_MODE_STORAGE_KEY, entryViewMode);
+    }, [entryViewMode]);
 
     return (
         <>
@@ -226,7 +241,33 @@ export default function EntradasLoteIndex({
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogContent className="grid h-[92vh] max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-none grid-rows-[auto_minmax(0,1fr)] overflow-hidden sm:w-[calc(100vw-4rem)] sm:max-w-none lg:w-[calc(100vw-8rem)]">
                     <DialogHeader>
-                        <DialogTitle>Nova entrada em lote</DialogTitle>
+                        <div className="flex items-center justify-between gap-3">
+                            <DialogTitle>Nova entrada em lote</DialogTitle>
+                            <div className="inline-flex items-center gap-1 rounded-md border border-input p-1">
+                                <Button
+                                    type="button"
+                                    variant={entryViewMode === 'carousel' ? 'default' : 'ghost'}
+                                    size="sm"
+                                    className="h-8 px-2"
+                                    onClick={() => setEntryViewMode('carousel')}
+                                    aria-label="Modo A: carousel"
+                                    title="Modo A: carousel"
+                                >
+                                    <Columns2 className="h-4 w-4" />A
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant={entryViewMode === 'normal' ? 'default' : 'ghost'}
+                                    size="sm"
+                                    className="h-8 px-2"
+                                    onClick={() => setEntryViewMode('normal')}
+                                    aria-label="Modo B: normal"
+                                    title="Modo B: normal"
+                                >
+                                    <GalleryVerticalEnd className="h-4 w-4" />B
+                                </Button>
+                            </div>
+                        </div>
                         <DialogDescription>
                             Cadastre uma nova entrada sem sair da tela de
                             listagem.
@@ -243,6 +284,7 @@ export default function EntradasLoteIndex({
                             locais={locais}
                             condicoesEntrada={condicoesEntrada}
                             embedded
+                            viewMode={entryViewMode}
                             onRequestClose={() => setCreateDialogOpen(false)}
                         />
                     </div>

@@ -70,6 +70,7 @@ export type NovaEntradaLoteProps = {
 type EmbeddedProps = {
     embedded?: boolean;
     onRequestClose?: () => void;
+    viewMode?: 'carousel' | 'normal';
 };
 
 const novoItem = (): ItemLinha => ({
@@ -101,6 +102,7 @@ export default function NovaEntradaLote({
     condicoesEntrada,
     embedded = false,
     onRequestClose,
+    viewMode = 'carousel',
 }: NovaEntradaLoteProps & EmbeddedProps) {
     const [condicaoEntrada, setCondicaoEntrada] = useState('');
     const [estoqueId, setEstoqueId] = useState('');
@@ -238,6 +240,7 @@ export default function NovaEntradaLote({
         'Itens',
         'Total',
     ];
+    const isCarouselMode = embedded && viewMode === 'carousel';
     const idxCondicao = 0;
     const idxNota = mostrarNota ? 1 : -1;
     const idxMovimentacao = mostrarNota ? 2 : 1;
@@ -254,7 +257,7 @@ export default function NovaEntradaLote({
         );
 
     useEffect(() => {
-        if (!embedded) {
+        if (!isCarouselMode) {
             return;
         }
 
@@ -287,7 +290,7 @@ export default function NovaEntradaLote({
         return () => {
             window.removeEventListener('keydown', onKeyDown);
         };
-    }, [embedded, etapasCarousel.length]);
+    }, [isCarouselMode, etapasCarousel.length]);
 
     return (
         <>
@@ -296,7 +299,10 @@ export default function NovaEntradaLote({
             <div
                 className={
                     embedded
-                        ? 'h-full w-full space-y-6 overflow-hidden p-0'
+                        ? cn(
+                              'h-full w-full space-y-6 p-0',
+                              isCarouselMode ? 'overflow-hidden' : 'overflow-y-auto pr-1',
+                          )
                         : 'mx-auto max-w-5xl space-y-6 p-4'
                 }
             >
@@ -335,10 +341,13 @@ export default function NovaEntradaLote({
                 )}
 
                 <form
-                    className={cn('space-y-6', embedded && 'h-full overflow-hidden')}
+                    className={cn(
+                        'space-y-6',
+                        embedded && (isCarouselMode ? 'h-full overflow-hidden' : 'h-auto'),
+                    )}
                     onSubmit={enviar}
                 >
-                    {embedded ? (
+                    {isCarouselMode ? (
                         <div className="grid h-full min-h-0 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
                             <div className="min-h-0 min-w-0 space-y-4">
                                 <div className="grid h-[70vh] items-stretch gap-2 md:grid-cols-[60px_minmax(0,1fr)]">
