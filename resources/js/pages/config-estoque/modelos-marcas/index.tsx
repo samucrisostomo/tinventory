@@ -51,7 +51,8 @@ type MarcaOption = {
 type ModeloMarcaListItem = {
     id: number;
     marcas_id: number;
-    descricao: string;
+    nome: string;
+    descricao: string | null;
     ativo: boolean;
     created_at: string;
     updated_at: string;
@@ -95,6 +96,7 @@ export default function ModelosMarcasIndex({ modelosMarcas, marcas }: Props) {
 
     const form = useForm({
         marcas_id: '',
+        nome: '',
         descricao: '',
     });
 
@@ -111,6 +113,7 @@ export default function ModelosMarcasIndex({ modelosMarcas, marcas }: Props) {
         setEditingModeloMarcaId(modeloMarca.id);
         form.setData({
             marcas_id: String(modeloMarca.marcas_id),
+            nome: modeloMarca.nome,
             descricao: modeloMarca.descricao,
         });
         form.clearErrors();
@@ -186,11 +189,10 @@ export default function ModelosMarcasIndex({ modelosMarcas, marcas }: Props) {
                             <tr>
                                 <th className="px-4 py-3 font-medium">ID</th>
                                 <th className="px-4 py-3 font-medium">Marca</th>
+                                <th className="px-4 py-3 font-medium">Modelo</th>
                                 <th className="px-4 py-3 font-medium">Descrição</th>
                                 <th className="px-4 py-3 font-medium">Ativo</th>
                                 <th className="px-4 py-3 font-medium">Criado em</th>
-                                <th className="px-4 py-3 font-medium">Atualizado em</th>
-                                <th className="px-4 py-3 font-medium">Excluído em</th>
                                 <th className="px-4 py-3 font-medium">Ações</th>
                             </tr>
                         </thead>
@@ -201,7 +203,8 @@ export default function ModelosMarcasIndex({ modelosMarcas, marcas }: Props) {
                                     <td className="px-4 py-3">
                                         {modeloMarca.marca?.nome ?? '-'}
                                     </td>
-                                    <td className="px-4 py-3">{modeloMarca.descricao}</td>
+                                    <td className="px-4 py-3">{modeloMarca.nome}</td>
+                                    <td className="px-4 py-3">{modeloMarca.descricao || '-'}</td>
                                     <td className="px-4 py-3">
                                         <Switch
                                             checked={modeloMarca.ativo}
@@ -215,18 +218,6 @@ export default function ModelosMarcasIndex({ modelosMarcas, marcas }: Props) {
                                         {new Date(modeloMarca.created_at).toLocaleString(
                                             'pt-BR',
                                         )}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {new Date(modeloMarca.updated_at).toLocaleString(
-                                            'pt-BR',
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {modeloMarca.deleted_at
-                                            ? new Date(modeloMarca.deleted_at).toLocaleString(
-                                                'pt-BR',
-                                            )
-                                            : '-'}
                                     </td>
                                     <td className="px-4 py-3">
                                         <DropdownMenu>
@@ -325,7 +316,23 @@ export default function ModelosMarcasIndex({ modelosMarcas, marcas }: Props) {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="descricao">Descrição *</Label>
+                                <Label htmlFor="nome">Nome *</Label>
+                                <Input
+                                    id="nome"
+                                    value={form.data.nome}
+                                    onChange={(event) =>
+                                        form.setData('nome', event.target.value)
+                                    }
+                                />
+                                {form.errors.nome && (
+                                    <p className="text-xs text-destructive">
+                                        {form.errors.nome}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="descricao">Descrição</Label>
                                 <Input
                                     id="descricao"
                                     value={form.data.descricao}

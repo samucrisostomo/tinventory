@@ -13,6 +13,7 @@ class ModeloMarcaService
             ->select([
                 'id',
                 'marcas_id',
+                'nome',
                 'descricao',
                 'ativo',
                 'created_at',

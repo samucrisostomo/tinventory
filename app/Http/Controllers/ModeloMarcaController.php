@@ -75,7 +75,8 @@ class ModeloMarcaController extends Controller
     {
         return [
             'marcas_id' => ['required', 'integer', 'exists:marcas,id'],
-            'descricao' => ['required', 'string', 'max:255'],
+            'nome' => ['required', 'string', 'max:255'],
+            'descricao' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -84,7 +85,8 @@ class ModeloMarcaController extends Controller
         return [
             'marcas_id.required' => 'Selecione a marca.',
             'marcas_id.exists' => 'A marca selecionada é inválida.',
-            'descricao.required' => 'Informe a descrição do modelo.',
+            'nome.required' => 'Informe o nome do modelo.',
+            'nome.max' => 'O nome deve ter no máximo :max caracteres.',
             'descricao.max' => 'A descrição deve ter no máximo :max caracteres.',
         ];
     }
@@ -93,6 +95,7 @@ class ModeloMarcaController extends Controller
     {
         return [
             'marcas_id' => 'marca',
+            'nome' => 'nome',
             'descricao' => 'descrição',
         ];
     }

@@ -14,6 +14,7 @@ class ModeloMarca extends Model
 
     protected $fillable = [
         'marcas_id',
+        'nome',
         'descricao',
         'ativo',
     ];
