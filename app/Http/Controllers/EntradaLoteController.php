@@ -107,6 +107,28 @@ class EntradaLoteController extends Controller
                 if (! $tipoId || ! $marcaId) {
                     continue;
                 }
+                $tipoMaterial = TipoMaterial::query()
+                    ->select(['id', 'rastreavel'])
+                    ->find($tipoId);
+
+                if ($tipoMaterial?->rastreavel) {
+                    $quantidade = isset($item['quantidade']) ? (float) $item['quantidade'] : 0;
+                    if (abs($quantidade - 1.0) > 0.0001) {
+                        $v->errors()->add(
+                            "itens.{$i}.quantidade",
+                            'Para materiais rastreáveis a quantidade deve ser igual a 1.',
+                        );
+                    }
+
+                    $numeroSerie = trim((string) ($item['numero_serie'] ?? ''));
+                    if ($numeroSerie === '') {
+                        $v->errors()->add(
+                            "itens.{$i}.numero_serie",
+                            'Informe o número de série para itens rastreáveis.',
+                        );
+                    }
+                }
+
                 $ok = Marca::query()
                     ->where('id', $marcaId)
                     ->where('tipo_material_id', $tipoId)
@@ -202,6 +224,7 @@ class EntradaLoteController extends Controller
             'itens.*.local_id' => ['nullable', 'integer', 'exists:locais,id'],
             'itens.*.quantidade' => ['required', 'numeric', 'min:0.0001'],
             'itens.*.valor_unitario' => ['required', 'numeric', 'min:0'],
+            'itens.*.numero_serie' => ['nullable', 'string', 'max:255'],
             'itens.*.observacao' => ['nullable', 'string', 'max:2000'],
             'itens.*.termo_recebimento' => ['nullable', 'file', 'max:15360'],
             'itens.*.fotos' => ['nullable', 'array'],

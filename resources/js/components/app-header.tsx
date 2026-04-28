@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     BriefcaseBusiness,
     Building2,
+    Component,
     LayoutGrid,
     ListChecks,
     MapPinHouse,
@@ -137,6 +138,11 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
             title: 'Marcas',
             href: '/config-estoque/marcas',
             icon: BriefcaseBusiness,
+        },
+        {
+            title: 'Modelos de Marcas',
+            href: '/config-estoque/modelos-marcas',
+            icon: Component,
         },
     ];
 
@@ -401,6 +407,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                     activeItemStyles,
                                                 ) ||
                                                 whenCurrentUrl(
+                                                    '/config-estoque/modelos-marcas',
+                                                    activeItemStyles,
+                                                ) ||
+                                                whenCurrentUrl(
                                                     '/config-estoque/tipos-estoque',
                                                     activeItemStyles,
                                                 ),
@@ -443,6 +453,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     ) ||
                                         isCurrentUrl(
                                             '/config-estoque/marcas',
+                                        ) ||
+                                        isCurrentUrl(
+                                            '/config-estoque/modelos-marcas',
                                         ) ||
                                         isCurrentUrl(
                                             '/config-estoque/tipos-estoque',

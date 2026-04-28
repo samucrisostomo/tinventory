@@ -74,6 +74,7 @@ type ItemLinha = {
     marca_id: string;
     empresa_id: string;
     local_id: string;
+    numero_serie: string;
     quantidade: string;
     valor_unitario: string;
     observacao: string;
@@ -102,6 +103,7 @@ const novoItem = (): ItemLinha => ({
     marca_id: '',
     empresa_id: '',
     local_id: '',
+    numero_serie: '',
     quantidade: '',
     valor_unitario: '',
     observacao: '',
@@ -230,6 +232,12 @@ export default function NovaEntradaLote({
         return marcas.filter((m) => String(m.tipo_material_id) === tipoId);
     };
 
+    const tipoMaterialPorId = (tipoId: string) =>
+        tiposMateriais.find((t) => String(t.id) === tipoId) ?? null;
+
+    const tipoMaterialRastreavel = (tipoId: string) =>
+        Boolean(tipoMaterialPorId(tipoId)?.rastreavel);
+
     const montarFormData = (): FormData => {
         const fd = new FormData();
         fd.append('condicao_entrada', condicaoEntrada);
@@ -256,6 +264,7 @@ export default function NovaEntradaLote({
         }
 
         itens.forEach((it, i) => {
+            const isRastreavel = tipoMaterialRastreavel(it.tipo_material_id);
             fd.append(`itens[${i}][tipo_material_id]`, it.tipo_material_id);
             fd.append(`itens[${i}][marca_id]`, it.marca_id);
 
@@ -267,14 +276,15 @@ export default function NovaEntradaLote({
                 fd.append(`itens[${i}][local_id]`, it.local_id);
             }
 
-            fd.append(
-                `itens[${i}][quantidade]`,
-                it.quantidade.replace(',', '.'),
-            );
+            fd.append(`itens[${i}][quantidade]`, isRastreavel ? '1' : it.quantidade.replace(',', '.'));
             fd.append(
                 `itens[${i}][valor_unitario]`,
                 it.valor_unitario.replace(',', '.'),
             );
+
+            if (isRastreavel || it.numero_serie.trim()) {
+                fd.append(`itens[${i}][numero_serie]`, it.numero_serie.trim());
+            }
 
             if (it.observacao.trim()) {
                 fd.append(`itens[${i}][observacao]`, it.observacao.trim());
@@ -1044,6 +1054,14 @@ export default function NovaEntradaLote({
                                                                                                 next,
                                                                                             marca_id:
                                                                                                 '',
+                                                                                            numero_serie:
+                                                                                                '',
+                                                                                            quantidade:
+                                                                                                tipoMaterialRastreavel(
+                                                                                                    next,
+                                                                                                )
+                                                                                                    ? '1'
+                                                                                                    : '',
                                                                                         },
                                                                                     );
                                                                                 }}
@@ -1319,6 +1337,47 @@ export default function NovaEntradaLote({
                                                                                 </p>
                                                                             )}
                                                                         </div>
+                                                                        {item.tipo_material_id !== '' &&
+                                                                            tipoMaterialRastreavel(
+                                                                                item.tipo_material_id,
+                                                                            ) && (
+                                                                                <div className="space-y-2">
+                                                                                    <Label>
+                                                                                        Número de
+                                                                                        série *
+                                                                                    </Label>
+                                                                                    <Input
+                                                                                        value={
+                                                                                            item.numero_serie
+                                                                                        }
+                                                                                        onChange={(
+                                                                                            e,
+                                                                                        ) =>
+                                                                                            atualizarItem(
+                                                                                                index,
+                                                                                                {
+                                                                                                    numero_serie:
+                                                                                                        e
+                                                                                                            .target
+                                                                                                            .value,
+                                                                                                },
+                                                                                            )
+                                                                                        }
+                                                                                        placeholder="Informe o número de série"
+                                                                                    />
+                                                                                    {errors[
+                                                                                        `itens.${index}.numero_serie`
+                                                                                    ] && (
+                                                                                        <p className="text-xs text-destructive">
+                                                                                            {
+                                                                                                errors[
+                                                                                                    `itens.${index}.numero_serie`
+                                                                                                ]
+                                                                                            }
+                                                                                        </p>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
                                                                         <div className="space-y-2">
                                                                             <Label>
                                                                                 Quantidade
@@ -1329,6 +1388,9 @@ export default function NovaEntradaLote({
                                                                                 value={
                                                                                     item.quantidade
                                                                                 }
+                                                                                disabled={tipoMaterialRastreavel(
+                                                                                    item.tipo_material_id,
+                                                                                )}
                                                                                 onChange={(
                                                                                     e,
                                                                                 ) =>
@@ -1343,6 +1405,13 @@ export default function NovaEntradaLote({
                                                                                     )
                                                                                 }
                                                                             />
+                                                                            {tipoMaterialRastreavel(
+                                                                                item.tipo_material_id,
+                                                                            ) && (
+                                                                                <p className="text-xs text-muted-foreground">
+                                                                                    Materiais rastreáveis sempre registram quantidade fixa igual a 1.
+                                                                                </p>
+                                                                            )}
                                                                             {errors[
                                                                                 `itens.${index}.quantidade`
                                                                             ] && (
@@ -1950,6 +2019,14 @@ export default function NovaEntradaLote({
                                                                         next,
                                                                     marca_id:
                                                                         '',
+                                                                    numero_serie:
+                                                                        '',
+                                                                    quantidade:
+                                                                        tipoMaterialRastreavel(
+                                                                            next,
+                                                                        )
+                                                                            ? '1'
+                                                                            : '',
                                                                 },
                                                             );
                                                         }}
@@ -2183,11 +2260,53 @@ export default function NovaEntradaLote({
                                                         </p>
                                                     )}
                                                 </div>
+                                                {item.tipo_material_id !== '' &&
+                                                    tipoMaterialRastreavel(
+                                                        item.tipo_material_id,
+                                                    ) && (
+                                                        <div className="space-y-2">
+                                                            <Label>
+                                                                Número de série
+                                                                *
+                                                            </Label>
+                                                            <Input
+                                                                value={
+                                                                    item.numero_serie
+                                                                }
+                                                                onChange={(e) =>
+                                                                    atualizarItem(
+                                                                        index,
+                                                                        {
+                                                                            numero_serie:
+                                                                                e
+                                                                                    .target
+                                                                                    .value,
+                                                                        },
+                                                                    )
+                                                                }
+                                                                placeholder="Informe o número de série"
+                                                            />
+                                                            {errors[
+                                                                `itens.${index}.numero_serie`
+                                                            ] && (
+                                                                <p className="text-xs text-destructive">
+                                                                    {
+                                                                        errors[
+                                                                            `itens.${index}.numero_serie`
+                                                                        ]
+                                                                    }
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 <div className="space-y-2">
                                                     <Label>Quantidade *</Label>
                                                     <Input
                                                         inputMode="decimal"
                                                         value={item.quantidade}
+                                                        disabled={tipoMaterialRastreavel(
+                                                            item.tipo_material_id,
+                                                        )}
                                                         onChange={(e) =>
                                                             atualizarItem(
                                                                 index,
@@ -2199,6 +2318,13 @@ export default function NovaEntradaLote({
                                                             )
                                                         }
                                                     />
+                                                    {tipoMaterialRastreavel(
+                                                        item.tipo_material_id,
+                                                    ) && (
+                                                        <p className="text-xs text-muted-foreground">
+                                                            Materiais rastreáveis sempre registram quantidade fixa igual a 1.
+                                                        </p>
+                                                    )}
                                                     {errors[
                                                         `itens.${index}.quantidade`
                                                     ] && (

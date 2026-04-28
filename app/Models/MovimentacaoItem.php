@@ -14,6 +14,7 @@ class MovimentacaoItem extends Model
         'material_id',
         'empresa_id',
         'local_id',
+        'numero_serie',
         'quantidade',
         'valor_unitario',
         'observacao',

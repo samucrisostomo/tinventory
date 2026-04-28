@@ -63,8 +63,11 @@ class EntradaLoteService
                 $tipoMaterialId = (int) $row['tipo_material_id'];
                 $marcaId = (int) $row['marca_id'];
                 $material = $this->resolverOuCriarMaterial($tipoMaterialId, $marcaId);
+                $tipoMaterial = TipoMaterial::query()
+                    ->select(['id', 'rastreavel'])
+                    ->findOrFail($tipoMaterialId);
 
-                $quantidade = (float) $row['quantidade'];
+                $quantidade = $tipoMaterial->rastreavel ? 1.0 : (float) $row['quantidade'];
                 $valorUnitario = (float) $row['valor_unitario'];
 
                 $item = MovimentacaoItem::create([
@@ -76,6 +79,7 @@ class EntradaLoteService
                     'local_id' => isset($row['local_id']) && $row['local_id'] !== '' && $row['local_id'] !== null
                         ? (int) $row['local_id']
                         : null,
+                    'numero_serie' => ! empty($row['numero_serie']) ? trim((string) $row['numero_serie']) : null,
                     'quantidade' => $quantidade,
                     'valor_unitario' => $valorUnitario,
                     'observacao' => $row['observacao'] ?? null,
