@@ -873,7 +873,81 @@ export default function NovaEntradaLote({
                                     </div>
                                 </div>
 
-                                <div className="flex flex-wrap justify-end gap-2">
+                            </div>
+
+                            <div className="flex h-full min-h-0 flex-col gap-4">
+                                <Card className="min-h-0 flex-1 overflow-hidden">
+                                    <CardHeader>
+                                        <CardTitle>Resumo da entrada</CardTitle>
+                                        <CardDescription>Informações consolidadas em tempo real.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4 overflow-y-auto text-sm">
+                                        <div className="space-y-1">
+                                            <p className="text-muted-foreground">Condição</p>
+                                            <p className="font-medium">
+                                                {condicoesEntrada.find((c) => c.value === condicaoEntrada)?.label ??
+                                                    'Não selecionada'}
+                                            </p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-muted-foreground">Estoque</p>
+                                            <p className="font-medium">
+                                                {estoques.find((e) => String(e.id) === estoqueId)?.nome ??
+                                                    'Não selecionado'}
+                                            </p>
+                                        </div>
+                                        {mostrarNota && (
+                                            <>
+                                                <div className="space-y-1">
+                                                    <p className="text-muted-foreground">Número da nota</p>
+                                                    <p className="font-medium">
+                                                        {notaNumero.trim() || 'Não informado'}
+                                                    </p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-muted-foreground">Data de emissão</p>
+                                                    <p className="font-medium">
+                                                        {notaDataEmissao
+                                                            ? new Date(
+                                                                  `${notaDataEmissao}T00:00:00`,
+                                                              ).toLocaleDateString('pt-BR')
+                                                            : 'Não informada'}
+                                                    </p>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-muted-foreground">Fornecedor (NF)</p>
+                                                    <p className="font-medium">
+                                                        {fornecedores.find(
+                                                            (f) => String(f.id) === notaFornecedorId,
+                                                        )?.nome_fantasia ||
+                                                            fornecedores.find(
+                                                                (f) => String(f.id) === notaFornecedorId,
+                                                            )?.nome ||
+                                                            'Não informado'}
+                                                    </p>
+                                                </div>
+                                            </>
+                                        )}
+                                        <div className="space-y-1">
+                                            <p className="text-muted-foreground">Itens</p>
+                                            <p className="font-medium">{itens.length}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-muted-foreground">Quantidade total</p>
+                                            <p className="font-medium">
+                                                {totalLote.quantidade.toLocaleString('pt-BR', {
+                                                    maximumFractionDigits: 4,
+                                                })}
+                                            </p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-muted-foreground">Valor total</p>
+                                            <p className="font-medium">{formatBrl(totalLote.valor)}</p>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                <div className="mt-auto flex flex-wrap justify-end gap-2">
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -886,45 +960,6 @@ export default function NovaEntradaLote({
                                     </Button>
                                 </div>
                             </div>
-
-                            <Card className="h-fit lg:sticky lg:top-0">
-                                <CardHeader>
-                                    <CardTitle>Resumo da entrada</CardTitle>
-                                    <CardDescription>Informações consolidadas em tempo real.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4 text-sm">
-                                    <div className="space-y-1">
-                                        <p className="text-muted-foreground">Condição</p>
-                                        <p className="font-medium">
-                                            {condicoesEntrada.find((c) => c.value === condicaoEntrada)?.label ??
-                                                'Não selecionada'}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-muted-foreground">Estoque</p>
-                                        <p className="font-medium">
-                                            {estoques.find((e) => String(e.id) === estoqueId)?.nome ??
-                                                'Não selecionado'}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-muted-foreground">Itens</p>
-                                        <p className="font-medium">{itens.length}</p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-muted-foreground">Quantidade total</p>
-                                        <p className="font-medium">
-                                            {totalLote.quantidade.toLocaleString('pt-BR', {
-                                                maximumFractionDigits: 4,
-                                            })}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-muted-foreground">Valor total</p>
-                                        <p className="font-medium">{formatBrl(totalLote.valor)}</p>
-                                    </div>
-                                </CardContent>
-                            </Card>
                         </div>
                     ) : (
                         <>
