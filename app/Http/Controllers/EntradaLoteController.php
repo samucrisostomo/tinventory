@@ -11,10 +11,11 @@ use App\Models\Marca;
 use App\Models\Movimentacao;
 use App\Models\TipoMaterial;
 use App\Services\EntradaLoteService;
+use Illuminate\Contracts\Validation\Validator as ValidatorContract;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -91,7 +92,7 @@ class EntradaLoteController extends Controller
             $this->attributes(),
         );
 
-        $validator->after(function (Validator $v) use ($request) {
+        $validator->after(function (ValidatorContract $v) use ($request) {
             $itens = $request->input('itens', []);
             if (! is_array($itens)) {
                 return;

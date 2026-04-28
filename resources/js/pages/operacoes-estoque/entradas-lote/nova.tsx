@@ -13,6 +13,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from '@/components/ui/carousel';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -201,6 +208,9 @@ export default function NovaEntradaLote({
         router.post(POST_URL, montarFormData(), {
             forceFormData: true,
             preserveScroll: true,
+            preserveState: true,
+            replace: true,
+            showProgress: false,
             onFinish: () => setProcessing(false),
             onError: (errs) => setErrors(errs as Record<string, string>),
         });
@@ -255,7 +265,609 @@ export default function NovaEntradaLote({
                 )}
 
                 <form className="space-y-6" onSubmit={enviar}>
-                    <Card>
+                    {embedded ? (
+                        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+                            <div className="min-w-0 space-y-4">
+                                <Carousel opts={{ align: 'start', loop: false }} className="w-full">
+                                    <CarouselContent className="-ml-2">
+                                        <CarouselItem className="pl-2">
+                                            <Card>
+                                                <CardHeader>
+                                                    <CardTitle>Condição da entrada</CardTitle>
+                                                    <CardDescription>
+                                                        Define se a mercadoria é nova ou usada e se há nota
+                                                        fiscal.
+                                                    </CardDescription>
+                                                </CardHeader>
+                                                <CardContent className="space-y-2">
+                                                    <Label htmlFor="condicao_entrada">Tipo de entrada *</Label>
+                                                    <Select
+                                                        value={selectVal(condicaoEntrada)}
+                                                        onValueChange={(v) =>
+                                                            setCondicaoEntrada(
+                                                                v === SELECT_VAZIO ? '' : v,
+                                                            )
+                                                        }
+                                                    >
+                                                        <SelectTrigger id="condicao_entrada" className="w-full">
+                                                            <SelectValue placeholder="Selecione" />
+                                                        </SelectTrigger>
+                                                        <SelectContent position="popper">
+                                                            <SelectItem value={SELECT_VAZIO} disabled>
+                                                                Selecione
+                                                            </SelectItem>
+                                                            {condicoesEntrada.map((c) => (
+                                                                <SelectItem key={c.value} value={c.value}>
+                                                                    {c.label}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    {errors.condicao_entrada && (
+                                                        <p className="text-xs text-destructive">
+                                                            {errors.condicao_entrada}
+                                                        </p>
+                                                    )}
+                                                </CardContent>
+                                            </Card>
+                                        </CarouselItem>
+
+                                        {mostrarNota && (
+                                            <CarouselItem className="pl-2">
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Dados da nota fiscal</CardTitle>
+                                                        <CardDescription>
+                                                            Campos exibidos quando a condição exige nota fiscal.
+                                                        </CardDescription>
+                                                    </CardHeader>
+                                                    <CardContent className="grid gap-4 sm:grid-cols-2">
+                                                        <div className="space-y-2 sm:col-span-2">
+                                                            <Label htmlFor="nota_numero">Número da nota *</Label>
+                                                            <Input
+                                                                id="nota_numero"
+                                                                value={notaNumero}
+                                                                onChange={(e) =>
+                                                                    setNotaNumero(e.target.value)
+                                                                }
+                                                            />
+                                                            {errors.nota_numero && (
+                                                                <p className="text-xs text-destructive">
+                                                                    {errors.nota_numero}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="nota_data_emissao">
+                                                                Data de emissão
+                                                            </Label>
+                                                            <Input
+                                                                id="nota_data_emissao"
+                                                                type="date"
+                                                                value={notaDataEmissao}
+                                                                onChange={(e) =>
+                                                                    setNotaDataEmissao(e.target.value)
+                                                                }
+                                                            />
+                                                            {errors.nota_data_emissao && (
+                                                                <p className="text-xs text-destructive">
+                                                                    {errors.nota_data_emissao}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor="nota_fornecedor">Fornecedor</Label>
+                                                            <Select
+                                                                value={selectVal(notaFornecedorId)}
+                                                                onValueChange={(v) =>
+                                                                    setNotaFornecedorId(
+                                                                        v === SELECT_VAZIO ? '' : v,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <SelectTrigger
+                                                                    id="nota_fornecedor"
+                                                                    className="w-full"
+                                                                >
+                                                                    <SelectValue placeholder="Opcional" />
+                                                                </SelectTrigger>
+                                                                <SelectContent position="popper">
+                                                                    <SelectItem value={SELECT_VAZIO}>
+                                                                        Nenhum
+                                                                    </SelectItem>
+                                                                    {fornecedores.map((f) => (
+                                                                        <SelectItem
+                                                                            key={f.id}
+                                                                            value={String(f.id)}
+                                                                        >
+                                                                            {f.nome_fantasia || f.nome}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                        <div className="space-y-2 sm:col-span-2">
+                                                            <Label htmlFor="nota_arquivo">
+                                                                Arquivo da nota fiscal
+                                                            </Label>
+                                                            <Input
+                                                                id="nota_arquivo"
+                                                                type="file"
+                                                                accept=".pdf,.jpg,.jpeg,.png,.webp"
+                                                                onChange={(e) =>
+                                                                    setNotaArquivo(
+                                                                        e.target.files?.[0] ?? null,
+                                                                    )
+                                                                }
+                                                            />
+                                                            {errors.nota_arquivo && (
+                                                                <p className="text-xs text-destructive">
+                                                                    {errors.nota_arquivo}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            </CarouselItem>
+                                        )}
+
+                                        <CarouselItem className="pl-2">
+                                            <Card>
+                                                <CardHeader>
+                                                    <CardTitle>Dados da movimentação</CardTitle>
+                                                </CardHeader>
+                                                <CardContent className="space-y-4">
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="estoque_id">Estoque de destino *</Label>
+                                                        <Select
+                                                            value={selectVal(estoqueId)}
+                                                            onValueChange={(v) =>
+                                                                setEstoqueId(
+                                                                    v === SELECT_VAZIO ? '' : v,
+                                                                )
+                                                            }
+                                                        >
+                                                            <SelectTrigger id="estoque_id" className="w-full">
+                                                                <SelectValue placeholder="Selecione o estoque" />
+                                                            </SelectTrigger>
+                                                            <SelectContent position="popper">
+                                                                <SelectItem value={SELECT_VAZIO} disabled>
+                                                                    Selecione
+                                                                </SelectItem>
+                                                                {estoques.map((e) => (
+                                                                    <SelectItem
+                                                                        key={e.id}
+                                                                        value={String(e.id)}
+                                                                    >
+                                                                        {e.nome}
+                                                                        {e.empresa
+                                                                            ? ` — ${e.empresa.nome}`
+                                                                            : ''}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        {errors.estoque_id && (
+                                                            <p className="text-xs text-destructive">
+                                                                {errors.estoque_id}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="observacao">Observações gerais</Label>
+                                                        <textarea
+                                                            id="observacao"
+                                                            rows={3}
+                                                            value={observacao}
+                                                            onChange={(e) =>
+                                                                setObservacao(e.target.value)
+                                                            }
+                                                            className={cn(
+                                                                'flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs',
+                                                                'placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+                                                                'outline-none disabled:cursor-not-allowed disabled:opacity-50',
+                                                            )}
+                                                        />
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </CarouselItem>
+
+                                        <CarouselItem className="pl-2">
+                                            <Card>
+                                                <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0">
+                                                    <div>
+                                                        <CardTitle>Itens da entrada</CardTitle>
+                                                        <CardDescription>
+                                                            Tipo de material, marca, empresa/local do item,
+                                                            quantidades e anexos opcionais.
+                                                        </CardDescription>
+                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        variant="secondary"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            setItens((rows) => [...rows, novoItem()])
+                                                        }
+                                                    >
+                                                        <Plus className="mr-1 h-4 w-4" />
+                                                        Adicionar item
+                                                    </Button>
+                                                </CardHeader>
+                                                <CardContent className="space-y-6">
+                                                    {errors.itens && (
+                                                        <p className="text-sm text-destructive">
+                                                            {errors.itens}
+                                                        </p>
+                                                    )}
+                                                    {itens.map((item, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="rounded-lg border border-border p-4 space-y-4"
+                                                        >
+                                                            <div className="flex items-center justify-between gap-2">
+                                                                <span className="text-sm font-medium">
+                                                                    Item {index + 1}
+                                                                </span>
+                                                                {itens.length > 1 && (
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="h-8 w-8 text-destructive"
+                                                                        onClick={() =>
+                                                                            setItens((rows) =>
+                                                                                rows.filter(
+                                                                                    (_, i) =>
+                                                                                        i !== index,
+                                                                                ),
+                                                                            )
+                                                                        }
+                                                                        aria-label={`Remover item ${index + 1}`}
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                            <div className="grid gap-3 sm:grid-cols-2">
+                                                                <div className="space-y-2">
+                                                                    <Label>Tipo de material *</Label>
+                                                                    <Select
+                                                                        value={selectVal(item.tipo_material_id)}
+                                                                        onValueChange={(v) => {
+                                                                            const next =
+                                                                                v === SELECT_VAZIO ? '' : v;
+                                                                            atualizarItem(index, {
+                                                                                tipo_material_id: next,
+                                                                                marca_id: '',
+                                                                            });
+                                                                        }}
+                                                                    >
+                                                                        <SelectTrigger className="w-full">
+                                                                            <SelectValue placeholder="Selecione" />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent position="popper">
+                                                                            <SelectItem
+                                                                                value={SELECT_VAZIO}
+                                                                                disabled
+                                                                            >
+                                                                                Selecione
+                                                                            </SelectItem>
+                                                                            {tiposMateriais.map((t) => (
+                                                                                <SelectItem
+                                                                                    key={t.id}
+                                                                                    value={String(t.id)}
+                                                                                >
+                                                                                    {t.nome}
+                                                                                </SelectItem>
+                                                                            ))}
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                    {errors[
+                                                                        `itens.${index}.tipo_material_id`
+                                                                    ] && (
+                                                                        <p className="text-xs text-destructive">
+                                                                            {
+                                                                                errors[
+                                                                                    `itens.${index}.tipo_material_id`
+                                                                                ]
+                                                                            }
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                                <div className="space-y-2">
+                                                                    <Label>Marca / modelo *</Label>
+                                                                    <Select
+                                                                        value={selectVal(item.marca_id)}
+                                                                        onValueChange={(v) =>
+                                                                            atualizarItem(index, {
+                                                                                marca_id:
+                                                                                    v === SELECT_VAZIO
+                                                                                        ? ''
+                                                                                        : v,
+                                                                            })
+                                                                        }
+                                                                        disabled={item.tipo_material_id === ''}
+                                                                    >
+                                                                        <SelectTrigger className="w-full">
+                                                                            <SelectValue
+                                                                                placeholder={
+                                                                                    item.tipo_material_id === ''
+                                                                                        ? 'Selecione o tipo primeiro'
+                                                                                        : 'Selecione a marca'
+                                                                                }
+                                                                            />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent position="popper">
+                                                                            <SelectItem
+                                                                                value={SELECT_VAZIO}
+                                                                                disabled
+                                                                            >
+                                                                                Selecione
+                                                                            </SelectItem>
+                                                                            {marcasPorTipo(
+                                                                                item.tipo_material_id,
+                                                                            ).map((m) => (
+                                                                                <SelectItem
+                                                                                    key={m.id}
+                                                                                    value={String(m.id)}
+                                                                                >
+                                                                                    {m.nome}
+                                                                                </SelectItem>
+                                                                            ))}
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                    {errors[`itens.${index}.marca_id`] && (
+                                                                        <p className="text-xs text-destructive">
+                                                                            {errors[`itens.${index}.marca_id`]}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                                <div className="space-y-2">
+                                                                    <Label>Empresa</Label>
+                                                                    <Select
+                                                                        value={selectVal(item.empresa_id)}
+                                                                        onValueChange={(v) => {
+                                                                            const next =
+                                                                                v === SELECT_VAZIO ? '' : v;
+                                                                            atualizarItem(index, {
+                                                                                empresa_id: next,
+                                                                                local_id: '',
+                                                                            });
+                                                                        }}
+                                                                    >
+                                                                        <SelectTrigger className="w-full">
+                                                                            <SelectValue placeholder="Opcional" />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent position="popper">
+                                                                            <SelectItem value={SELECT_VAZIO}>
+                                                                                Nenhuma
+                                                                            </SelectItem>
+                                                                            {empresas.map((e) => (
+                                                                                <SelectItem
+                                                                                    key={e.id}
+                                                                                    value={String(e.id)}
+                                                                                >
+                                                                                    {e.nome}
+                                                                                </SelectItem>
+                                                                            ))}
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                </div>
+                                                                <div className="space-y-2">
+                                                                    <Label>Local</Label>
+                                                                    <Select
+                                                                        value={selectVal(item.local_id)}
+                                                                        onValueChange={(v) =>
+                                                                            atualizarItem(index, {
+                                                                                local_id:
+                                                                                    v === SELECT_VAZIO
+                                                                                        ? ''
+                                                                                        : v,
+                                                                            })
+                                                                        }
+                                                                        disabled={item.empresa_id === ''}
+                                                                    >
+                                                                        <SelectTrigger className="w-full">
+                                                                            <SelectValue
+                                                                                placeholder={
+                                                                                    item.empresa_id === ''
+                                                                                        ? 'Selecione empresa'
+                                                                                        : 'Opcional'
+                                                                                }
+                                                                            />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent position="popper">
+                                                                            <SelectItem value={SELECT_VAZIO}>
+                                                                                Nenhum
+                                                                            </SelectItem>
+                                                                            {locaisPorEmpresa(
+                                                                                item.empresa_id,
+                                                                            ).map((l) => (
+                                                                                <SelectItem
+                                                                                    key={l.id}
+                                                                                    value={String(l.id)}
+                                                                                >
+                                                                                    {l.nome} ({l.codigo})
+                                                                                </SelectItem>
+                                                                            ))}
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                    {errors[`itens.${index}.local_id`] && (
+                                                                        <p className="text-xs text-destructive">
+                                                                            {errors[`itens.${index}.local_id`]}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                                <div className="space-y-2">
+                                                                    <Label>Quantidade *</Label>
+                                                                    <Input
+                                                                        inputMode="decimal"
+                                                                        value={item.quantidade}
+                                                                        onChange={(e) =>
+                                                                            atualizarItem(index, {
+                                                                                quantidade: e.target.value,
+                                                                            })
+                                                                        }
+                                                                    />
+                                                                    {errors[`itens.${index}.quantidade`] && (
+                                                                        <p className="text-xs text-destructive">
+                                                                            {errors[`itens.${index}.quantidade`]}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                                <div className="space-y-2">
+                                                                    <Label>Valor unitário *</Label>
+                                                                    <Input
+                                                                        inputMode="decimal"
+                                                                        value={item.valor_unitario}
+                                                                        onChange={(e) =>
+                                                                            atualizarItem(index, {
+                                                                                valor_unitario: e.target.value,
+                                                                            })
+                                                                        }
+                                                                    />
+                                                                    {errors[`itens.${index}.valor_unitario`] && (
+                                                                        <p className="text-xs text-destructive">
+                                                                            {errors[`itens.${index}.valor_unitario`]}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                                <div className="space-y-2 sm:col-span-2">
+                                                                    <Label>Observação do item</Label>
+                                                                    <Input
+                                                                        value={item.observacao}
+                                                                        onChange={(e) =>
+                                                                            atualizarItem(index, {
+                                                                                observacao: e.target.value,
+                                                                            })
+                                                                        }
+                                                                    />
+                                                                </div>
+                                                                <div className="space-y-2">
+                                                                    <Label>Termo de recebimento</Label>
+                                                                    <Input
+                                                                        type="file"
+                                                                        onChange={(e) =>
+                                                                            atualizarItem(index, {
+                                                                                termo:
+                                                                                    e.target.files?.[0] ?? null,
+                                                                            })
+                                                                        }
+                                                                    />
+                                                                </div>
+                                                                <div className="space-y-2">
+                                                                    <Label>Fotos</Label>
+                                                                    <Input
+                                                                        type="file"
+                                                                        multiple
+                                                                        accept="image/*"
+                                                                        onChange={(e) =>
+                                                                            atualizarItem(index, {
+                                                                                fotos: e.target.files
+                                                                                    ? Array.from(
+                                                                                          e.target.files,
+                                                                                      )
+                                                                                    : [],
+                                                                            })
+                                                                        }
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </CardContent>
+                                            </Card>
+                                        </CarouselItem>
+
+                                        <CarouselItem className="pl-2">
+                                            <Card>
+                                                <CardHeader>
+                                                    <CardTitle>Total do lote</CardTitle>
+                                                    <CardDescription>Soma automática dos itens.</CardDescription>
+                                                </CardHeader>
+                                                <CardContent className="flex flex-wrap gap-8 text-sm">
+                                                    <div>
+                                                        <p className="text-muted-foreground">Quantidade total</p>
+                                                        <p className="text-lg font-semibold">
+                                                            {totalLote.quantidade.toLocaleString('pt-BR', {
+                                                                maximumFractionDigits: 4,
+                                                            })}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-muted-foreground">Valor total</p>
+                                                        <p className="text-lg font-semibold">
+                                                            {formatBrl(totalLote.valor)}
+                                                        </p>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </CarouselItem>
+                                    </CarouselContent>
+                                    <div className="mt-3 flex items-center justify-end gap-2">
+                                        <CarouselPrevious className="static translate-y-0" />
+                                        <CarouselNext className="static translate-y-0" />
+                                    </div>
+                                </Carousel>
+
+                                <div className="flex flex-wrap justify-end gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setShowSairDialog(true)}
+                                    >
+                                        Descartar
+                                    </Button>
+                                    <Button type="submit" disabled={processing}>
+                                        {processing ? 'Enviando…' : 'Registrar entrada'}
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <Card className="h-fit lg:sticky lg:top-0">
+                                <CardHeader>
+                                    <CardTitle>Resumo da entrada</CardTitle>
+                                    <CardDescription>Informações consolidadas em tempo real.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4 text-sm">
+                                    <div className="space-y-1">
+                                        <p className="text-muted-foreground">Condição</p>
+                                        <p className="font-medium">
+                                            {condicoesEntrada.find((c) => c.value === condicaoEntrada)?.label ??
+                                                'Não selecionada'}
+                                        </p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-muted-foreground">Estoque</p>
+                                        <p className="font-medium">
+                                            {estoques.find((e) => String(e.id) === estoqueId)?.nome ??
+                                                'Não selecionado'}
+                                        </p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-muted-foreground">Itens</p>
+                                        <p className="font-medium">{itens.length}</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-muted-foreground">Quantidade total</p>
+                                        <p className="font-medium">
+                                            {totalLote.quantidade.toLocaleString('pt-BR', {
+                                                maximumFractionDigits: 4,
+                                            })}
+                                        </p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <p className="text-muted-foreground">Valor total</p>
+                                        <p className="font-medium">{formatBrl(totalLote.valor)}</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    ) : (
+                        <>
+                            <Card>
                         <CardHeader>
                             <CardTitle>Condição da entrada</CardTitle>
                             <CardDescription>
@@ -692,18 +1304,20 @@ export default function NovaEntradaLote({
                         </CardContent>
                     </Card>
 
-                    <div className="flex flex-wrap justify-end gap-2">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setShowSairDialog(true)}
-                        >
-                            Descartar
-                        </Button>
-                        <Button type="submit" disabled={processing}>
-                            {processing ? 'Enviando…' : 'Registrar entrada'}
-                        </Button>
-                    </div>
+                            <div className="flex flex-wrap justify-end gap-2">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setShowSairDialog(true)}
+                                >
+                                    Descartar
+                                </Button>
+                                <Button type="submit" disabled={processing}>
+                                    {processing ? 'Enviando…' : 'Registrar entrada'}
+                                </Button>
+                            </div>
+                        </>
+                    )}
                 </form>
             </div>
 
