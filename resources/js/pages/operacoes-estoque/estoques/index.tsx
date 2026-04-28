@@ -1,5 +1,14 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { EllipsisVertical, Pencil, Trash2 } from 'lucide-react';
+import {
+    Building2,
+    EllipsisVertical,
+    MapPin,
+    Pencil,
+    Search,
+    Trash2,
+    UserRound,
+    Warehouse,
+} from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import { toast } from 'sonner';
@@ -20,6 +29,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -107,6 +117,7 @@ export default function EstoquesIndex({
     const [sheetOpen, setSheetOpen] = useState(false);
     const [editingEstoqueId, setEditingEstoqueId] = useState<number | null>(null);
     const [estoqueToDelete, setEstoqueToDelete] = useState<EstoqueListItem | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         if (flash?.success) {
@@ -249,6 +260,29 @@ export default function EstoquesIndex({
     const tipoEstoqueLabel = (tipo: TipoEstoqueOption) =>
         tipo.descricao ? `${tipo.codigo} - ${tipo.descricao}` : tipo.codigo;
 
+    const estoquesFiltrados = useMemo(() => {
+        const normalizedQuery = searchTerm.trim().toLowerCase();
+
+        if (!normalizedQuery) {
+            return estoques;
+        }
+
+        return estoques.filter((estoque) => {
+            const terms = [
+                estoque.nome,
+                estoque.tipo_estoque?.codigo ?? '',
+                estoque.tipo_estoque?.descricao ?? '',
+                estoque.empresa?.nome ?? '',
+                estoque.local?.nome ?? '',
+                estoque.local?.codigo ?? '',
+                estoque.colaborador?.nome ?? '',
+                String(estoque.id),
+            ];
+
+            return terms.some((term) => term.toLowerCase().includes(normalizedQuery));
+        });
+    }, [estoques, searchTerm]);
+
     return (
         <>
             <Head title="Estoques" />
@@ -259,52 +293,52 @@ export default function EstoquesIndex({
                     <Button onClick={openCreateSheet}>Novo estoque</Button>
                 </div>
 
-                <div className="overflow-hidden rounded-lg border border-border">
-                    <table className="w-full text-left text-sm">
-                        <thead className="bg-muted/50 text-muted-foreground">
-                            <tr>
-                                <th className="px-4 py-3 font-medium">Código</th>
-                                <th className="px-4 py-3 font-medium">Nome</th>
-                                <th className="px-4 py-3 font-medium">Tipo</th>
-                                <th className="px-4 py-3 font-medium">Colaborador</th>
-                                <th className="px-4 py-3 font-medium">Empresa</th>
-                                <th className="px-4 py-3 font-medium">Local</th>
-                                <th className="px-4 py-3 font-medium">Criado em</th>
-                                <th className="px-4 py-3 font-medium">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {estoques.map((estoque) => (
-                                <tr key={estoque.id} className="border-t border-border">
-                                    <td className="px-4 py-3">
-                                        {estoque.colaborador?.id ?? '-'}
-                                    </td>
-                                    <td className="px-4 py-3">{estoque.nome}</td>
-                                    <td className="px-4 py-3">
-                                        {estoque.tipo_estoque
-                                            ? tipoEstoqueLabel(estoque.tipo_estoque)
-                                            : '-'}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {estoque.colaborador?.nome ?? '-'}
-                                    </td>
-                                    <td className="px-4 py-3">{estoque.empresa?.nome ?? '-'}</td>
-                                    <td className="px-4 py-3">
-                                        {estoque.local
-                                            ? `${estoque.local.nome} (${estoque.local.codigo})`
-                                            : '-'}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {new Date(estoque.created_at).toLocaleString('pt-BR')}
-                                    </td>
-                                    <td className="px-4 py-3">
+                <div className="mb-4 rounded-2xl border border-border/70 bg-card/50 p-3 backdrop-blur supports-backdrop-filter:bg-card/40">
+                    <div className="relative">
+                        <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            value={searchTerm}
+                            onChange={(event) => setSearchTerm(event.target.value)}
+                            placeholder="Buscar por nome, tipo, empresa, local, colaborador ou código"
+                            className="h-10 rounded-xl border-border/70 bg-background pl-9"
+                        />
+                    </div>
+                </div>
+
+                {estoquesFiltrados.length === 0 ? (
+                    <Card className="rounded-2xl border border-dashed border-border/70">
+                        <CardContent className="py-12 text-center">
+                            <Warehouse className="mx-auto mb-3 h-10 w-10 text-muted-foreground/70" />
+                            <p className="text-base font-semibold">Nenhum estoque encontrado</p>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Ajuste sua busca ou cadastre um novo estoque.
+                            </p>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                        {estoquesFiltrados.map((estoque) => (
+                            <Card
+                                key={estoque.id}
+                                className="group rounded-2xl border-border/70 bg-card/80 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                            >
+                                <CardHeader className="pb-3">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <div className="space-y-1">
+                                            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                                                EST-{String(estoque.id).padStart(4, '0')}
+                                            </p>
+                                            <CardTitle className="line-clamp-1 text-base">
+                                                {estoque.nome}
+                                            </CardTitle>
+                                        </div>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="h-8 w-8"
-                                                    aria-label={`Abrir acoes de ${estoque.nome}`}
+                                                    className="h-8 w-8 rounded-full"
+                                                    aria-label={`Abrir ações de ${estoque.nome}`}
                                                 >
                                                     <EllipsisVertical className="h-4 w-4" />
                                                 </Button>
@@ -317,20 +351,70 @@ export default function EstoquesIndex({
                                                     Editar
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
-                                                    className="text-destructive focus:text-destructive"
                                                     onClick={() => setEstoqueToDelete(estoque)}
                                                 >
-                                                    <Trash2 className="mr-2 h-4 w-4 text-red" />
-                                                    Deletar
+                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    Excluir
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="space-y-3 pt-0">
+                                    <div className="rounded-xl border border-border/60 bg-background/70 px-3 py-2">
+                                        <p className="text-xs text-muted-foreground">Tipo</p>
+                                        <p className="text-sm font-medium">
+                                            {estoque.tipo_estoque
+                                                ? tipoEstoqueLabel(estoque.tipo_estoque)
+                                                : '-'}
+                                        </p>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        <div className="flex items-start gap-2 rounded-lg px-1 py-1">
+                                            <Building2 className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                            <div>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Empresa
+                                                </p>
+                                                <p className="text-sm font-medium">
+                                                    {estoque.empresa?.nome ?? '-'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-2 rounded-lg px-1 py-1">
+                                            <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                            <div>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Local
+                                                </p>
+                                                <p className="text-sm font-medium">
+                                                    {estoque.local
+                                                        ? `${estoque.local.nome} (${estoque.local.codigo})`
+                                                        : '-'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-2 rounded-lg px-1 py-1">
+                                            <UserRound className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                                            <div>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Responsável
+                                                </p>
+                                                <p className="text-sm font-medium">
+                                                    {estoque.colaborador?.nome ?? 'Não vinculado'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="border-t border-border/60 pt-2 text-xs text-muted-foreground">
+                                        Criado em{' '}
+                                        {new Date(estoque.created_at).toLocaleString('pt-BR')}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                )}
             </div>
 
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
