@@ -67,7 +67,8 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
         };
     };
     const getInitials = useInitials();
-    const { isCurrentUrl, isCurrentOrParentUrl, whenCurrentUrl } = useCurrentUrl();
+    const { isCurrentUrl, isCurrentOrParentUrl, whenCurrentUrl } =
+        useCurrentUrl();
     const dashboardUrl = dashboard();
 
     const mainNavItems: NavItem[] = [
@@ -244,22 +245,25 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                     Operações de Estoque
                                                 </p>
                                                 <div className="flex flex-col space-y-3">
-                                                    {operacoesEstoqueNavItems.map((item) => (
-                                                        <Link
-                                                            key={item.title}
-                                                            href={item.href}
-                                                            className="flex items-center space-x-2 pl-1 font-medium"
-                                                        >
-                                                            {item.icon && (
-                                                                <item.icon className="h-4 w-4 text-muted-foreground" />
-                                                            )}
-                                                            <span>{item.title}</span>
-                                                        </Link>
-                                                    ))}
+                                                    {operacoesEstoqueNavItems.map(
+                                                        (item) => (
+                                                            <Link
+                                                                key={item.title}
+                                                                href={item.href}
+                                                                className="flex items-center space-x-2 pl-1 font-medium"
+                                                            >
+                                                                {item.icon && (
+                                                                    <item.icon className="h-4 w-4 text-muted-foreground" />
+                                                                )}
+                                                                <span>
+                                                                    {item.title}
+                                                                </span>
+                                                            </Link>
+                                                        ),
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div>
                                 </div>
                             </SheetContent>
@@ -276,7 +280,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
                     {/* Desktop Navigation */}
                     <div className="hidden h-full flex-1 items-center justify-center px-6 lg:flex">
-                        <NavigationMenu viewport={false} className="flex h-full items-stretch">
+                        <NavigationMenu
+                            viewport={false}
+                            className="flex h-full items-stretch"
+                        >
                             <NavigationMenuList className="flex h-full items-stretch space-x-2">
                                 {mainNavItems.map((item, index) => (
                                     <NavigationMenuItem
@@ -312,13 +319,13 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                 activeItemStyles,
                                             ) ||
                                                 whenCurrentUrl(
-                                                '/perfis',
-                                                activeItemStyles,
-                                            ) ||
+                                                    '/perfis',
+                                                    activeItemStyles,
+                                                ) ||
                                                 whenCurrentUrl(
-                                                '/users',
-                                                activeItemStyles,
-                                            ) ||
+                                                    '/users',
+                                                    activeItemStyles,
+                                                ) ||
                                                 whenCurrentUrl(
                                                     '/empresas',
                                                     activeItemStyles,
@@ -375,7 +382,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         isCurrentUrl('/empresas') ||
                                         isCurrentUrl('/fornecedores') ||
                                         isCurrentUrl('/tipos-colaborador') ||
-                                        isCurrentUrl('/situacoes-colaborador') ||
+                                        isCurrentUrl(
+                                            '/situacoes-colaborador',
+                                        ) ||
                                         isCurrentUrl('/colaboradores')) && (
                                         <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-primary"></div>
                                     )}
@@ -402,32 +411,42 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     </NavigationMenuTrigger>
                                     <NavigationMenuContent>
                                         <ul className="grid w-[240px] gap-1 p-2">
-                                            {configuracoesEstoqueNavItems.map((item) => (
-                                                <li key={item.title}>
-                                                    <NavigationMenuLink asChild>
-                                                        <Link
-                                                            href={item.href}
-                                                            className={cn(
-                                                                moduleLinkClasses,
-                                                                whenCurrentUrl(
-                                                                    item.href,
-                                                                    'bg-accent/50 text-accent-foreground',
-                                                                ),
-                                                            )}
+                                            {configuracoesEstoqueNavItems.map(
+                                                (item) => (
+                                                    <li key={item.title}>
+                                                        <NavigationMenuLink
+                                                            asChild
                                                         >
-                                                            {item.icon && (
-                                                                <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                                            )}
-                                                            {item.title}
-                                                        </Link>
-                                                    </NavigationMenuLink>
-                                                </li>
-                                            ))}
+                                                            <Link
+                                                                href={item.href}
+                                                                className={cn(
+                                                                    moduleLinkClasses,
+                                                                    whenCurrentUrl(
+                                                                        item.href,
+                                                                        'bg-accent/50 text-accent-foreground',
+                                                                    ),
+                                                                )}
+                                                            >
+                                                                {item.icon && (
+                                                                    <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                                                )}
+                                                                {item.title}
+                                                            </Link>
+                                                        </NavigationMenuLink>
+                                                    </li>
+                                                ),
+                                            )}
                                         </ul>
                                     </NavigationMenuContent>
-                                    {(isCurrentUrl('/config-estoque/tipos-materiais') ||
-                                        isCurrentUrl('/config-estoque/marcas') ||
-                                        isCurrentUrl('/config-estoque/tipos-estoque')) && (
+                                    {(isCurrentUrl(
+                                        '/config-estoque/tipos-materiais',
+                                    ) ||
+                                        isCurrentUrl(
+                                            '/config-estoque/marcas',
+                                        ) ||
+                                        isCurrentUrl(
+                                            '/config-estoque/tipos-estoque',
+                                        )) && (
                                         <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-primary"></div>
                                     )}
                                 </NavigationMenuItem>
@@ -438,7 +457,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                 '/operacoes-estoque/estoques',
                                                 activeItemStyles,
                                             ) ||
-                                                (isCurrentOrParentUrl('/operacoes-estoque/entradas-lote')
+                                                (isCurrentOrParentUrl(
+                                                    '/operacoes-estoque/entradas-lote',
+                                                )
                                                     ? activeItemStyles
                                                     : null),
                                             'h-9 cursor-pointer px-3',
@@ -448,31 +469,39 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     </NavigationMenuTrigger>
                                     <NavigationMenuContent>
                                         <ul className="grid w-[220px] gap-1 p-2">
-                                            {operacoesEstoqueNavItems.map((item) => (
-                                                <li key={item.title}>
-                                                    <NavigationMenuLink asChild>
-                                                        <Link
-                                                            href={item.href}
-                                                            className={cn(
-                                                                moduleLinkClasses,
-                                                                whenCurrentUrl(
-                                                                    item.href,
-                                                                    'bg-accent/50 text-accent-foreground',
-                                                                ),
-                                                            )}
+                                            {operacoesEstoqueNavItems.map(
+                                                (item) => (
+                                                    <li key={item.title}>
+                                                        <NavigationMenuLink
+                                                            asChild
                                                         >
-                                                            {item.icon && (
-                                                                <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                                            )}
-                                                            {item.title}
-                                                        </Link>
-                                                    </NavigationMenuLink>
-                                                </li>
-                                            ))}
+                                                            <Link
+                                                                href={item.href}
+                                                                className={cn(
+                                                                    moduleLinkClasses,
+                                                                    whenCurrentUrl(
+                                                                        item.href,
+                                                                        'bg-accent/50 text-accent-foreground',
+                                                                    ),
+                                                                )}
+                                                            >
+                                                                {item.icon && (
+                                                                    <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                                                )}
+                                                                {item.title}
+                                                            </Link>
+                                                        </NavigationMenuLink>
+                                                    </li>
+                                                ),
+                                            )}
                                         </ul>
                                     </NavigationMenuContent>
-                                    {(isCurrentUrl('/operacoes-estoque/estoques') ||
-                                        isCurrentOrParentUrl('/operacoes-estoque/entradas-lote')) && (
+                                    {(isCurrentUrl(
+                                        '/operacoes-estoque/estoques',
+                                    ) ||
+                                        isCurrentOrParentUrl(
+                                            '/operacoes-estoque/entradas-lote',
+                                        )) && (
                                         <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-primary"></div>
                                     )}
                                 </NavigationMenuItem>

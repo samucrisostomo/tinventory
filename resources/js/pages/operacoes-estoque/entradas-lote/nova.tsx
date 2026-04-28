@@ -37,7 +37,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 const BASE = '/operacoes-estoque/entradas-lote';
@@ -157,8 +161,10 @@ export default function NovaEntradaLote({
     const totaisPorItem = useMemo(
         () =>
             itens.map((item, index) => {
-                const quantidade = parseFloat(item.quantidade.replace(',', '.')) || 0;
-                const valorUnitario = parseFloat(item.valor_unitario.replace(',', '.')) || 0;
+                const quantidade =
+                    parseFloat(item.quantidade.replace(',', '.')) || 0;
+                const valorUnitario =
+                    parseFloat(item.valor_unitario.replace(',', '.')) || 0;
                 const total = quantidade * valorUnitario;
 
                 return {
@@ -167,11 +173,12 @@ export default function NovaEntradaLote({
                     valorUnitario,
                     total,
                     tipoNome:
-                        tiposMateriais.find((t) => String(t.id) === item.tipo_material_id)?.nome ??
-                        'Tipo não selecionado',
+                        tiposMateriais.find(
+                            (t) => String(t.id) === item.tipo_material_id,
+                        )?.nome ?? 'Tipo não selecionado',
                     marcaNome:
-                        marcas.find((m) => String(m.id) === item.marca_id)?.nome ??
-                        'Marca não selecionada',
+                        marcas.find((m) => String(m.id) === item.marca_id)
+                            ?.nome ?? 'Marca não selecionada',
                 };
             }),
         [itens, marcas, tiposMateriais],
@@ -190,7 +197,9 @@ export default function NovaEntradaLote({
 
         window.requestAnimationFrame(() => {
             window.requestAnimationFrame(() => {
-                const target = document.getElementById(`item-entrada-${novoIndex}`);
+                const target = document.getElementById(
+                    `item-entrada-${novoIndex}`,
+                );
 
                 if (!target) {
                     return;
@@ -331,35 +340,44 @@ export default function NovaEntradaLote({
                 : 'translate-y-1 opacity-85',
         );
     const fornecedorNotaSelecionado =
-        fornecedores.find((f) => String(f.id) === notaFornecedorId)?.nome_fantasia ||
+        fornecedores.find((f) => String(f.id) === notaFornecedorId)
+            ?.nome_fantasia ||
         fornecedores.find((f) => String(f.id) === notaFornecedorId)?.nome ||
         'Não informado';
     const resumoEntradaBlocos = (
         <>
             <div className="grid grid-cols-1 gap-3">
                 <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Condição</p>
+                    <p className="text-xs tracking-wide text-muted-foreground uppercase">
+                        Condição
+                    </p>
                     <p className="mt-1 font-medium">
-                        {condicoesEntrada.find((c) => c.value === condicaoEntrada)?.label ??
-                            'Não selecionada'}
+                        {condicoesEntrada.find(
+                            (c) => c.value === condicaoEntrada,
+                        )?.label ?? 'Não selecionada'}
                     </p>
                 </div>
                 <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Estoque</p>
+                    <p className="text-xs tracking-wide text-muted-foreground uppercase">
+                        Estoque
+                    </p>
                     <p className="mt-1 font-medium">
-                        {estoques.find((e) => String(e.id) === estoqueId)?.nome ?? 'Não selecionado'}
+                        {estoques.find((e) => String(e.id) === estoqueId)
+                            ?.nome ?? 'Não selecionado'}
                     </p>
                 </div>
             </div>
 
             {mostrarNota && (
                 <div className="space-y-3 rounded-lg border border-border/60 bg-background p-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                         Nota fiscal
                     </p>
                     <div className="space-y-2">
                         <div className="flex items-center justify-between gap-3">
-                            <span className="text-muted-foreground">Número</span>
+                            <span className="text-muted-foreground">
+                                Número
+                            </span>
                             <span
                                 className="max-w-[60%] truncate text-right font-medium"
                                 title={notaNumero.trim() || 'Não informado'}
@@ -368,16 +386,25 @@ export default function NovaEntradaLote({
                             </span>
                         </div>
                         <div className="flex items-center justify-between gap-3">
-                            <span className="text-muted-foreground">Emissão</span>
+                            <span className="text-muted-foreground">
+                                Emissão
+                            </span>
                             <span className="font-medium">
                                 {notaDataEmissao
-                                    ? new Date(`${notaDataEmissao}T00:00:00`).toLocaleDateString('pt-BR')
+                                    ? new Date(
+                                          `${notaDataEmissao}T00:00:00`,
+                                      ).toLocaleDateString('pt-BR')
                                     : 'Não informada'}
                             </span>
                         </div>
                         <div className="flex items-center justify-between gap-3">
-                            <span className="text-muted-foreground">Fornecedor</span>
-                            <span className="max-w-[60%] truncate text-right font-medium" title={fornecedorNotaSelecionado}>
+                            <span className="text-muted-foreground">
+                                Fornecedor
+                            </span>
+                            <span
+                                className="max-w-[60%] truncate text-right font-medium"
+                                title={fornecedorNotaSelecionado}
+                            >
                                 {fornecedorNotaSelecionado}
                             </span>
                         </div>
@@ -387,11 +414,15 @@ export default function NovaEntradaLote({
 
             <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Itens</p>
+                    <p className="text-xs tracking-wide text-muted-foreground uppercase">
+                        Itens
+                    </p>
                     <p className="mt-1 text-lg font-semibold">{itens.length}</p>
                 </div>
                 <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Quantidade</p>
+                    <p className="text-xs tracking-wide text-muted-foreground uppercase">
+                        Quantidade
+                    </p>
                     <p className="mt-1 text-lg font-semibold">
                         {totalLote.quantidade.toLocaleString('pt-BR', {
                             maximumFractionDigits: 4,
@@ -401,8 +432,12 @@ export default function NovaEntradaLote({
             </div>
 
             <div className="rounded-xl border border-primary/30 bg-primary/5 px-3 py-3">
-                <p className="text-xs uppercase tracking-wide text-muted-foreground">Valor total</p>
-                <p className="mt-1 text-xl font-semibold text-primary">{formatBrl(totalLote.valor)}</p>
+                <p className="text-xs tracking-wide text-muted-foreground uppercase">
+                    Valor total
+                </p>
+                <p className="mt-1 text-xl font-semibold text-primary">
+                    {formatBrl(totalLote.valor)}
+                </p>
             </div>
         </>
     );
@@ -524,11 +559,14 @@ export default function NovaEntradaLote({
                                                     <button
                                                         type="button"
                                                         onClick={() =>
-                                                            setCurrentStep(index)
+                                                            setCurrentStep(
+                                                                index,
+                                                            )
                                                         }
                                                         className={cn(
                                                             'flex h-9 w-9 items-center justify-center rounded-full border',
-                                                            currentStepSafe === index
+                                                            currentStepSafe ===
+                                                                index
                                                                 ? 'border-primary bg-primary/10 text-primary'
                                                                 : 'border-border text-muted-foreground hover:bg-muted',
                                                         )}
@@ -924,7 +962,9 @@ export default function NovaEntradaLote({
                                                             type="button"
                                                             variant="secondary"
                                                             size="sm"
-                                                            onClick={adicionarItemComScroll}
+                                                            onClick={
+                                                                adicionarItemComScroll
+                                                            }
                                                         >
                                                             <Plus className="mr-1 h-4 w-4" />
                                                             Adicionar item
@@ -1438,7 +1478,9 @@ export default function NovaEntradaLote({
                                                                 type="button"
                                                                 variant="secondary"
                                                                 size="sm"
-                                                                onClick={adicionarItemComScroll}
+                                                                onClick={
+                                                                    adicionarItemComScroll
+                                                                }
                                                             >
                                                                 <Plus className="mr-1 h-4 w-4" />
                                                                 Adicionar item
@@ -1469,7 +1511,8 @@ export default function NovaEntradaLote({
                                                         <div className="flex flex-wrap gap-8">
                                                             <div>
                                                                 <p className="text-muted-foreground">
-                                                                    Quantidade total
+                                                                    Quantidade
+                                                                    total
                                                                 </p>
                                                                 <p className="text-lg font-semibold">
                                                                     {totalLote.quantidade.toLocaleString(
@@ -1485,33 +1528,73 @@ export default function NovaEntradaLote({
                                                                     Valor total
                                                                 </p>
                                                                 <p className="text-lg font-semibold">
-                                                                    {formatBrl(totalLote.valor)}
+                                                                    {formatBrl(
+                                                                        totalLote.valor,
+                                                                    )}
                                                                 </p>
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-2">
-                                                            <p className="text-sm font-medium">Total por item</p>
+                                                            <p className="text-sm font-medium">
+                                                                Total por item
+                                                            </p>
                                                             <div className="space-y-2">
-                                                                {totaisPorItem.map((item) => (
-                                                                    <div
-                                                                        key={item.index}
-                                                                        className="rounded-md border border-border/60 bg-muted/20 px-3 py-2"
-                                                                    >
-                                                                        <p className="text-sm font-medium">
-                                                                            Item {item.index + 1} - {item.tipoNome} / {item.marcaNome}
-                                                                        </p>
-                                                                        <p className="text-xs text-muted-foreground">
-                                                                            Qtd: {item.quantidade.toLocaleString('pt-BR', { maximumFractionDigits: 4 })} x Unit: {formatBrl(item.valorUnitario)} = {formatBrl(item.total)}
-                                                                        </p>
-                                                                    </div>
-                                                                ))}
+                                                                {totaisPorItem.map(
+                                                                    (item) => (
+                                                                        <div
+                                                                            key={
+                                                                                item.index
+                                                                            }
+                                                                            className="rounded-md border border-border/60 bg-muted/20 px-3 py-2"
+                                                                        >
+                                                                            <p className="text-sm font-medium">
+                                                                                Item{' '}
+                                                                                {item.index +
+                                                                                    1}{' '}
+                                                                                -{' '}
+                                                                                {
+                                                                                    item.tipoNome
+                                                                                }{' '}
+                                                                                /{' '}
+                                                                                {
+                                                                                    item.marcaNome
+                                                                                }
+                                                                            </p>
+                                                                            <p className="text-xs text-muted-foreground">
+                                                                                Qtd:{' '}
+                                                                                {item.quantidade.toLocaleString(
+                                                                                    'pt-BR',
+                                                                                    {
+                                                                                        maximumFractionDigits: 4,
+                                                                                    },
+                                                                                )}{' '}
+                                                                                x
+                                                                                Unit:{' '}
+                                                                                {formatBrl(
+                                                                                    item.valorUnitario,
+                                                                                )}{' '}
+                                                                                ={' '}
+                                                                                {formatBrl(
+                                                                                    item.total,
+                                                                                )}
+                                                                            </p>
+                                                                        </div>
+                                                                    ),
+                                                                )}
                                                             </div>
                                                         </div>
 
                                                         <div className="space-y-3">
-                                                            <p className="text-sm font-medium">Resumo da entrada</p>
-                                                            <div className="space-y-4">{resumoEntradaBlocos}</div>
+                                                            <p className="text-sm font-medium">
+                                                                Resumo da
+                                                                entrada
+                                                            </p>
+                                                            <div className="space-y-4">
+                                                                {
+                                                                    resumoEntradaBlocos
+                                                                }
+                                                            </div>
                                                         </div>
                                                     </CardContent>
                                                 </Card>
@@ -1537,9 +1620,11 @@ export default function NovaEntradaLote({
                             </div>
 
                             <div className="flex h-full min-h-0 flex-col gap-4">
-                                <Card className="min-h-0 flex-1 overflow-hidden border-primary/20 shadow-sm bg-muted/30">
+                                <Card className="min-h-0 flex-1 overflow-hidden border-primary/20 bg-muted/30 shadow-sm">
                                     <CardHeader className="border-b bg-muted/30">
-                                        <CardTitle className="text-base">Resumo da entrada</CardTitle>
+                                        <CardTitle className="text-base">
+                                            Resumo da entrada
+                                        </CardTitle>
                                     </CardHeader>
                                     <CardContent className="mt-2 space-y-4 overflow-y-auto text-sm [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/70 [&::-webkit-scrollbar-track]:bg-transparent">
                                         {resumoEntradaBlocos}
@@ -2269,7 +2354,9 @@ export default function NovaEntradaLote({
                                     </div>
 
                                     <div className="space-y-2">
-                                        <p className="text-sm font-medium">Total por item</p>
+                                        <p className="text-sm font-medium">
+                                            Total por item
+                                        </p>
                                         <div className="space-y-2">
                                             {totaisPorItem.map((item) => (
                                                 <div
@@ -2277,10 +2364,24 @@ export default function NovaEntradaLote({
                                                     className="rounded-md border border-border/60 bg-muted/20 px-3 py-2"
                                                 >
                                                     <p className="text-sm font-medium">
-                                                        Item {item.index + 1} - {item.tipoNome} / {item.marcaNome}
+                                                        Item {item.index + 1} -{' '}
+                                                        {item.tipoNome} /{' '}
+                                                        {item.marcaNome}
                                                     </p>
                                                     <p className="text-xs text-muted-foreground">
-                                                        Qtd: {item.quantidade.toLocaleString('pt-BR', { maximumFractionDigits: 4 })} x Unit: {formatBrl(item.valorUnitario)} = {formatBrl(item.total)}
+                                                        Qtd:{' '}
+                                                        {item.quantidade.toLocaleString(
+                                                            'pt-BR',
+                                                            {
+                                                                maximumFractionDigits: 4,
+                                                            },
+                                                        )}{' '}
+                                                        x Unit:{' '}
+                                                        {formatBrl(
+                                                            item.valorUnitario,
+                                                        )}{' '}
+                                                        ={' '}
+                                                        {formatBrl(item.total)}
                                                     </p>
                                                 </div>
                                             ))}
@@ -2288,8 +2389,12 @@ export default function NovaEntradaLote({
                                     </div>
 
                                     <div className="space-y-3">
-                                        <p className="text-sm font-medium">Resumo da entrada</p>
-                                        <div className="space-y-4">{resumoEntradaBlocos}</div>
+                                        <p className="text-sm font-medium">
+                                            Resumo da entrada
+                                        </p>
+                                        <div className="space-y-4">
+                                            {resumoEntradaBlocos}
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -2348,4 +2453,3 @@ export default function NovaEntradaLote({
         </>
     );
 }
-
