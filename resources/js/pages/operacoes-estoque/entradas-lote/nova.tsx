@@ -13,13 +13,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
-} from '@/components/ui/carousel';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -120,18 +113,21 @@ export default function NovaEntradaLote({
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [processing, setProcessing] = useState(false);
     const [showSairDialog, setShowSairDialog] = useState(false);
+    const [currentStep, setCurrentStep] = useState(0);
 
     const mostrarNota = exigeNotaFiscal(condicaoEntrada);
 
     const totalLote = useMemo(() => {
         let q = 0;
         let v = 0;
+
         for (const it of itens) {
             const qq = parseFloat(it.quantidade.replace(',', '.')) || 0;
             const vu = parseFloat(it.valor_unitario.replace(',', '.')) || 0;
             q += qq;
             v += qq * vu;
         }
+
         return { quantidade: q, valor: v };
     }, [itens]);
 
@@ -145,6 +141,7 @@ export default function NovaEntradaLote({
         if (empresaId === '') {
             return [];
         }
+
         return locais.filter((l) => String(l.empresa_id) === empresaId);
     };
 
@@ -152,6 +149,7 @@ export default function NovaEntradaLote({
         if (tipoId === '') {
             return [];
         }
+
         return marcas.filter((m) => String(m.tipo_material_id) === tipoId);
     };
 
@@ -159,17 +157,22 @@ export default function NovaEntradaLote({
         const fd = new FormData();
         fd.append('condicao_entrada', condicaoEntrada);
         fd.append('estoque_id', estoqueId);
+
         if (observacao.trim()) {
             fd.append('observacao', observacao.trim());
         }
+
         if (mostrarNota) {
             fd.append('nota_numero', notaNumero.trim());
+
             if (notaDataEmissao) {
                 fd.append('nota_data_emissao', notaDataEmissao);
             }
+
             if (notaFornecedorId !== '') {
                 fd.append('nota_fornecedor_id', notaFornecedorId);
             }
+
             if (notaArquivo) {
                 fd.append('nota_arquivo', notaArquivo);
             }
@@ -178,20 +181,26 @@ export default function NovaEntradaLote({
         itens.forEach((it, i) => {
             fd.append(`itens[${i}][tipo_material_id]`, it.tipo_material_id);
             fd.append(`itens[${i}][marca_id]`, it.marca_id);
+
             if (it.empresa_id !== '') {
                 fd.append(`itens[${i}][empresa_id]`, it.empresa_id);
             }
+
             if (it.local_id !== '') {
                 fd.append(`itens[${i}][local_id]`, it.local_id);
             }
+
             fd.append(`itens[${i}][quantidade]`, it.quantidade.replace(',', '.'));
             fd.append(`itens[${i}][valor_unitario]`, it.valor_unitario.replace(',', '.'));
+
             if (it.observacao.trim()) {
                 fd.append(`itens[${i}][observacao]`, it.observacao.trim());
             }
+
             if (it.termo) {
                 fd.append(`itens[${i}][termo_recebimento]`, it.termo);
             }
+
             it.fotos.forEach((foto) => {
                 fd.append(`itens[${i}][fotos][]`, foto);
             });
@@ -218,8 +227,31 @@ export default function NovaEntradaLote({
 
     const primeiroErroGeral = () => {
         const keys = Object.keys(errors).filter((k) => !k.startsWith('itens.'));
+
         return keys.length ? errors[keys[0]!] : null;
     };
+
+    const etapasCarousel = [
+        'Condição',
+        ...(mostrarNota ? ['Nota fiscal'] : []),
+        'Movimentação',
+        'Itens',
+        'Total',
+    ];
+    const idxCondicao = 0;
+    const idxNota = mostrarNota ? 1 : -1;
+    const idxMovimentacao = mostrarNota ? 2 : 1;
+    const idxItens = mostrarNota ? 3 : 2;
+    const idxTotal = mostrarNota ? 4 : 3;
+    const currentStepSafe = Math.min(currentStep, etapasCarousel.length - 1);
+    const etapaVisivel = (index: number) => index === currentStepSafe;
+    const ordemEtapa = (index: number) => (index === currentStepSafe ? 'order-1' : 'order-2');
+    const classeAnimacaoEtapa = (index: number) =>
+        cn(
+            ordemEtapa(index),
+            'transition-all duration-300 ease-out',
+            index === currentStepSafe ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-85',
+        );
 
     return (
         <>
@@ -227,7 +259,9 @@ export default function NovaEntradaLote({
 
             <div
                 className={
-                    embedded ? 'w-full space-y-6 p-0' : 'mx-auto max-w-5xl space-y-6 p-4'
+                    embedded
+                        ? 'h-full w-full space-y-6 overflow-hidden p-0'
+                        : 'mx-auto max-w-5xl space-y-6 p-4'
                 }
             >
                 {!embedded && (
@@ -264,14 +298,37 @@ export default function NovaEntradaLote({
                     </div>
                 )}
 
-                <form className="space-y-6" onSubmit={enviar}>
+                <form
+                    className={cn('space-y-6', embedded && 'h-full overflow-hidden')}
+                    onSubmit={enviar}
+                >
                     {embedded ? (
-                        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-                            <div className="min-w-0 space-y-4">
-                                <Carousel opts={{ align: 'start', loop: false }} className="w-full">
-                                    <CarouselContent className="-ml-2">
-                                        <CarouselItem className="pl-2">
-                                            <Card>
+                        <div className="grid h-full min-h-0 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+                            <div className="min-h-0 min-w-0 space-y-4">
+                                <div className="grid h-[70vh] items-stretch gap-2 md:grid-cols-[60px_minmax(0,1fr)]">
+                                    <div className="flex h-full flex-col items-center justify-center gap-2">
+                                        {etapasCarousel.map((etapa, index) => (
+                                            <button
+                                                key={etapa}
+                                                type="button"
+                                                onClick={() => setCurrentStep(index)}
+                                                className={cn(
+                                                    'flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold',
+                                                    currentStepSafe === index
+                                                        ? 'border-primary bg-primary/10 text-primary'
+                                                        : 'border-border text-muted-foreground hover:bg-muted',
+                                                )}
+                                                aria-label={`Ir para etapa ${index + 1}`}
+                                            >
+                                                {index + 1}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <div className="h-full min-h-0 min-w-0 overflow-y-auto pr-1 flex flex-col gap-4">
+                                        {etapaVisivel(idxCondicao) && (
+                                            <div className={classeAnimacaoEtapa(idxCondicao)}>
+                                                <Card>
                                                 <CardHeader>
                                                     <CardTitle>Condição da entrada</CardTitle>
                                                     <CardDescription>
@@ -309,11 +366,12 @@ export default function NovaEntradaLote({
                                                         </p>
                                                     )}
                                                 </CardContent>
-                                            </Card>
-                                        </CarouselItem>
+                                                </Card>
+                                            </div>
+                                        )}
 
-                                        {mostrarNota && (
-                                            <CarouselItem className="pl-2">
+                                        {mostrarNota && etapaVisivel(idxNota) && (
+                                            <div className={classeAnimacaoEtapa(idxNota)}>
                                                 <Card>
                                                     <CardHeader>
                                                         <CardTitle>Dados da nota fiscal</CardTitle>
@@ -408,11 +466,12 @@ export default function NovaEntradaLote({
                                                         </div>
                                                     </CardContent>
                                                 </Card>
-                                            </CarouselItem>
+                                            </div>
                                         )}
 
-                                        <CarouselItem className="pl-2">
-                                            <Card>
+                                        {etapaVisivel(idxMovimentacao) && (
+                                            <div className={classeAnimacaoEtapa(idxMovimentacao)}>
+                                                <Card>
                                                 <CardHeader>
                                                     <CardTitle>Dados da movimentação</CardTitle>
                                                 </CardHeader>
@@ -470,11 +529,13 @@ export default function NovaEntradaLote({
                                                         />
                                                     </div>
                                                 </CardContent>
-                                            </Card>
-                                        </CarouselItem>
+                                                </Card>
+                                            </div>
+                                        )}
 
-                                        <CarouselItem className="pl-2">
-                                            <Card>
+                                        {etapaVisivel(idxItens) && (
+                                            <div className={classeAnimacaoEtapa(idxItens)}>
+                                                <Card>
                                                 <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0">
                                                     <div>
                                                         <CardTitle>Itens da entrada</CardTitle>
@@ -778,11 +839,13 @@ export default function NovaEntradaLote({
                                                         </div>
                                                     ))}
                                                 </CardContent>
-                                            </Card>
-                                        </CarouselItem>
+                                                </Card>
+                                            </div>
+                                        )}
 
-                                        <CarouselItem className="pl-2">
-                                            <Card>
+                                        {etapaVisivel(idxTotal) && (
+                                            <div className={classeAnimacaoEtapa(idxTotal)}>
+                                                <Card>
                                                 <CardHeader>
                                                     <CardTitle>Total do lote</CardTitle>
                                                     <CardDescription>Soma automática dos itens.</CardDescription>
@@ -803,14 +866,12 @@ export default function NovaEntradaLote({
                                                         </p>
                                                     </div>
                                                 </CardContent>
-                                            </Card>
-                                        </CarouselItem>
-                                    </CarouselContent>
-                                    <div className="mt-3 flex items-center justify-end gap-2">
-                                        <CarouselPrevious className="static translate-y-0" />
-                                        <CarouselNext className="static translate-y-0" />
+                                                </Card>
+                                            </div>
+                                        )}
+
                                     </div>
-                                </Carousel>
+                                </div>
 
                                 <div className="flex flex-wrap justify-end gap-2">
                                     <Button
