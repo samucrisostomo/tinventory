@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
     AlertDialog,
@@ -252,6 +252,42 @@ export default function NovaEntradaLote({
             'transition-all duration-300 ease-out',
             index === currentStepSafe ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-85',
         );
+
+    useEffect(() => {
+        if (!embedded) {
+            return;
+        }
+
+        const onKeyDown = (event: KeyboardEvent) => {
+            const target = event.target as HTMLElement | null;
+            const isTypingTarget =
+                target instanceof HTMLInputElement ||
+                target instanceof HTMLTextAreaElement ||
+                target instanceof HTMLSelectElement ||
+                target?.isContentEditable ||
+                target?.getAttribute('role') === 'combobox';
+
+            if (isTypingTarget) {
+                return;
+            }
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                setCurrentStep((prev) => Math.min(prev + 1, etapasCarousel.length - 1));
+            }
+
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                setCurrentStep((prev) => Math.max(prev - 1, 0));
+            }
+        };
+
+        window.addEventListener('keydown', onKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', onKeyDown);
+        };
+    }, [embedded, etapasCarousel.length]);
 
     return (
         <>
