@@ -1,13 +1,19 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { Head, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import NovaEntradaLote, { type NovaEntradaLoteProps } from './nova';
 import type { BreadcrumbItem } from '@/types';
 
 const BASE = '/operacoes-estoque/entradas-lote';
-
-type CondicaoOption = { value: string; label: string };
 
 type EntradaRow = {
     id: number;
@@ -26,8 +32,7 @@ type Props = {
         valor_total_mes: number;
     };
     entradasRecentes: EntradaRow[];
-    condicoesEntrada: CondicaoOption[];
-};
+} & NovaEntradaLoteProps;
 
 const labelCondicao = (value: string, opcoes: CondicaoOption[]) =>
     opcoes.find((o) => o.value === value)?.label ?? value;
@@ -39,10 +44,17 @@ export default function EntradasLoteIndex({
     estatisticas,
     entradasRecentes,
     condicoesEntrada,
+    tiposMateriais,
+    marcas,
+    estoques,
+    fornecedores,
+    empresas,
+    locais,
 }: Props) {
     const { flash } = usePage().props as {
         flash?: { success?: string; error?: string };
     };
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
     useEffect(() => {
         if (flash?.success) {
@@ -66,8 +78,8 @@ export default function EntradasLoteIndex({
                             anexos por item.
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href={`${BASE}/nova`}>Nova entrada</Link>
+                    <Button type="button" onClick={() => setCreateDialogOpen(true)}>
+                        Nova entrada
                     </Button>
                 </div>
 
@@ -164,6 +176,29 @@ export default function EntradasLoteIndex({
                     </CardContent>
                 </Card>
             </div>
+
+            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+                <DialogContent className="w-[calc(100vw-1.5rem)] max-w-none sm:w-[calc(100vw-4rem)] sm:max-w-none lg:w-[calc(100vw-8rem)] max-h-[95vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Nova entrada em lote</DialogTitle>
+                        <DialogDescription>
+                            Cadastre uma nova entrada sem sair da tela de listagem.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <NovaEntradaLote
+                        tiposMateriais={tiposMateriais}
+                        marcas={marcas}
+                        estoques={estoques}
+                        fornecedores={fornecedores}
+                        empresas={empresas}
+                        locais={locais}
+                        condicoesEntrada={condicoesEntrada}
+                        embedded
+                        onRequestClose={() => setCreateDialogOpen(false)}
+                    />
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

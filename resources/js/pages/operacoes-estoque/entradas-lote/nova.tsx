@@ -57,7 +57,7 @@ type ItemLinha = {
     fotos: File[];
 };
 
-type Props = {
+export type NovaEntradaLoteProps = {
     tiposMateriais: TipoMat[];
     marcas: MarcaOpt[];
     estoques: EstoqueOpt[];
@@ -65,6 +65,11 @@ type Props = {
     empresas: Option[];
     locais: LocalOpt[];
     condicoesEntrada: CondicaoOption[];
+};
+
+type EmbeddedProps = {
+    embedded?: boolean;
+    onRequestClose?: () => void;
 };
 
 const novoItem = (): ItemLinha => ({
@@ -94,7 +99,9 @@ export default function NovaEntradaLote({
     empresas,
     locais,
     condicoesEntrada,
-}: Props) {
+    embedded = false,
+    onRequestClose,
+}: NovaEntradaLoteProps & EmbeddedProps) {
     const [condicaoEntrada, setCondicaoEntrada] = useState('');
     const [estoqueId, setEstoqueId] = useState('');
     const [observacao, setObservacao] = useState('');
@@ -206,27 +213,37 @@ export default function NovaEntradaLote({
 
     return (
         <>
-            <Head title="Nova entrada em lote" />
+            {!embedded && <Head title="Nova entrada em lote" />}
 
-            <div className="mx-auto max-w-5xl space-y-6 p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                        <Button variant="ghost" size="sm" className="mb-2 -ml-2" asChild>
-                            <Link href={BASE}>
-                                <ArrowLeft className="mr-1 h-4 w-4" />
-                                Voltar à lista
-                            </Link>
+            <div
+                className={
+                    embedded ? 'w-full space-y-6 p-0' : 'mx-auto max-w-5xl space-y-6 p-4'
+                }
+            >
+                {!embedded && (
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                            <Button variant="ghost" size="sm" className="mb-2 -ml-2" asChild>
+                                <Link href={BASE}>
+                                    <ArrowLeft className="mr-1 h-4 w-4" />
+                                    Voltar à lista
+                                </Link>
+                            </Button>
+                            <h1 className="text-lg font-semibold">Nova entrada em lote</h1>
+                            <p className="text-sm text-muted-foreground">
+                                Preencha a condição da entrada, o estoque de destino e os itens. Use
+                                cancelar para sair com confirmação se já houver dados.
+                            </p>
+                        </div>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowSairDialog(true)}
+                        >
+                            Cancelar entrada
                         </Button>
-                        <h1 className="text-lg font-semibold">Nova entrada em lote</h1>
-                        <p className="text-sm text-muted-foreground">
-                            Preencha a condição da entrada, o estoque de destino e os itens. Use
-                            cancelar para sair com confirmação se já houver dados.
-                        </p>
                     </div>
-                    <Button type="button" variant="outline" onClick={() => setShowSairDialog(true)}>
-                        Cancelar entrada
-                    </Button>
-                </div>
+                )}
 
                 {primeiroErroGeral() && (
                     <div
@@ -253,7 +270,7 @@ export default function NovaEntradaLote({
                                     setCondicaoEntrada(v === SELECT_VAZIO ? '' : v)
                                 }
                             >
-                                <SelectTrigger id="condicao_entrada" className="max-w-xl">
+                                <SelectTrigger id="condicao_entrada" className="w-full">
                                     <SelectValue placeholder="Selecione" />
                                 </SelectTrigger>
                                 <SelectContent position="popper">
@@ -315,7 +332,7 @@ export default function NovaEntradaLote({
                                             setNotaFornecedorId(v === SELECT_VAZIO ? '' : v)
                                         }
                                     >
-                                        <SelectTrigger id="nota_fornecedor">
+                                        <SelectTrigger id="nota_fornecedor" className="w-full">
                                             <SelectValue placeholder="Opcional" />
                                         </SelectTrigger>
                                         <SelectContent position="popper">
@@ -357,7 +374,7 @@ export default function NovaEntradaLote({
                                     value={selectVal(estoqueId)}
                                     onValueChange={(v) => setEstoqueId(v === SELECT_VAZIO ? '' : v)}
                                 >
-                                    <SelectTrigger id="estoque_id" className="max-w-xl">
+                                    <SelectTrigger id="estoque_id" className="w-full">
                                         <SelectValue placeholder="Selecione o estoque" />
                                     </SelectTrigger>
                                     <SelectContent position="popper">
@@ -455,7 +472,7 @@ export default function NovaEntradaLote({
                                                     });
                                                 }}
                                             >
-                                                <SelectTrigger>
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue placeholder="Selecione" />
                                                 </SelectTrigger>
                                                 <SelectContent position="popper">
@@ -486,7 +503,7 @@ export default function NovaEntradaLote({
                                                 }
                                                 disabled={item.tipo_material_id === ''}
                                             >
-                                                <SelectTrigger>
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue
                                                         placeholder={
                                                             item.tipo_material_id === ''
@@ -529,7 +546,7 @@ export default function NovaEntradaLote({
                                                     });
                                                 }}
                                             >
-                                                <SelectTrigger>
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue placeholder="Opcional" />
                                                 </SelectTrigger>
                                                 <SelectContent position="popper">
@@ -553,7 +570,7 @@ export default function NovaEntradaLote({
                                                 }
                                                 disabled={item.empresa_id === ''}
                                             >
-                                                <SelectTrigger>
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue
                                                         placeholder={
                                                             item.empresa_id === ''
@@ -691,7 +708,7 @@ export default function NovaEntradaLote({
             </div>
 
             <AlertDialog open={showSairDialog} onOpenChange={setShowSairDialog}>
-                <AlertDialogContent>
+                <AlertDialogContent className="w-full">
                     <AlertDialogHeader>
                         <AlertDialogTitle>Sair sem registrar?</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -700,9 +717,22 @@ export default function NovaEntradaLote({
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Voltar ao formulário</AlertDialogCancel>
-                        <Button asChild variant="default">
-                            <Link href={BASE}>Sair para a lista</Link>
-                        </Button>
+                        {embedded ? (
+                            <Button
+                                type="button"
+                                variant="default"
+                                onClick={() => {
+                                    setShowSairDialog(false);
+                                    onRequestClose?.();
+                                }}
+                            >
+                                Fechar modal
+                            </Button>
+                        ) : (
+                            <Button asChild variant="default">
+                                <Link href={BASE}>Sair para a lista</Link>
+                            </Button>
+                        )}
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

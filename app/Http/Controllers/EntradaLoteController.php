@@ -62,11 +62,11 @@ class EntradaLoteController extends Controller
             ->limit(20)
             ->get();
 
-        return Inertia::render('operacoes-estoque/entradas-lote/index', [
+        return Inertia::render('operacoes-estoque/entradas-lote/index', array_merge([
             'estatisticas' => $estatisticas,
             'entradasRecentes' => $entradasRecentes,
             'condicoesEntrada' => CondicaoEntradaLote::options(),
-        ]);
+        ], $this->catalogoProps()));
     }
 
     public function create(): Response
