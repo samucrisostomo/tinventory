@@ -1,5 +1,14 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import {
+    ArrowLeft,
+    ClipboardList,
+    DollarSign,
+    FileText,
+    Package,
+    Plus,
+    Trash2,
+    Truck,
+} from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
@@ -28,6 +37,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { BreadcrumbItem } from '@/types';
 
@@ -145,6 +155,29 @@ export default function NovaEntradaLote({
         return { quantidade: q, valor: v };
     }, [itens]);
 
+    const totaisPorItem = useMemo(
+        () =>
+            itens.map((item, index) => {
+                const quantidade = parseFloat(item.quantidade.replace(',', '.')) || 0;
+                const valorUnitario = parseFloat(item.valor_unitario.replace(',', '.')) || 0;
+                const total = quantidade * valorUnitario;
+
+                return {
+                    index,
+                    quantidade,
+                    valorUnitario,
+                    total,
+                    tipoNome:
+                        tiposMateriais.find((t) => String(t.id) === item.tipo_material_id)?.nome ??
+                        'Tipo não selecionado',
+                    marcaNome:
+                        marcas.find((m) => String(m.id) === item.marca_id)?.nome ??
+                        'Marca não selecionada',
+                };
+            }),
+        [itens, marcas, tiposMateriais],
+    );
+
     const atualizarItem = (index: number, patch: Partial<ItemLinha>) => {
         setItens((rows) =>
             rows.map((row, i) => (i === index ? { ...row, ...patch } : row)),
@@ -252,11 +285,11 @@ export default function NovaEntradaLote({
     };
 
     const etapasCarousel = [
-        'Condição',
-        ...(mostrarNota ? ['Nota fiscal'] : []),
-        'Movimentação',
-        'Itens',
-        'Total',
+        { label: 'Condição da entrada', icon: ClipboardList },
+        ...(mostrarNota ? [{ label: 'Nota fiscal', icon: FileText }] : []),
+        { label: 'Dados da movimentação', icon: Truck },
+        { label: 'Itens da entrada', icon: Package },
+        { label: 'Total do lote', icon: DollarSign },
     ];
     const isCarouselMode = embedded && viewMode === 'carousel';
     const idxCondicao = 0;
@@ -276,6 +309,77 @@ export default function NovaEntradaLote({
                 ? 'translate-y-0 opacity-100'
                 : 'translate-y-1 opacity-85',
         );
+    const fornecedorNotaSelecionado =
+        fornecedores.find((f) => String(f.id) === notaFornecedorId)?.nome_fantasia ||
+        fornecedores.find((f) => String(f.id) === notaFornecedorId)?.nome ||
+        'Não informado';
+    const resumoEntradaBlocos = (
+        <>
+            <div className="grid grid-cols-1 gap-3">
+                <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Condição</p>
+                    <p className="mt-1 font-medium">
+                        {condicoesEntrada.find((c) => c.value === condicaoEntrada)?.label ??
+                            'Não selecionada'}
+                    </p>
+                </div>
+                <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Estoque</p>
+                    <p className="mt-1 font-medium">
+                        {estoques.find((e) => String(e.id) === estoqueId)?.nome ?? 'Não selecionado'}
+                    </p>
+                </div>
+            </div>
+
+            {mostrarNota && (
+                <div className="space-y-3 rounded-lg border border-border/60 bg-background p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Nota fiscal
+                    </p>
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-3">
+                            <span className="text-muted-foreground">Número</span>
+                            <span className="font-medium">{notaNumero.trim() || 'Não informado'}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                            <span className="text-muted-foreground">Emissão</span>
+                            <span className="font-medium">
+                                {notaDataEmissao
+                                    ? new Date(`${notaDataEmissao}T00:00:00`).toLocaleDateString('pt-BR')
+                                    : 'Não informada'}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                            <span className="text-muted-foreground">Fornecedor</span>
+                            <span className="max-w-[60%] truncate text-right font-medium" title={fornecedorNotaSelecionado}>
+                                {fornecedorNotaSelecionado}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Itens</p>
+                    <p className="mt-1 text-lg font-semibold">{itens.length}</p>
+                </div>
+                <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Quantidade</p>
+                    <p className="mt-1 text-lg font-semibold">
+                        {totalLote.quantidade.toLocaleString('pt-BR', {
+                            maximumFractionDigits: 4,
+                        })}
+                    </p>
+                </div>
+            </div>
+
+            <div className="rounded-xl border border-primary/30 bg-primary/5 px-3 py-3">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Valor total</p>
+                <p className="mt-1 text-xl font-semibold text-primary">{formatBrl(totalLote.valor)}</p>
+            </div>
+        </>
+    );
 
     useEffect(() => {
         if (!isCarouselMode) {
@@ -389,22 +493,28 @@ export default function NovaEntradaLote({
                                 <div className="grid h-[70vh] items-stretch gap-2 md:grid-cols-[40px_minmax(0,1fr)]">
                                     <div className="flex h-full flex-col items-center justify-center gap-2">
                                         {etapasCarousel.map((etapa, index) => (
-                                            <button
-                                                key={etapa}
-                                                type="button"
-                                                onClick={() =>
-                                                    setCurrentStep(index)
-                                                }
-                                                className={cn(
-                                                    'flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold',
-                                                    currentStepSafe === index
-                                                        ? 'border-primary bg-primary/10 text-primary'
-                                                        : 'border-border text-muted-foreground hover:bg-muted',
-                                                )}
-                                                aria-label={`Ir para etapa ${index + 1}`}
-                                            >
-                                                {index + 1}
-                                            </button>
+                                            <Tooltip key={etapa.label}>
+                                                <TooltipTrigger asChild>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setCurrentStep(index)
+                                                        }
+                                                        className={cn(
+                                                            'flex h-9 w-9 items-center justify-center rounded-full border',
+                                                            currentStepSafe === index
+                                                                ? 'border-primary bg-primary/10 text-primary'
+                                                                : 'border-border text-muted-foreground hover:bg-muted',
+                                                        )}
+                                                        aria-label={`Ir para ${etapa.label}`}
+                                                    >
+                                                        <etapa.icon className="h-4 w-4" />
+                                                    </button>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="right">
+                                                    <p>{etapa.label}</p>
+                                                </TooltipContent>
+                                            </Tooltip>
                                         ))}
                                     </div>
 
@@ -1324,29 +1434,53 @@ export default function NovaEntradaLote({
                                                             itens.
                                                         </CardDescription>
                                                     </CardHeader>
-                                                    <CardContent className="flex flex-wrap gap-8 text-sm">
-                                                        <div>
-                                                            <p className="text-muted-foreground">
-                                                                Quantidade total
-                                                            </p>
-                                                            <p className="text-lg font-semibold">
-                                                                {totalLote.quantidade.toLocaleString(
-                                                                    'pt-BR',
-                                                                    {
-                                                                        maximumFractionDigits: 4,
-                                                                    },
-                                                                )}
-                                                            </p>
+                                                    <CardContent className="space-y-4 text-sm">
+                                                        <div className="flex flex-wrap gap-8">
+                                                            <div>
+                                                                <p className="text-muted-foreground">
+                                                                    Quantidade total
+                                                                </p>
+                                                                <p className="text-lg font-semibold">
+                                                                    {totalLote.quantidade.toLocaleString(
+                                                                        'pt-BR',
+                                                                        {
+                                                                            maximumFractionDigits: 4,
+                                                                        },
+                                                                    )}
+                                                                </p>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-muted-foreground">
+                                                                    Valor total
+                                                                </p>
+                                                                <p className="text-lg font-semibold">
+                                                                    {formatBrl(totalLote.valor)}
+                                                                </p>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <p className="text-muted-foreground">
-                                                                Valor total
-                                                            </p>
-                                                            <p className="text-lg font-semibold">
-                                                                {formatBrl(
-                                                                    totalLote.valor,
-                                                                )}
-                                                            </p>
+
+                                                        <div className="space-y-2">
+                                                            <p className="text-sm font-medium">Total por item</p>
+                                                            <div className="space-y-2">
+                                                                {totaisPorItem.map((item) => (
+                                                                    <div
+                                                                        key={item.index}
+                                                                        className="rounded-md border border-border/60 bg-muted/20 px-3 py-2"
+                                                                    >
+                                                                        <p className="text-sm font-medium">
+                                                                            Item {item.index + 1} - {item.tipoNome} / {item.marcaNome}
+                                                                        </p>
+                                                                        <p className="text-xs text-muted-foreground">
+                                                                            Qtd: {item.quantidade.toLocaleString('pt-BR', { maximumFractionDigits: 4 })} x Unit: {formatBrl(item.valorUnitario)} = {formatBrl(item.total)}
+                                                                        </p>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="space-y-3">
+                                                            <p className="text-sm font-medium">Resumo da entrada</p>
+                                                            <div className="space-y-4">{resumoEntradaBlocos}</div>
                                                         </div>
                                                     </CardContent>
                                                 </Card>
@@ -1372,97 +1506,12 @@ export default function NovaEntradaLote({
                             </div>
 
                             <div className="flex h-full min-h-0 flex-col gap-4">
-                                <Card className="min-h-0 flex-1 overflow-hidden border-primary/20 shadow-sm">
+                                <Card className="min-h-0 flex-1 overflow-hidden border-primary/20 shadow-sm bg-muted/30">
                                     <CardHeader className="border-b bg-muted/30">
                                         <CardTitle className="text-base">Resumo da entrada</CardTitle>
                                     </CardHeader>
                                     <CardContent className="mt-2 space-y-4 overflow-y-auto text-sm [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/70 [&::-webkit-scrollbar-track]:bg-transparent">
-                                        <div className="grid grid-cols-1 gap-3">
-                                            <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
-                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                                                    Condição
-                                                </p>
-                                                <p className="mt-1 font-medium">
-                                                    {condicoesEntrada.find((c) => c.value === condicaoEntrada)
-                                                        ?.label ?? 'Não selecionada'}
-                                                </p>
-                                            </div>
-                                            <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
-                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                                                    Estoque
-                                                </p>
-                                                <p className="mt-1 font-medium">
-                                                    {estoques.find((e) => String(e.id) === estoqueId)?.nome ??
-                                                        'Não selecionado'}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {mostrarNota && (
-                                            <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-3">
-                                                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                                    Nota fiscal
-                                                </p>
-                                                <div className="space-y-2">
-                                                    <div className="flex items-center justify-between gap-3">
-                                                        <span className="text-muted-foreground">Número</span>
-                                                        <span className="font-medium">
-                                                            {notaNumero.trim() || 'Não informado'}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center justify-between gap-3">
-                                                        <span className="text-muted-foreground">Emissão</span>
-                                                        <span className="font-medium">
-                                                            {notaDataEmissao
-                                                                ? new Date(
-                                                                      `${notaDataEmissao}T00:00:00`,
-                                                                  ).toLocaleDateString('pt-BR')
-                                                                : 'Não informada'}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center justify-between gap-3">
-                                                        <span className="text-muted-foreground">Fornecedor</span>
-                                                        <span className="text-right font-medium">
-                                                            {fornecedores.find(
-                                                                (f) => String(f.id) === notaFornecedorId,
-                                                            )?.nome_fantasia ||
-                                                                fornecedores.find(
-                                                                    (f) => String(f.id) === notaFornecedorId,
-                                                                )?.nome ||
-                                                                'Não informado'}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
-                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                                                    Itens
-                                                </p>
-                                                <p className="mt-1 text-lg font-semibold">{itens.length}</p>
-                                            </div>
-                                            <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
-                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                                                    Quantidade
-                                                </p>
-                                                <p className="mt-1 text-lg font-semibold">
-                                                    {totalLote.quantidade.toLocaleString('pt-BR', {
-                                                        maximumFractionDigits: 4,
-                                                    })}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div className="rounded-xl border border-primary/30 bg-primary/5 px-3 py-3">
-                                            <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                                                Valor total
-                                            </p>
-                                            <p className="mt-1 text-xl font-semibold text-primary">
-                                                {formatBrl(totalLote.valor)}
-                                            </p>
-                                        </div>
+                                        {resumoEntradaBlocos}
                                     </CardContent>
                                 </Card>
                             </div>
@@ -2156,27 +2205,53 @@ export default function NovaEntradaLote({
                                         Soma automática dos itens.
                                     </CardDescription>
                                 </CardHeader>
-                                <CardContent className="flex flex-wrap gap-8 text-sm">
-                                    <div>
-                                        <p className="text-muted-foreground">
-                                            Quantidade total
-                                        </p>
-                                        <p className="text-lg font-semibold">
-                                            {totalLote.quantidade.toLocaleString(
-                                                'pt-BR',
-                                                {
-                                                    maximumFractionDigits: 4,
-                                                },
-                                            )}
-                                        </p>
+                                <CardContent className="space-y-4 text-sm">
+                                    <div className="flex flex-wrap gap-8">
+                                        <div>
+                                            <p className="text-muted-foreground">
+                                                Quantidade total
+                                            </p>
+                                            <p className="text-lg font-semibold">
+                                                {totalLote.quantidade.toLocaleString(
+                                                    'pt-BR',
+                                                    {
+                                                        maximumFractionDigits: 4,
+                                                    },
+                                                )}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-muted-foreground">
+                                                Valor total
+                                            </p>
+                                            <p className="text-lg font-semibold">
+                                                {formatBrl(totalLote.valor)}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-muted-foreground">
-                                            Valor total
-                                        </p>
-                                        <p className="text-lg font-semibold">
-                                            {formatBrl(totalLote.valor)}
-                                        </p>
+
+                                    <div className="space-y-2">
+                                        <p className="text-sm font-medium">Total por item</p>
+                                        <div className="space-y-2">
+                                            {totaisPorItem.map((item) => (
+                                                <div
+                                                    key={item.index}
+                                                    className="rounded-md border border-border/60 bg-muted/20 px-3 py-2"
+                                                >
+                                                    <p className="text-sm font-medium">
+                                                        Item {item.index + 1} - {item.tipoNome} / {item.marcaNome}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Qtd: {item.quantidade.toLocaleString('pt-BR', { maximumFractionDigits: 4 })} x Unit: {formatBrl(item.valorUnitario)} = {formatBrl(item.total)}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <p className="text-sm font-medium">Resumo da entrada</p>
+                                        <div className="space-y-4">{resumoEntradaBlocos}</div>
                                     </div>
                                 </CardContent>
                             </Card>
