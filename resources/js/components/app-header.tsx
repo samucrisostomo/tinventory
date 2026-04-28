@@ -1,5 +1,22 @@
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, Menu, Search } from 'lucide-react';
+import {
+    BriefcaseBusiness,
+    Building2,
+    LayoutGrid,
+    ListChecks,
+    MapPinHouse,
+    Menu,
+    PackageSearch,
+    ScanBarcode,
+    Search,
+    ShieldCheck,
+    Tags,
+    Truck,
+    UserCog,
+    Users,
+    UserSquare2,
+    Warehouse,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -39,6 +56,8 @@ type Props = {
 
 const activeItemStyles =
     'bg-muted text-foreground dark:bg-muted/90 dark:text-foreground';
+const moduleLinkClasses =
+    '!flex !flex-row !items-center gap-2 rounded-sm px-3 py-2 text-sm';
 
 export function AppHeader({ breadcrumbs = [] }: Props) {
     const page = usePage();
@@ -63,49 +82,60 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
         {
             title: 'Locais',
             href: '/locais',
+            icon: MapPinHouse,
         },
         {
             title: 'Perfis',
             href: '/perfis',
+            icon: ShieldCheck,
         },
         {
             title: 'Usuários',
             href: '/users',
+            icon: UserCog,
         },
         {
             title: 'Empresas',
             href: '/empresas',
+            icon: Building2,
         },
         {
             title: 'Fornecedores',
             href: '/fornecedores',
+            icon: Truck,
         },
         {
             title: 'Tipo Colaborador',
             href: '/tipos-colaborador',
+            icon: UserSquare2,
         },
         {
             title: 'Situação do Colaborador',
             href: '/situacoes-colaborador',
+            icon: ListChecks,
         },
         {
             title: 'Colaboradores',
             href: '/colaboradores',
+            icon: Users,
         },
     ];
 
     const configuracoesEstoqueNavItems: NavItem[] = [
         {
+            title: 'Tipo Estoque',
+            href: '/config-estoque/tipos-estoque',
+            icon: Warehouse,
+        },
+        {
             title: 'Tipo Material',
             href: '/config-estoque/tipos-materiais',
+            icon: Tags,
         },
         {
             title: 'Marcas',
             href: '/config-estoque/marcas',
-        },
-        {
-            title: 'Tipo Estoque',
-            href: '/config-estoque/tipos-estoque',
+            icon: BriefcaseBusiness,
         },
     ];
 
@@ -113,10 +143,12 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
         {
             title: 'Estoques',
             href: '/operacoes-estoque/estoques',
+            icon: PackageSearch,
         },
         {
             title: 'Entradas em lote',
             href: '/operacoes-estoque/entradas-lote',
+            icon: ScanBarcode,
         },
     ];
 
@@ -173,6 +205,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                                 href={item.href}
                                                                 className="flex items-center space-x-2 pl-1 font-medium"
                                                             >
+                                                                {item.icon && (
+                                                                    <item.icon className="h-4 w-4 text-muted-foreground" />
+                                                                )}
                                                                 <span>
                                                                     {item.title}
                                                                 </span>
@@ -193,6 +228,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                                 href={item.href}
                                                                 className="flex items-center space-x-2 pl-1 font-medium"
                                                             >
+                                                                {item.icon && (
+                                                                    <item.icon className="h-4 w-4 text-muted-foreground" />
+                                                                )}
                                                                 <span>
                                                                     {item.title}
                                                                 </span>
@@ -212,6 +250,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                             href={item.href}
                                                             className="flex items-center space-x-2 pl-1 font-medium"
                                                         >
+                                                            {item.icon && (
+                                                                <item.icon className="h-4 w-4 text-muted-foreground" />
+                                                            )}
                                                             <span>{item.title}</span>
                                                         </Link>
                                                     ))}
@@ -304,20 +345,23 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         Cadastros
                                     </NavigationMenuTrigger>
                                     <NavigationMenuContent>
-                                        <ul className="grid w-[220px] gap-1 p-2">
+                                        <ul className="grid w-[460px] grid-cols-2 gap-1 p-2">
                                             {cadastrosNavItems.map((item) => (
                                                 <li key={item.title}>
                                                     <NavigationMenuLink asChild>
                                                         <Link
                                                             href={item.href}
                                                             className={cn(
-                                                                'block rounded-sm px-3 py-2 text-sm',
+                                                                moduleLinkClasses,
                                                                 whenCurrentUrl(
                                                                     item.href,
                                                                     'bg-accent/50 text-accent-foreground',
                                                                 ),
                                                             )}
                                                         >
+                                                            {item.icon && (
+                                                                <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                                            )}
                                                             {item.title}
                                                         </Link>
                                                     </NavigationMenuLink>
@@ -364,13 +408,16 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                         <Link
                                                             href={item.href}
                                                             className={cn(
-                                                                'block rounded-sm px-3 py-2 text-sm',
+                                                                moduleLinkClasses,
                                                                 whenCurrentUrl(
                                                                     item.href,
                                                                     'bg-accent/50 text-accent-foreground',
                                                                 ),
                                                             )}
                                                         >
+                                                            {item.icon && (
+                                                                <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                                            )}
                                                             {item.title}
                                                         </Link>
                                                     </NavigationMenuLink>
@@ -407,13 +454,16 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                         <Link
                                                             href={item.href}
                                                             className={cn(
-                                                                'block rounded-sm px-3 py-2 text-sm',
+                                                                moduleLinkClasses,
                                                                 whenCurrentUrl(
                                                                     item.href,
                                                                     'bg-accent/50 text-accent-foreground',
                                                                 ),
                                                             )}
                                                         >
+                                                            {item.icon && (
+                                                                <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                                            )}
                                                             {item.title}
                                                         </Link>
                                                     </NavigationMenuLink>
