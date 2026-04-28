@@ -1372,114 +1372,99 @@ export default function NovaEntradaLote({
                             </div>
 
                             <div className="flex h-full min-h-0 flex-col gap-4">
-                                <Card className="min-h-0 flex-1 overflow-hidden">
-                                    <CardHeader>
-                                        <CardTitle>Resumo da entrada</CardTitle>
+                                <Card className="min-h-0 flex-1 overflow-hidden border-primary/20 shadow-sm">
+                                    <CardHeader className="border-b bg-muted/30">
+                                        <CardTitle className="text-base">Resumo da entrada</CardTitle>
                                     </CardHeader>
                                     <CardContent className="mt-2 space-y-4 overflow-y-auto text-sm [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/70 [&::-webkit-scrollbar-track]:bg-transparent">
-                                        <div className="space-y-1">
-                                            <p className="text-muted-foreground">
-                                                Condição
-                                            </p>
-                                            <p className="font-medium">
-                                                {condicoesEntrada.find(
-                                                    (c) =>
-                                                        c.value ===
-                                                        condicaoEntrada,
-                                                )?.label ?? 'Não selecionada'}
-                                            </p>
+                                        <div className="grid grid-cols-1 gap-3">
+                                            <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
+                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                                                    Condição
+                                                </p>
+                                                <p className="mt-1 font-medium">
+                                                    {condicoesEntrada.find((c) => c.value === condicaoEntrada)
+                                                        ?.label ?? 'Não selecionada'}
+                                                </p>
+                                            </div>
+                                            <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
+                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                                                    Estoque
+                                                </p>
+                                                <p className="mt-1 font-medium">
+                                                    {estoques.find((e) => String(e.id) === estoqueId)?.nome ??
+                                                        'Não selecionado'}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="space-y-1">
-                                            <p className="text-muted-foreground">
-                                                Estoque
-                                            </p>
-                                            <p className="font-medium">
-                                                {estoques.find(
-                                                    (e) =>
-                                                        String(e.id) ===
-                                                        estoqueId,
-                                                )?.nome ?? 'Não selecionado'}
-                                            </p>
-                                        </div>
+
                                         {mostrarNota && (
-                                            <>
-                                                <div className="space-y-1">
-                                                    <p className="text-muted-foreground">
-                                                        Número da nota
-                                                    </p>
-                                                    <p className="font-medium">
-                                                        {notaNumero.trim() ||
-                                                            'Não informado'}
-                                                    </p>
+                                            <div className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-3">
+                                                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                                    Nota fiscal
+                                                </p>
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center justify-between gap-3">
+                                                        <span className="text-muted-foreground">Número</span>
+                                                        <span className="font-medium">
+                                                            {notaNumero.trim() || 'Não informado'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between gap-3">
+                                                        <span className="text-muted-foreground">Emissão</span>
+                                                        <span className="font-medium">
+                                                            {notaDataEmissao
+                                                                ? new Date(
+                                                                      `${notaDataEmissao}T00:00:00`,
+                                                                  ).toLocaleDateString('pt-BR')
+                                                                : 'Não informada'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between gap-3">
+                                                        <span className="text-muted-foreground">Fornecedor</span>
+                                                        <span className="text-right font-medium">
+                                                            {fornecedores.find(
+                                                                (f) => String(f.id) === notaFornecedorId,
+                                                            )?.nome_fantasia ||
+                                                                fornecedores.find(
+                                                                    (f) => String(f.id) === notaFornecedorId,
+                                                                )?.nome ||
+                                                                'Não informado'}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <p className="text-muted-foreground">
-                                                        Data de emissão
-                                                    </p>
-                                                    <p className="font-medium">
-                                                        {notaDataEmissao
-                                                            ? new Date(
-                                                                  `${notaDataEmissao}T00:00:00`,
-                                                              ).toLocaleDateString(
-                                                                  'pt-BR',
-                                                              )
-                                                            : 'Não informada'}
-                                                    </p>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <p className="text-muted-foreground">
-                                                        Fornecedor (NF)
-                                                    </p>
-                                                    <p className="font-medium">
-                                                        {fornecedores.find(
-                                                            (f) =>
-                                                                String(f.id) ===
-                                                                notaFornecedorId,
-                                                        )?.nome_fantasia ||
-                                                            fornecedores.find(
-                                                                (f) =>
-                                                                    String(
-                                                                        f.id,
-                                                                    ) ===
-                                                                    notaFornecedorId,
-                                                            )?.nome ||
-                                                            'Não informado'}
-                                                    </p>
-                                                </div>
-                                            </>
+                                            </div>
                                         )}
-                                        <div className="space-y-1">
-                                            <p className="text-muted-foreground">
-                                                Itens
-                                            </p>
-                                            <p className="font-medium">
-                                                {itens.length}
-                                            </p>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="text-muted-foreground">
-                                                Quantidade total
-                                            </p>
-                                            <p className="font-medium">
-                                                {totalLote.quantidade.toLocaleString(
-                                                    'pt-BR',
-                                                    {
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
+                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                                                    Itens
+                                                </p>
+                                                <p className="mt-1 text-lg font-semibold">{itens.length}</p>
+                                            </div>
+                                            <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
+                                                <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                                                    Quantidade
+                                                </p>
+                                                <p className="mt-1 text-lg font-semibold">
+                                                    {totalLote.quantidade.toLocaleString('pt-BR', {
                                                         maximumFractionDigits: 4,
-                                                    },
-                                                )}
-                                            </p>
+                                                    })}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="space-y-1">
-                                            <p className="text-muted-foreground">
+
+                                        <div className="rounded-xl border border-primary/30 bg-primary/5 px-3 py-3">
+                                            <p className="text-xs uppercase tracking-wide text-muted-foreground">
                                                 Valor total
                                             </p>
-                                            <p className="font-medium">
+                                            <p className="mt-1 text-xl font-semibold text-primary">
                                                 {formatBrl(totalLote.valor)}
                                             </p>
                                         </div>
                                     </CardContent>
                                 </Card>
-
                             </div>
                         </div>
                     ) : (
