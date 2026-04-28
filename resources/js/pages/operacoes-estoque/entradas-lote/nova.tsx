@@ -184,6 +184,28 @@ export default function NovaEntradaLote({
         );
     };
 
+    const adicionarItemComScroll = () => {
+        const novoIndex = itens.length;
+
+        setItens((rows) => [...rows, novoItem()]);
+
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                const target = document.getElementById(`item-entrada-${novoIndex}`);
+
+                if (!target) {
+                    return;
+                }
+
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: isCarouselMode ? 'start' : 'nearest',
+                    inline: 'nearest',
+                });
+            });
+        });
+    };
+
     const locaisPorEmpresa = (empresaId: string) => {
         if (empresaId === '') {
             return [];
@@ -339,7 +361,12 @@ export default function NovaEntradaLote({
                     <div className="space-y-2">
                         <div className="flex items-center justify-between gap-3">
                             <span className="text-muted-foreground">Número</span>
-                            <span className="font-medium">{notaNumero.trim() || 'Não informado'}</span>
+                            <span
+                                className="max-w-[60%] truncate text-right font-medium"
+                                title={notaNumero.trim() || 'Não informado'}
+                            >
+                                {notaNumero.trim() || 'Não informado'}
+                            </span>
                         </div>
                         <div className="flex items-center justify-between gap-3">
                             <span className="text-muted-foreground">Emissão</span>
@@ -898,14 +925,7 @@ export default function NovaEntradaLote({
                                                             type="button"
                                                             variant="secondary"
                                                             size="sm"
-                                                            onClick={() =>
-                                                                setItens(
-                                                                    (rows) => [
-                                                                        ...rows,
-                                                                        novoItem(),
-                                                                    ],
-                                                                )
-                                                            }
+                                                            onClick={adicionarItemComScroll}
                                                         >
                                                             <Plus className="mr-1 h-4 w-4" />
                                                             Adicionar item
@@ -921,6 +941,7 @@ export default function NovaEntradaLote({
                                                             (item, index) => (
                                                                 <div
                                                                     key={index}
+                                                                    id={`item-entrada-${index}`}
                                                                     className="space-y-4 rounded-lg border border-border p-4"
                                                                 >
                                                                     <div className="flex items-center justify-between gap-2">
@@ -1413,6 +1434,17 @@ export default function NovaEntradaLote({
                                                                 </div>
                                                             ),
                                                         )}
+                                                        <div className="flex justify-end">
+                                                            <Button
+                                                                type="button"
+                                                                variant="secondary"
+                                                                size="sm"
+                                                                onClick={adicionarItemComScroll}
+                                                            >
+                                                                <Plus className="mr-1 h-4 w-4" />
+                                                                Adicionar item
+                                                            </Button>
+                                                        </div>
                                                     </CardContent>
                                                 </Card>
                                             </div>
@@ -1769,12 +1801,7 @@ export default function NovaEntradaLote({
                                         type="button"
                                         variant="secondary"
                                         size="sm"
-                                        onClick={() =>
-                                            setItens((rows) => [
-                                                ...rows,
-                                                novoItem(),
-                                            ])
-                                        }
+                                        onClick={adicionarItemComScroll}
                                     >
                                         <Plus className="mr-1 h-4 w-4" />
                                         Adicionar item
@@ -1789,6 +1816,7 @@ export default function NovaEntradaLote({
                                     {itens.map((item, index) => (
                                         <div
                                             key={index}
+                                            id={`item-entrada-${index}`}
                                             className="space-y-4 rounded-lg border border-border p-4"
                                         >
                                             <div className="flex items-center justify-between gap-2">
@@ -2195,6 +2223,17 @@ export default function NovaEntradaLote({
                                             </div>
                                         </div>
                                     ))}
+                                    <div className="flex justify-end">
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                            size="sm"
+                                            onClick={adicionarItemComScroll}
+                                        >
+                                            <Plus className="mr-1 h-4 w-4" />
+                                            Adicionar item
+                                        </Button>
+                                    </div>
                                 </CardContent>
                             </Card>
 
