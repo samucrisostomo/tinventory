@@ -200,12 +200,12 @@ export default function LocaisIndex({ locais, empresas }: Props) {
                                     ? new Date(`${normalizedDateLimit}T00:00:00`)
                                     : null;
                                 const isExpired =
-                                    localDateLimit !== null &&
+                                    Boolean(localDateLimit) &&
                                     localDateLimit <
-                                        new Date(
-                                            new Date().toISOString().slice(0, 10) +
-                                                'T00:00:00',
-                                        );
+                                    new Date(
+                                        new Date().toISOString().slice(0, 10) +
+                                            'T00:00:00',
+                                    );
 
                                 return (
                                 <tr key={local.id} className="border-t border-border">

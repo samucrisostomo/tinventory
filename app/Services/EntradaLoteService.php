@@ -62,8 +62,7 @@ class EntradaLoteService
             foreach ($itens as $index => $row) {
                 $tipoMaterialId = (int) $row['tipo_material_id'];
                 $marcaId = (int) $row['marca_id'];
-                $modeloId = isset($row['modelo_id']) && $row['modelo_id'] !== '' ? (int) $row['modelo_id'] : null;
-                $material = $this->resolverOuCriarMaterial($tipoMaterialId, $marcaId, $modeloId);
+                $material = $this->resolverOuCriarMaterial($tipoMaterialId, $marcaId);
                 $tipoMaterial = TipoMaterial::query()
                     ->select(['id', 'rastreavel'])
                     ->findOrFail($tipoMaterialId);
@@ -108,25 +107,18 @@ class EntradaLoteService
         });
     }
 
-    private function resolverOuCriarMaterial(int $tipoMaterialId, int $marcaId, ?int $modeloId = null): Material
+    private function resolverOuCriarMaterial(int $tipoMaterialId, int $marcaId): Material
     {
         $tipo = TipoMaterial::query()->findOrFail($tipoMaterialId);
         $marca = Marca::query()->findOrFail($marcaId);
-        $modelo = $modeloId ? \App\Models\ModeloMarca::query()->find($modeloId) : null;
-
-        $nome = $tipo->nome.' / '.$marca->nome;
-        if ($modelo) {
-            $nome .= ' / '.$modelo->nome;
-        }
 
         return Material::query()->firstOrCreate(
             [
                 'tipo_material_id' => $tipoMaterialId,
                 'marca_id' => $marcaId,
-                'modelo_marca_id' => $modeloId,
             ],
             [
-                'nome' => $nome,
+                'nome' => $tipo->nome.' / '.$marca->nome,
                 'quantidade_estoque' => 0,
             ],
         );

@@ -114,7 +114,7 @@ export default function ModelosMarcasIndex({ modelosMarcas, marcas }: Props) {
         form.setData({
             marcas_id: String(modeloMarca.marcas_id),
             nome: modeloMarca.nome,
-            descricao: modeloMarca.descricao ?? '',
+            descricao: modeloMarca.descricao,
         });
         form.clearErrors();
         setSheetOpen(true);

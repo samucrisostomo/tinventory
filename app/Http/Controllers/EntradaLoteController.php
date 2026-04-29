@@ -141,21 +141,6 @@ class EntradaLoteController extends Controller
                     );
                 }
 
-                $modeloId = isset($item['modelo_id']) && $item['modelo_id'] !== '' ? (int) $item['modelo_id'] : null;
-                if ($modeloId) {
-                    $modeloOk = \App\Models\ModeloMarca::query()
-                        ->where('id', $modeloId)
-                        ->where('marcas_id', $marcaId)
-                        ->where('ativo', true)
-                        ->exists();
-                    if (! $modeloOk) {
-                        $v->errors()->add(
-                            "itens.{$i}.modelo_id",
-                            'O modelo selecionado não pertence à marca ou está inativo.',
-                        );
-                    }
-                }
-
                 $empresaId = $item['empresa_id'] ?? null;
                 $localId = $item['local_id'] ?? null;
                 if ($empresaId && $localId) {
@@ -199,11 +184,6 @@ class EntradaLoteController extends Controller
                 ->where('ativo', true)
                 ->orderBy('nome')
                 ->get(),
-            'modelos' => \App\Models\ModeloMarca::query()
-                ->select(['id', 'nome', 'marcas_id as marca_id'])
-                ->where('ativo', true)
-                ->orderBy('nome')
-                ->get(),
             'estoques' => Estoque::query()
                 ->select(['id', 'nome', 'empresa_id', 'local_id'])
                 ->with([
@@ -240,7 +220,6 @@ class EntradaLoteController extends Controller
             'itens' => ['required', 'array', 'min:1'],
             'itens.*.tipo_material_id' => ['required', 'integer', 'exists:tipos_materiais,id'],
             'itens.*.marca_id' => ['required', 'integer', 'exists:marcas,id'],
-            'itens.*.modelo_id' => ['nullable', 'integer', 'exists:modelos_marcas,id'],
             'itens.*.empresa_id' => ['nullable', 'integer', 'exists:empresas,id'],
             'itens.*.local_id' => ['nullable', 'integer', 'exists:locais,id'],
             'itens.*.quantidade' => ['required', 'numeric', 'min:0.0001'],

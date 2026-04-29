@@ -48,12 +48,11 @@ const BASE = '/operacoes-estoque/entradas-lote';
 const POST_URL = `${BASE}`;
 const SELECT_VAZIO = '__none__';
 
-export type CondicaoOption = { value: string; label: string };
+type CondicaoOption = { value: string; label: string };
 
 type Option = { id: number; nome: string };
 type TipoMat = { id: number; nome: string; rastreavel: boolean };
 type MarcaOpt = { id: number; nome: string; tipo_material_id: number };
-type ModeloOpt = { id: number; nome: string; marca_id: number };
 type EstoqueOpt = {
     id: number;
     nome: string;
@@ -73,7 +72,6 @@ type FornecedorOpt = { id: number; nome: string; nome_fantasia: string | null };
 type ItemLinha = {
     tipo_material_id: string;
     marca_id: string;
-    modelo_id: string;
     empresa_id: string;
     local_id: string;
     numero_serie: string;
@@ -87,7 +85,6 @@ type ItemLinha = {
 export type NovaEntradaLoteProps = {
     tiposMateriais: TipoMat[];
     marcas: MarcaOpt[];
-    modelos: ModeloOpt[];
     estoques: EstoqueOpt[];
     fornecedores: FornecedorOpt[];
     empresas: Option[];
@@ -104,7 +101,6 @@ type EmbeddedProps = {
 const novoItem = (): ItemLinha => ({
     tipo_material_id: '',
     marca_id: '',
-    modelo_id: '',
     empresa_id: '',
     local_id: '',
     numero_serie: '',
@@ -126,7 +122,6 @@ const formatBrl = (n: number) =>
 export default function NovaEntradaLote({
     tiposMateriais,
     marcas,
-    modelos,
     estoques,
     fornecedores,
     empresas,
@@ -237,14 +232,6 @@ export default function NovaEntradaLote({
         return marcas.filter((m) => String(m.tipo_material_id) === tipoId);
     };
 
-    const modelosPorMarca = (marcaId: string) => {
-        if (marcaId === '') {
-            return [];
-        }
-
-        return modelos.filter((m) => String(m.marca_id) === marcaId);
-    };
-
     const tipoMaterialPorId = (tipoId: string) =>
         tiposMateriais.find((t) => String(t.id) === tipoId) ?? null;
 
@@ -280,10 +267,6 @@ export default function NovaEntradaLote({
             const isRastreavel = tipoMaterialRastreavel(it.tipo_material_id);
             fd.append(`itens[${i}][tipo_material_id]`, it.tipo_material_id);
             fd.append(`itens[${i}][marca_id]`, it.marca_id);
-
-            if (it.modelo_id !== '') {
-                fd.append(`itens[${i}][modelo_id]`, it.modelo_id);
-            }
 
             if (it.empresa_id !== '') {
                 fd.append(`itens[${i}][empresa_id]`, it.empresa_id);
@@ -1130,6 +1113,8 @@ export default function NovaEntradaLote({
                                                                         <div className="space-y-2">
                                                                             <Label>
                                                                                 Marca
+                                                                                /
+                                                                                modelo
                                                                                 *
                                                                             </Label>
                                                                             <Select
@@ -1147,7 +1132,6 @@ export default function NovaEntradaLote({
                                                                                                 SELECT_VAZIO
                                                                                                     ? ''
                                                                                                     : v,
-                                                                                            modelo_id: '',
                                                                                         },
                                                                                     )
                                                                                 }
@@ -1204,85 +1188,6 @@ export default function NovaEntradaLote({
                                                                                     {
                                                                                         errors[
                                                                                             `itens.${index}.marca_id`
-                                                                                        ]
-                                                                                    }
-                                                                                </p>
-                                                                            )}
-                                                                        </div>
-                                                                        <div className="space-y-2">
-                                                                            <Label>
-                                                                                Modelo
-                                                                            </Label>
-                                                                            <Select
-                                                                                value={selectVal(
-                                                                                    item.modelo_id,
-                                                                                )}
-                                                                                onValueChange={(
-                                                                                    v,
-                                                                                ) =>
-                                                                                    atualizarItem(
-                                                                                        index,
-                                                                                        {
-                                                                                            modelo_id:
-                                                                                                v ===
-                                                                                                SELECT_VAZIO
-                                                                                                    ? ''
-                                                                                                    : v,
-                                                                                        },
-                                                                                    )
-                                                                                }
-                                                                                disabled={
-                                                                                    item.marca_id ===
-                                                                                    ''
-                                                                                }
-                                                                            >
-                                                                                <SelectTrigger className="w-full">
-                                                                                    <SelectValue
-                                                                                        placeholder={
-                                                                                            item.marca_id ===
-                                                                                            ''
-                                                                                                ? 'Selecione a marca primeiro'
-                                                                                                : 'Opcional'
-                                                                                        }
-                                                                                    />
-                                                                                </SelectTrigger>
-                                                                                <SelectContent position="popper">
-                                                                                    <SelectItem
-                                                                                        value={
-                                                                                            SELECT_VAZIO
-                                                                                        }
-                                                                                    >
-                                                                                        Nenhum
-                                                                                    </SelectItem>
-                                                                                    {modelosPorMarca(
-                                                                                        item.marca_id,
-                                                                                    ).map(
-                                                                                        (
-                                                                                            m,
-                                                                                        ) => (
-                                                                                            <SelectItem
-                                                                                                key={
-                                                                                                    m.id
-                                                                                                }
-                                                                                                value={String(
-                                                                                                    m.id,
-                                                                                                )}
-                                                                                            >
-                                                                                                {
-                                                                                                    m.nome
-                                                                                                }
-                                                                                            </SelectItem>
-                                                                                        ),
-                                                                                    )}
-                                                                                </SelectContent>
-                                                                            </Select>
-                                                                            {errors[
-                                                                                `itens.${index}.modelo_id`
-                                                                            ] && (
-                                                                                <p className="text-xs text-destructive">
-                                                                                    {
-                                                                                        errors[
-                                                                                            `itens.${index}.modelo_id`
                                                                                         ]
                                                                                     }
                                                                                 </p>

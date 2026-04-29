@@ -16,7 +16,6 @@ class Material extends Model
     protected $fillable = [
         'tipo_material_id',
         'marca_id',
-        'modelo_marca_id',
         'nome',
         'quantidade_estoque',
     ];

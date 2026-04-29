@@ -17,10 +17,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import NovaEntradaLote, {
-    type CondicaoOption,
-    type NovaEntradaLoteProps,
-} from './nova';
+import NovaEntradaLote, { type NovaEntradaLoteProps } from './nova';
 
 const BASE = '/operacoes-estoque/entradas-lote';
 const ENTRY_VIEW_MODE_STORAGE_KEY = 'entradas-lote:view-mode';
@@ -56,7 +53,6 @@ export default function EntradasLoteIndex({
     condicoesEntrada,
     tiposMateriais,
     marcas,
-    modelos,
     estoques,
     fornecedores,
     empresas,
@@ -281,7 +277,6 @@ export default function EntradasLoteIndex({
                         <NovaEntradaLote
                             tiposMateriais={tiposMateriais}
                             marcas={marcas}
-                            modelos={modelos}
                             estoques={estoques}
                             fornecedores={fornecedores}
                             empresas={empresas}
