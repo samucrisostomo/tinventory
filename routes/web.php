@@ -13,6 +13,7 @@ use App\Http\Controllers\SituacaoColaboradorController;
 use App\Http\Controllers\TipoColaboradorController;
 use App\Http\Controllers\TipoEstoqueController;
 use App\Http\Controllers\TipoMaterialController;
+use App\Http\Controllers\TransferenciaEstoqueController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -87,6 +88,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('operacoes-estoque/entradas-lote', [EntradaLoteController::class, 'index'])->name('entradas-lote.index');
     Route::get('operacoes-estoque/entradas-lote/nova', [EntradaLoteController::class, 'create'])->name('entradas-lote.create');
     Route::post('operacoes-estoque/entradas-lote', [EntradaLoteController::class, 'store'])->name('entradas-lote.store');
+    Route::get('operacoes-estoque/transferencias', [TransferenciaEstoqueController::class, 'index'])->name('transferencias.index');
 });
 
 require __DIR__.'/settings.php';

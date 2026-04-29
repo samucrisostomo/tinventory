@@ -10,6 +10,7 @@ import {
     PackageSearch,
     ScanBarcode,
     Search,
+    Shuffle,
     ShieldCheck,
     Tags,
     Truck,
@@ -156,6 +157,11 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
             title: 'Entradas em lote',
             href: '/operacoes-estoque/entradas-lote',
             icon: ScanBarcode,
+        },
+        {
+            title: 'Transferências',
+            href: '/operacoes-estoque/transferencias',
+            icon: Shuffle,
         },
     ];
 
@@ -328,6 +334,11 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                     '/operacoes-estoque/entradas-lote',
                                                 )
                                                     ? activeItemStyles
+                                                    : null) ||
+                                                (isCurrentOrParentUrl(
+                                                    '/operacoes-estoque/transferencias',
+                                                )
+                                                    ? activeItemStyles
                                                     : null),
                                             'h-9 cursor-pointer px-3',
                                         )}
@@ -368,6 +379,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     ) ||
                                         isCurrentOrParentUrl(
                                             '/operacoes-estoque/entradas-lote',
+                                        ) ||
+                                        isCurrentOrParentUrl(
+                                            '/operacoes-estoque/transferencias',
                                         )) && (
                                         <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-primary"></div>
                                     )}
