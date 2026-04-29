@@ -20,7 +20,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import type { BreadcrumbItem } from '@/types';
 
 const ESTOQUES_BASE = '/operacoes-estoque/estoques';
 const SELECT_VAZIO = '__none__';
@@ -369,12 +368,4 @@ export default function EstoqueMateriaisPage({
     );
 }
 
-EstoqueMateriaisPage.layout = {
-    breadcrumbs: [
-        { title: 'Operacoes', href: ESTOQUES_BASE },
-        { title: 'Estoque', href: ESTOQUES_BASE },
-        { title: 'Estoques', href: ESTOQUES_BASE },
-        { title: 'Materiais do Estoque', href: ESTOQUES_BASE },
-    ] satisfies BreadcrumbItem[],
-};
 

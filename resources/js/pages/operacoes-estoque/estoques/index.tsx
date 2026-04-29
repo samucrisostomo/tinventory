@@ -48,7 +48,6 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet';
-import type { BreadcrumbItem } from '@/types';
 
 const ESTOQUES_BASE = '/operacoes-estoque/estoques';
 const SELECT_VAZIO = '__none__';
@@ -321,7 +320,25 @@ export default function EstoquesIndex({
                         {estoquesFiltrados.map((estoque) => (
                             <Card
                                 key={estoque.id}
-                                className="group rounded-2xl border-border/70 bg-card/80 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                                className="group cursor-pointer rounded-2xl border-border/70 bg-card/80 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                                role="button"
+                                tabIndex={0}
+                                onClick={() =>
+                                    router.visit(
+                                        `${ESTOQUES_BASE}/${estoque.id}/materiais`,
+                                    )
+                                }
+                                onKeyDown={(event) => {
+                                    if (
+                                        event.key === 'Enter' ||
+                                        event.key === ' '
+                                    ) {
+                                        event.preventDefault();
+                                        router.visit(
+                                            `${ESTOQUES_BASE}/${estoque.id}/materiais`,
+                                        );
+                                    }
+                                }}
                             >
                                 <CardHeader className="pb-3">
                                     <div className="flex items-start justify-between gap-2">
@@ -340,6 +357,12 @@ export default function EstoquesIndex({
                                                     size="icon"
                                                     className="h-8 w-8 rounded-full"
                                                     aria-label={`Abrir ações de ${estoque.nome}`}
+                                                    onClick={(event) =>
+                                                        event.stopPropagation()
+                                                    }
+                                                    onKeyDown={(event) =>
+                                                        event.stopPropagation()
+                                                    }
                                                 >
                                                     <EllipsisVertical className="h-4 w-4" />
                                                 </Button>
@@ -637,10 +660,3 @@ export default function EstoquesIndex({
     );
 }
 
-EstoquesIndex.layout = {
-    breadcrumbs: [
-        { title: 'Operacoes', href: ESTOQUES_BASE },
-        { title: 'Estoque', href: ESTOQUES_BASE },
-        { title: 'Estoques', href: ESTOQUES_BASE },
-    ] satisfies BreadcrumbItem[],
-};
