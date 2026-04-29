@@ -89,6 +89,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('operacoes-estoque/entradas-lote/nova', [EntradaLoteController::class, 'create'])->name('entradas-lote.create');
     Route::post('operacoes-estoque/entradas-lote', [EntradaLoteController::class, 'store'])->name('entradas-lote.store');
     Route::get('operacoes-estoque/transferencias', [TransferenciaEstoqueController::class, 'index'])->name('transferencias.index');
+    Route::post('operacoes-estoque/transferencias', [TransferenciaEstoqueController::class, 'store'])->name('transferencias.store');
 });
 
 require __DIR__.'/settings.php';
