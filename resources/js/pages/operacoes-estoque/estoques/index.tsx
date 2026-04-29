@@ -2,6 +2,7 @@ import { Head, router, useForm, usePage } from '@inertiajs/react';
 import {
     Building2,
     EllipsisVertical,
+    FileStack,
     MapPin,
     Pencil,
     Search,
@@ -344,6 +345,16 @@ export default function EstoquesIndex({
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
+                                                <DropdownMenuItem
+                                                    onClick={() =>
+                                                        router.visit(
+                                                            `${ESTOQUES_BASE}/${estoque.id}/materiais`,
+                                                        )
+                                                    }
+                                                >
+                                                    <FileStack className="mr-2 h-4 w-4" />
+                                                    Materiais do Estoque
+                                                </DropdownMenuItem>
                                                 <DropdownMenuItem
                                                     onClick={() => openEditSheet(estoque)}
                                                 >

@@ -8,6 +8,7 @@ use App\Models\Estoque;
 use App\Models\Local;
 use App\Models\TipoEstoque;
 use App\Services\EstoqueService;
+use App\Services\EstoqueMateriaisService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -18,6 +19,7 @@ class EstoqueController extends Controller
 {
     public function __construct(
         private readonly EstoqueService $estoqueService,
+        private readonly EstoqueMateriaisService $estoqueMateriaisService,
     ) {}
 
     public function index(): Response
@@ -77,6 +79,19 @@ class EstoqueController extends Controller
         $this->estoqueService->delete($estoque);
 
         return back()->with('success', 'Estoque excluído com sucesso.');
+    }
+
+    public function materiais(Estoque $estoque): Response
+    {
+        $estoque->load([
+            'tipoEstoque:id,codigo,descricao',
+            'empresa:id,nome',
+            'local:id,nome,codigo',
+        ]);
+
+        return Inertia::render('operacoes-estoque/estoques/materiais', array_merge([
+            'estoque' => $estoque,
+        ], $this->estoqueMateriaisService->montarPagina($estoque)));
     }
 
     private function rules(?Request $request = null): array

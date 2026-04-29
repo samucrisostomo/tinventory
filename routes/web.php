@@ -80,6 +80,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('config-estoque/tipos-estoque/{tipoEstoque}/status', [TipoEstoqueController::class, 'toggleStatus'])->name('tipos-estoque.toggle-status');
     Route::delete('config-estoque/tipos-estoque/{tipoEstoque}', [TipoEstoqueController::class, 'destroy'])->name('tipos-estoque.destroy');
     Route::get('operacoes-estoque/estoques', [EstoqueController::class, 'index'])->name('estoques.index');
+    Route::get('operacoes-estoque/estoques/{estoque}/materiais', [EstoqueController::class, 'materiais'])->name('estoques.materiais');
     Route::post('operacoes-estoque/estoques', [EstoqueController::class, 'store'])->name('estoques.store');
     Route::patch('operacoes-estoque/estoques/{estoque}', [EstoqueController::class, 'update'])->name('estoques.update');
     Route::delete('operacoes-estoque/estoques/{estoque}', [EstoqueController::class, 'destroy'])->name('estoques.destroy');
