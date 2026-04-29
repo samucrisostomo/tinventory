@@ -161,7 +161,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
     return (
         <>
-            <div className="border-b border-sidebar-border/10">
+            <div className="sticky top-0 z-30 bg-background border-b border-sidebar-border/10">
                 <div className="flex h-16 w-full items-center px-4">
                     {/* Mobile Menu */}
                     <div className="lg:hidden">
@@ -202,10 +202,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                             ))}
                                             <div className="space-y-2">
                                                 <p className="px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                                                    Cadastros
+                                                    Operações de Estoque
                                                 </p>
                                                 <div className="flex flex-col space-y-3">
-                                                    {cadastrosNavItems.map(
+                                                    {operacoesEstoqueNavItems.map(
                                                         (item) => (
                                                             <Link
                                                                 key={item.title}
@@ -248,10 +248,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                             </div>
                                             <div className="space-y-2">
                                                 <p className="px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                                                    Operações de Estoque
+                                                    Cadastros
                                                 </p>
                                                 <div className="flex flex-col space-y-3">
-                                                    {operacoesEstoqueNavItems.map(
+                                                    {cadastrosNavItems.map(
                                                         (item) => (
                                                             <Link
                                                                 key={item.title}
@@ -321,77 +321,54 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     <NavigationMenuTrigger
                                         className={cn(
                                             whenCurrentUrl(
-                                                '/locais',
+                                                '/operacoes-estoque/estoques',
                                                 activeItemStyles,
                                             ) ||
-                                                whenCurrentUrl(
-                                                    '/perfis',
-                                                    activeItemStyles,
-                                                ) ||
-                                                whenCurrentUrl(
-                                                    '/users',
-                                                    activeItemStyles,
-                                                ) ||
-                                                whenCurrentUrl(
-                                                    '/empresas',
-                                                    activeItemStyles,
-                                                ) ||
-                                                whenCurrentUrl(
-                                                    '/fornecedores',
-                                                    activeItemStyles,
-                                                ) ||
-                                                whenCurrentUrl(
-                                                    '/tipos-colaborador',
-                                                    activeItemStyles,
-                                                ) ||
-                                                whenCurrentUrl(
-                                                    '/situacoes-colaborador',
-                                                    activeItemStyles,
-                                                ) ||
-                                                whenCurrentUrl(
-                                                    '/colaboradores',
-                                                    activeItemStyles,
-                                                ),
+                                                (isCurrentOrParentUrl(
+                                                    '/operacoes-estoque/entradas-lote',
+                                                )
+                                                    ? activeItemStyles
+                                                    : null),
                                             'h-9 cursor-pointer px-3',
                                         )}
                                     >
-                                        Cadastros
+                                        Operações de Estoque
                                     </NavigationMenuTrigger>
                                     <NavigationMenuContent>
-                                        <ul className="grid w-[460px] grid-cols-2 gap-1 p-2">
-                                            {cadastrosNavItems.map((item) => (
-                                                <li key={item.title}>
-                                                    <NavigationMenuLink asChild>
-                                                        <Link
-                                                            href={item.href}
-                                                            className={cn(
-                                                                moduleLinkClasses,
-                                                                whenCurrentUrl(
-                                                                    item.href,
-                                                                    'bg-accent/50 text-accent-foreground',
-                                                                ),
-                                                            )}
+                                        <ul className="grid w-[220px] gap-1 p-2">
+                                            {operacoesEstoqueNavItems.map(
+                                                (item) => (
+                                                    <li key={item.title}>
+                                                        <NavigationMenuLink
+                                                            asChild
                                                         >
-                                                            {item.icon && (
-                                                                <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                                            )}
-                                                            {item.title}
-                                                        </Link>
-                                                    </NavigationMenuLink>
-                                                </li>
-                                            ))}
+                                                            <Link
+                                                                href={item.href}
+                                                                className={cn(
+                                                                    moduleLinkClasses,
+                                                                    whenCurrentUrl(
+                                                                        item.href,
+                                                                        'bg-accent/50 text-accent-foreground',
+                                                                    ),
+                                                                )}
+                                                            >
+                                                                {item.icon && (
+                                                                    <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                                                )}
+                                                                {item.title}
+                                                            </Link>
+                                                        </NavigationMenuLink>
+                                                    </li>
+                                                ),
+                                            )}
                                         </ul>
                                     </NavigationMenuContent>
-                                    {(isCurrentUrl('/users') ||
-                                        isCurrentUrl('/locais') ||
-                                        isCurrentUrl('/perfis') ||
-                                        isCurrentUrl('/empresas') ||
-                                        isCurrentUrl('/fornecedores') ||
-                                        isCurrentUrl('/tipos-colaborador') ||
-                                        isCurrentUrl(
-                                            '/situacoes-colaborador',
-                                        ) ||
-                                        isCurrentUrl('/colaboradores')) && (
+                                    {(isCurrentUrl(
+                                        '/operacoes-estoque/estoques',
+                                    ) ||
+                                        isCurrentOrParentUrl(
+                                            '/operacoes-estoque/entradas-lote',
+                                        )) && (
                                         <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-primary"></div>
                                     )}
                                 </NavigationMenuItem>
@@ -467,54 +444,77 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     <NavigationMenuTrigger
                                         className={cn(
                                             whenCurrentUrl(
-                                                '/operacoes-estoque/estoques',
+                                                '/locais',
                                                 activeItemStyles,
                                             ) ||
-                                                (isCurrentOrParentUrl(
-                                                    '/operacoes-estoque/entradas-lote',
-                                                )
-                                                    ? activeItemStyles
-                                                    : null),
+                                                whenCurrentUrl(
+                                                    '/perfis',
+                                                    activeItemStyles,
+                                                ) ||
+                                                whenCurrentUrl(
+                                                    '/users',
+                                                    activeItemStyles,
+                                                ) ||
+                                                whenCurrentUrl(
+                                                    '/empresas',
+                                                    activeItemStyles,
+                                                ) ||
+                                                whenCurrentUrl(
+                                                    '/fornecedores',
+                                                    activeItemStyles,
+                                                ) ||
+                                                whenCurrentUrl(
+                                                    '/tipos-colaborador',
+                                                    activeItemStyles,
+                                                ) ||
+                                                whenCurrentUrl(
+                                                    '/situacoes-colaborador',
+                                                    activeItemStyles,
+                                                ) ||
+                                                whenCurrentUrl(
+                                                    '/colaboradores',
+                                                    activeItemStyles,
+                                                ),
                                             'h-9 cursor-pointer px-3',
                                         )}
                                     >
-                                        Operações de Estoque
+                                        Cadastros
                                     </NavigationMenuTrigger>
                                     <NavigationMenuContent>
-                                        <ul className="grid w-[220px] gap-1 p-2">
-                                            {operacoesEstoqueNavItems.map(
-                                                (item) => (
-                                                    <li key={item.title}>
-                                                        <NavigationMenuLink
-                                                            asChild
+                                        <ul className="grid w-[460px] grid-cols-2 gap-1 p-2">
+                                            {cadastrosNavItems.map((item) => (
+                                                <li key={item.title}>
+                                                    <NavigationMenuLink asChild>
+                                                        <Link
+                                                            href={item.href}
+                                                            className={cn(
+                                                                moduleLinkClasses,
+                                                                whenCurrentUrl(
+                                                                    item.href,
+                                                                    'bg-accent/50 text-accent-foreground',
+                                                                ),
+                                                            )}
                                                         >
-                                                            <Link
-                                                                href={item.href}
-                                                                className={cn(
-                                                                    moduleLinkClasses,
-                                                                    whenCurrentUrl(
-                                                                        item.href,
-                                                                        'bg-accent/50 text-accent-foreground',
-                                                                    ),
-                                                                )}
-                                                            >
-                                                                {item.icon && (
-                                                                    <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                                                )}
-                                                                {item.title}
-                                                            </Link>
-                                                        </NavigationMenuLink>
-                                                    </li>
-                                                ),
-                                            )}
+                                                            {item.icon && (
+                                                                <item.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                                            )}
+                                                            {item.title}
+                                                        </Link>
+                                                    </NavigationMenuLink>
+                                                </li>
+                                            ))}
                                         </ul>
                                     </NavigationMenuContent>
-                                    {(isCurrentUrl(
-                                        '/operacoes-estoque/estoques',
-                                    ) ||
-                                        isCurrentOrParentUrl(
-                                            '/operacoes-estoque/entradas-lote',
-                                        )) && (
+                                    {(isCurrentUrl('/users') ||
+                                        isCurrentUrl('/locais') ||
+                                        isCurrentUrl('/perfis') ||
+                                        isCurrentUrl('/empresas') ||
+                                        isCurrentUrl('/fornecedores') ||
+                                        isCurrentUrl('/tipos-colaborador') ||
+                                        isCurrentUrl(
+                                            '/situacoes-colaborador',
+                                        ) ||
+                                        isCurrentUrl('/colaboradores')) && (
                                         <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-primary"></div>
                                     )}
                                 </NavigationMenuItem>
