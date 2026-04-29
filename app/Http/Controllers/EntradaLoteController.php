@@ -8,6 +8,7 @@ use App\Models\Estoque;
 use App\Models\Fornecedor;
 use App\Models\Local;
 use App\Models\Marca;
+use App\Models\ModeloMarca;
 use App\Models\Movimentacao;
 use App\Models\TipoMaterial;
 use App\Services\EntradaLoteService;
@@ -104,7 +105,8 @@ class EntradaLoteController extends Controller
                 }
                 $tipoId = isset($item['tipo_material_id']) ? (int) $item['tipo_material_id'] : null;
                 $marcaId = isset($item['marca_id']) ? (int) $item['marca_id'] : null;
-                if (! $tipoId || ! $marcaId) {
+                $modeloMarcaId = isset($item['modelo_marca_id']) ? (int) $item['modelo_marca_id'] : null;
+                if (! $tipoId || ! $marcaId || ! $modeloMarcaId) {
                     continue;
                 }
                 $tipoMaterial = TipoMaterial::query()
@@ -138,6 +140,18 @@ class EntradaLoteController extends Controller
                     $v->errors()->add(
                         "itens.{$i}.marca_id",
                         'A marca selecionada não pertence ao tipo de material ou está inativa.',
+                    );
+                }
+
+                $modeloOk = ModeloMarca::query()
+                    ->where('id', $modeloMarcaId)
+                    ->where('marcas_id', $marcaId)
+                    ->where('ativo', true)
+                    ->exists();
+                if (! $modeloOk) {
+                    $v->errors()->add(
+                        "itens.{$i}.modelo_marca_id",
+                        'O modelo selecionado não pertence à marca selecionada ou está inativo.',
                     );
                 }
 
@@ -184,6 +198,11 @@ class EntradaLoteController extends Controller
                 ->where('ativo', true)
                 ->orderBy('nome')
                 ->get(),
+            'modelosMarcas' => ModeloMarca::query()
+                ->select(['id', 'nome', 'marcas_id'])
+                ->where('ativo', true)
+                ->orderBy('nome')
+                ->get(),
             'estoques' => Estoque::query()
                 ->select(['id', 'nome', 'empresa_id', 'local_id'])
                 ->with([
@@ -220,6 +239,7 @@ class EntradaLoteController extends Controller
             'itens' => ['required', 'array', 'min:1'],
             'itens.*.tipo_material_id' => ['required', 'integer', 'exists:tipos_materiais,id'],
             'itens.*.marca_id' => ['required', 'integer', 'exists:marcas,id'],
+            'itens.*.modelo_marca_id' => ['required', 'integer', 'exists:modelos_marcas,id'],
             'itens.*.empresa_id' => ['nullable', 'integer', 'exists:empresas,id'],
             'itens.*.local_id' => ['nullable', 'integer', 'exists:locais,id'],
             'itens.*.quantidade' => ['required', 'numeric', 'min:0.0001'],

@@ -53,6 +53,7 @@ export default function EntradasLoteIndex({
     condicoesEntrada,
     tiposMateriais,
     marcas,
+    modelosMarcas,
     estoques,
     fornecedores,
     empresas,
@@ -277,6 +278,7 @@ export default function EntradasLoteIndex({
                         <NovaEntradaLote
                             tiposMateriais={tiposMateriais}
                             marcas={marcas}
+                            modelosMarcas={modelosMarcas}
                             estoques={estoques}
                             fornecedores={fornecedores}
                             empresas={empresas}

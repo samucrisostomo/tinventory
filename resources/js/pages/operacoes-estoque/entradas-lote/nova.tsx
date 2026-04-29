@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
+import { toast } from 'sonner';
 import {
     AlertDialog,
     AlertDialogCancel,
@@ -53,6 +54,7 @@ type CondicaoOption = { value: string; label: string };
 type Option = { id: number; nome: string };
 type TipoMat = { id: number; nome: string; rastreavel: boolean };
 type MarcaOpt = { id: number; nome: string; tipo_material_id: number };
+type ModeloMarcaOpt = { id: number; nome: string; marcas_id: number };
 type EstoqueOpt = {
     id: number;
     nome: string;
@@ -72,6 +74,7 @@ type FornecedorOpt = { id: number; nome: string; nome_fantasia: string | null };
 type ItemLinha = {
     tipo_material_id: string;
     marca_id: string;
+    modelo_marca_id: string;
     empresa_id: string;
     local_id: string;
     numero_serie: string;
@@ -85,6 +88,7 @@ type ItemLinha = {
 export type NovaEntradaLoteProps = {
     tiposMateriais: TipoMat[];
     marcas: MarcaOpt[];
+    modelosMarcas: ModeloMarcaOpt[];
     estoques: EstoqueOpt[];
     fornecedores: FornecedorOpt[];
     empresas: Option[];
@@ -101,6 +105,7 @@ type EmbeddedProps = {
 const novoItem = (): ItemLinha => ({
     tipo_material_id: '',
     marca_id: '',
+    modelo_marca_id: '',
     empresa_id: '',
     local_id: '',
     numero_serie: '',
@@ -122,6 +127,7 @@ const formatBrl = (n: number) =>
 export default function NovaEntradaLote({
     tiposMateriais,
     marcas,
+    modelosMarcas,
     estoques,
     fornecedores,
     empresas,
@@ -181,9 +187,13 @@ export default function NovaEntradaLote({
                     marcaNome:
                         marcas.find((m) => String(m.id) === item.marca_id)
                             ?.nome ?? 'Marca não selecionada',
+                    modeloNome:
+                        modelosMarcas.find(
+                            (m) => String(m.id) === item.modelo_marca_id,
+                        )?.nome ?? 'Modelo não selecionado',
                 };
             }),
-        [itens, marcas, tiposMateriais],
+        [itens, marcas, modelosMarcas, tiposMateriais],
     );
 
     const atualizarItem = (index: number, patch: Partial<ItemLinha>) => {
@@ -232,6 +242,14 @@ export default function NovaEntradaLote({
         return marcas.filter((m) => String(m.tipo_material_id) === tipoId);
     };
 
+    const modelosPorMarca = (marcaId: string) => {
+        if (marcaId === '') {
+            return [];
+        }
+
+        return modelosMarcas.filter((m) => String(m.marcas_id) === marcaId);
+    };
+
     const tipoMaterialPorId = (tipoId: string) =>
         tiposMateriais.find((t) => String(t.id) === tipoId) ?? null;
 
@@ -267,6 +285,7 @@ export default function NovaEntradaLote({
             const isRastreavel = tipoMaterialRastreavel(it.tipo_material_id);
             fd.append(`itens[${i}][tipo_material_id]`, it.tipo_material_id);
             fd.append(`itens[${i}][marca_id]`, it.marca_id);
+            fd.append(`itens[${i}][modelo_marca_id]`, it.modelo_marca_id);
 
             if (it.empresa_id !== '') {
                 fd.append(`itens[${i}][empresa_id]`, it.empresa_id);
@@ -304,8 +323,15 @@ export default function NovaEntradaLote({
 
     const enviar = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        if (processing) {
+            return;
+        }
+
         setErrors({});
         setProcessing(true);
+        const toastId = 'entrada-lote-submit';
+        toast.loading('Entrada sendo cadastrada...', { id: toastId });
 
         router.post(POST_URL, montarFormData(), {
             forceFormData: true,
@@ -313,8 +339,20 @@ export default function NovaEntradaLote({
             preserveState: true,
             replace: true,
             showProgress: false,
+            onSuccess: () => {
+                toast.success('Entrada concluída com sucesso.', { id: toastId });
+
+                if (embedded) {
+                    onRequestClose?.();
+                }
+            },
+            onError: (errs) => {
+                setErrors(errs as Record<string, string>);
+                toast.error('Não foi possível concluir o cadastro da entrada.', {
+                    id: toastId,
+                });
+            },
             onFinish: () => setProcessing(false),
-            onError: (errs) => setErrors(errs as Record<string, string>),
         });
     };
 
@@ -1054,6 +1092,8 @@ export default function NovaEntradaLote({
                                                                                                 next,
                                                                                             marca_id:
                                                                                                 '',
+                                                                                            modelo_marca_id:
+                                                                                                '',
                                                                                             numero_serie:
                                                                                                 '',
                                                                                             quantidade:
@@ -1112,10 +1152,7 @@ export default function NovaEntradaLote({
                                                                         </div>
                                                                         <div className="space-y-2">
                                                                             <Label>
-                                                                                Marca
-                                                                                /
-                                                                                modelo
-                                                                                *
+                                                                                Marca *
                                                                             </Label>
                                                                             <Select
                                                                                 value={selectVal(
@@ -1132,6 +1169,8 @@ export default function NovaEntradaLote({
                                                                                                 SELECT_VAZIO
                                                                                                     ? ''
                                                                                                     : v,
+                                                                                            modelo_marca_id:
+                                                                                                '',
                                                                                         },
                                                                                     )
                                                                                 }
@@ -1188,6 +1227,87 @@ export default function NovaEntradaLote({
                                                                                     {
                                                                                         errors[
                                                                                             `itens.${index}.marca_id`
+                                                                                        ]
+                                                                                    }
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="space-y-2">
+                                                                            <Label>
+                                                                                Modelo
+                                                                                *
+                                                                            </Label>
+                                                                            <Select
+                                                                                value={selectVal(
+                                                                                    item.modelo_marca_id,
+                                                                                )}
+                                                                                onValueChange={(
+                                                                                    v,
+                                                                                ) =>
+                                                                                    atualizarItem(
+                                                                                        index,
+                                                                                        {
+                                                                                            modelo_marca_id:
+                                                                                                v ===
+                                                                                                SELECT_VAZIO
+                                                                                                    ? ''
+                                                                                                    : v,
+                                                                                        },
+                                                                                    )
+                                                                                }
+                                                                                disabled={
+                                                                                    item.marca_id ===
+                                                                                    ''
+                                                                                }
+                                                                            >
+                                                                                <SelectTrigger className="w-full">
+                                                                                    <SelectValue
+                                                                                        placeholder={
+                                                                                            item.marca_id ===
+                                                                                            ''
+                                                                                                ? 'Selecione a marca primeiro'
+                                                                                                : 'Selecione o modelo'
+                                                                                        }
+                                                                                    />
+                                                                                </SelectTrigger>
+                                                                                <SelectContent position="popper">
+                                                                                    <SelectItem
+                                                                                        value={
+                                                                                            SELECT_VAZIO
+                                                                                        }
+                                                                                        disabled
+                                                                                    >
+                                                                                        Selecione
+                                                                                    </SelectItem>
+                                                                                    {modelosPorMarca(
+                                                                                        item.marca_id,
+                                                                                    ).map(
+                                                                                        (
+                                                                                            modelo,
+                                                                                        ) => (
+                                                                                            <SelectItem
+                                                                                                key={
+                                                                                                    modelo.id
+                                                                                                }
+                                                                                                value={String(
+                                                                                                    modelo.id,
+                                                                                                )}
+                                                                                            >
+                                                                                                {
+                                                                                                    modelo.nome
+                                                                                                }
+                                                                                            </SelectItem>
+                                                                                        ),
+                                                                                    )}
+                                                                                </SelectContent>
+                                                                            </Select>
+                                                                            {errors[
+                                                                                `itens.${index}.modelo_marca_id`
+                                                                            ] && (
+                                                                                <p className="text-xs text-destructive">
+                                                                                    {
+                                                                                        errors[
+                                                                                            `itens.${index}.modelo_marca_id`
                                                                                         ]
                                                                                     }
                                                                                 </p>
@@ -1629,6 +1749,10 @@ export default function NovaEntradaLote({
                                                                                 {
                                                                                     item.marcaNome
                                                                                 }
+                                                                                {' / '}
+                                                                                {
+                                                                                    item.modeloNome
+                                                                                }
                                                                             </p>
                                                                             <p className="text-xs text-muted-foreground">
                                                                                 Qtd:{' '}
@@ -1676,6 +1800,7 @@ export default function NovaEntradaLote({
                                     <Button
                                         type="button"
                                         variant="outline"
+                                        disabled={processing}
                                         onClick={() => setShowSairDialog(true)}
                                     >
                                         Descartar
@@ -2019,6 +2144,8 @@ export default function NovaEntradaLote({
                                                                         next,
                                                                     marca_id:
                                                                         '',
+                                                                    modelo_marca_id:
+                                                                        '',
                                                                     numero_serie:
                                                                         '',
                                                                     quantidade:
@@ -2072,9 +2199,7 @@ export default function NovaEntradaLote({
                                                     )}
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <Label>
-                                                        Marca / modelo *
-                                                    </Label>
+                                                    <Label>Marca *</Label>
                                                     <Select
                                                         value={selectVal(
                                                             item.marca_id,
@@ -2088,6 +2213,8 @@ export default function NovaEntradaLote({
                                                                         SELECT_VAZIO
                                                                             ? ''
                                                                             : v,
+                                                                    modelo_marca_id:
+                                                                        '',
                                                                 },
                                                             )
                                                         }
@@ -2136,6 +2263,76 @@ export default function NovaEntradaLote({
                                                             {
                                                                 errors[
                                                                     `itens.${index}.marca_id`
+                                                                ]
+                                                            }
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label>Modelo *</Label>
+                                                    <Select
+                                                        value={selectVal(
+                                                            item.modelo_marca_id,
+                                                        )}
+                                                        onValueChange={(v) =>
+                                                            atualizarItem(
+                                                                index,
+                                                                {
+                                                                    modelo_marca_id:
+                                                                        v ===
+                                                                        SELECT_VAZIO
+                                                                            ? ''
+                                                                            : v,
+                                                                },
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            item.marca_id ===
+                                                            ''
+                                                        }
+                                                    >
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue
+                                                                placeholder={
+                                                                    item.marca_id ===
+                                                                    ''
+                                                                        ? 'Selecione a marca primeiro'
+                                                                        : 'Selecione o modelo'
+                                                                }
+                                                            />
+                                                        </SelectTrigger>
+                                                        <SelectContent position="popper">
+                                                            <SelectItem
+                                                                value={
+                                                                    SELECT_VAZIO
+                                                                }
+                                                                disabled
+                                                            >
+                                                                Selecione
+                                                            </SelectItem>
+                                                            {modelosPorMarca(
+                                                                item.marca_id,
+                                                            ).map((modelo) => (
+                                                                <SelectItem
+                                                                    key={
+                                                                        modelo.id
+                                                                    }
+                                                                    value={String(
+                                                                        modelo.id,
+                                                                    )}
+                                                                >
+                                                                    {modelo.nome}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    {errors[
+                                                        `itens.${index}.modelo_marca_id`
+                                                    ] && (
+                                                        <p className="text-xs text-destructive">
+                                                            {
+                                                                errors[
+                                                                    `itens.${index}.modelo_marca_id`
                                                                 ]
                                                             }
                                                         </p>
@@ -2492,7 +2689,8 @@ export default function NovaEntradaLote({
                                                     <p className="text-sm font-medium">
                                                         Item {item.index + 1} -{' '}
                                                         {item.tipoNome} /{' '}
-                                                        {item.marcaNome}
+                                                        {item.marcaNome} /{' '}
+                                                        {item.modeloNome}
                                                     </p>
                                                     <p className="text-xs text-muted-foreground">
                                                         Qtd:{' '}
@@ -2529,6 +2727,7 @@ export default function NovaEntradaLote({
                                 <Button
                                     type="button"
                                     variant="outline"
+                                    disabled={processing}
                                     onClick={() => setShowSairDialog(true)}
                                 >
                                     Descartar
