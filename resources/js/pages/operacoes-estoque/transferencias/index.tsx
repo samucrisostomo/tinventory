@@ -636,7 +636,7 @@ export default function TransferenciasEstoquePage({
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="mb-4 rounded-xl border border-primary/20 bg-linear-to-r from-primary/15 via-background to-primary/5 p-3">
+                        <div className="mb-4 rounded-xl border border-primary/20 bg-linear-to-r from-primary/15 via-background to-primary/5 p-3 dark:border-primary/35 dark:bg-none dark:bg-[#1f2b44]">
                             <div className="mb-3 flex items-center justify-between gap-2">
                                 <p className="text-sm font-medium">Filtros</p>
                                 <div className="flex items-center gap-2">
@@ -874,9 +874,9 @@ export default function TransferenciasEstoquePage({
                                     (transferencia) => (
                                         <Card
                                             key={transferencia.id}
-                                            className="group relative overflow-hidden border-primary/45 bg-linear-to-r from-primary/15 via-background to-primary/5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-primary/35 dark:bg-[#1f2b44]/90 dark:from-primary/25 dark:to-primary/10"
+                                            className="group relative overflow-hidden border-primary/45 bg-linear-to-r from-primary/15 via-background to-primary/5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-primary/35 dark:bg-none dark:bg-[#1f2b44]"
                                         >
-                                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.35),transparent_48%)] dark:bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.28),transparent_48%)]" />
+                                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.35),transparent_48%)] dark:bg-none" />
                                             <CardHeader className="space-y-3 pb-3">
                                                 <div className="flex items-start justify-between gap-2">
                                                     <p className="text-xs font-semibold tracking-wide text-primary uppercase">
@@ -886,7 +886,7 @@ export default function TransferenciasEstoquePage({
                                                         ).padStart(5, '0')}
                                                     </p>
                                                     <div className="flex items-center gap-1">
-                                                        <span className="rounded-full border border-primary/40 bg-primary/20 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                                                        <span className="rounded-full border border-primary/40 bg-primary/20 px-2 py-0.5 text-[11px] font-semibold text-primary dark:bg-[#1f2b44] dark:text-[#4ad0af]">
                                                             {transferencia.total_itens.toLocaleString(
                                                                 'pt-BR',
                                                                 {
@@ -954,7 +954,7 @@ export default function TransferenciasEstoquePage({
                                                     </div>
                                                 </div>
                                                 <div className="rounded-lg border border-primary/30 bg-white/15 p-3 text-primary backdrop-blur-[1px] dark:bg-white/10">
-                                                    <p className="text-xs text-[#1f2b44]">
+                                                    <p className="text-xs text-[#1f2b44] dark:text-[#e1ff7d]">
                                                         Rota
                                                     </p>
                                                     <p className="mt-1 text-sm font-medium text-primary">
@@ -962,7 +962,7 @@ export default function TransferenciasEstoquePage({
                                                             transferencia.estoque_origem
                                                         }
                                                     </p>
-                                                    <p className="-mb-0.5 text-[11px] leading-none text-[#1f2b44]">
+                                                    <p className="-mb-0.5 text-[11px] leading-none text-[#1f2b44] dark:text-[#e1ff7d]">
                                                         para
                                                     </p>
                                                     <p className="text-sm font-medium text-primary">
@@ -975,7 +975,7 @@ export default function TransferenciasEstoquePage({
                                             <CardContent className="space-y-3 pt-0">
                                                 <div className="grid grid-cols-2 gap-2 text-xs">
                                                     <div className="rounded-lg border border-primary/30 bg-white/12 p-2 text-primary backdrop-blur-[1px] dark:bg-white/10">
-                                                        <p className="text-[#1f2b44]">
+                                                        <p className="text-[#1f2b44] dark:text-[#e1ff7d]">
                                                             Usuário
                                                         </p>
                                                         <p className="mt-0.5 text-sm font-medium text-primary">
@@ -985,7 +985,7 @@ export default function TransferenciasEstoquePage({
                                                         </p>
                                                     </div>
                                                     <div className="rounded-lg border border-primary/30 bg-white/12 p-2 text-primary backdrop-blur-[1px] dark:bg-white/10">
-                                                        <p className="text-[#1f2b44]">
+                                                        <p className="text-[#1f2b44] dark:text-[#e1ff7d]">
                                                             Data
                                                         </p>
                                                         <p className="mt-0.5 text-sm font-medium text-primary">
@@ -1000,7 +1000,7 @@ export default function TransferenciasEstoquePage({
                                                     </div>
                                                 </div>
                                                 <div className="rounded-lg border border-primary/30 bg-white/12 p-2 text-primary backdrop-blur-[1px] dark:bg-white/10">
-                                                    <p className="text-xs text-[#1f2b44]">
+                                                    <p className="text-xs text-[#1f2b44] dark:text-[#e1ff7d]">
                                                         Observação
                                                     </p>
                                                     <p
@@ -1017,7 +1017,7 @@ export default function TransferenciasEstoquePage({
                                                 {transferencia.itens.length >
                                                     0 && (
                                                     <div className="space-y-2 rounded-lg border border-primary/30 bg-white/12 p-2 backdrop-blur-[1px] dark:bg-white/10">
-                                                        <p className="text-xs text-[#1f2b44]">
+                                                        <p className="text-xs text-[#1f2b44] dark:text-[#e1ff7d]">
                                                             Itens (prévia)
                                                         </p>
                                                         {transferencia.itens
