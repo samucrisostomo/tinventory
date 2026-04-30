@@ -143,6 +143,10 @@ class TransferenciaEstoqueService
                     'estoqueOrigem:id,nome',
                     'estoqueDestino:id,nome',
                     'user:id,name',
+                    'itens:id,transferencia_id,material_id,empresa_id,local_id,numero_serie,condicao,quantidade',
+                    'itens.material:id,nome',
+                    'itens.empresa:id,nome',
+                    'itens.local:id,nome',
                 ])
                 ->latest()
                 ->limit(30)
@@ -158,6 +162,17 @@ class TransferenciaEstoqueService
                         ? Storage::url($transferencia->termo_recebimento_path)
                         : null,
                     'created_at' => $transferencia->created_at?->toISOString(),
+                    'itens' => $transferencia->itens
+                        ->map(fn (TransferenciaItem $item) => [
+                            'id' => $item->id,
+                            'material' => $item->material?->nome ?? '-',
+                            'empresa' => $item->empresa?->nome,
+                            'local' => $item->local?->nome,
+                            'numero_serie' => $item->numero_serie,
+                            'condicao' => $item->condicao,
+                            'quantidade' => (float) $item->quantidade,
+                        ])
+                        ->values(),
                 ])
                 ->values(),
         ];

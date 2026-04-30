@@ -1,5 +1,5 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { ArrowRightLeft, ClipboardList, Clock3, EllipsisVertical, FileText, Plus, Repeat, Trash2, Warehouse } from 'lucide-react';
+import { ArrowRightLeft, ChevronDown, ChevronUp, ClipboardList, Clock3, EllipsisVertical, Eye, FileText, Plus, Repeat, Trash2, Warehouse } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -32,9 +32,17 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 const SELECT_VAZIO = '__none__';
+const TRANSFERENCIAS_FILTROS_EXPANDIDOS_STORAGE_KEY =
+    'transferencias:filtros-expandidos';
 
 type EstoqueOption = {
     id: number;
@@ -85,6 +93,15 @@ type Props = {
         observacao: string | null;
         termo_url: string | null;
         created_at: string | null;
+        itens: {
+            id: number;
+            material: string;
+            empresa: string | null;
+            local: string | null;
+            numero_serie: string | null;
+            condicao: string | null;
+            quantidade: number;
+        }[];
     }[];
 };
 
@@ -116,16 +133,40 @@ export default function TransferenciasEstoquePage({
     const [itens, setItens] = useState<ItemTransferencia[]>([novoItem()]);
     const [termoRecebimento, setTermoRecebimento] = useState<File | null>(null);
     const [observacoes, setObservacoes] = useState('');
+    const [modalDetalhesAberto, setModalDetalhesAberto] = useState(false);
+    const [transferenciaSelecionada, setTransferenciaSelecionada] = useState<Props['transferenciasRecentes'][number] | null>(null);
+    const [filtroBusca, setFiltroBusca] = useState('');
+    const [filtroOrigem, setFiltroOrigem] = useState('');
+    const [filtroDestino, setFiltroDestino] = useState('');
+    const [filtroUsuario, setFiltroUsuario] = useState('');
+    const [filtroTermo, setFiltroTermo] = useState('');
+    const [filtrosExpandidos, setFiltrosExpandidos] = useState<boolean>(() => {
+        if (typeof window === 'undefined') {
+            return false;
+        }
+
+        return window.localStorage.getItem(
+            TRANSFERENCIAS_FILTROS_EXPANDIDOS_STORAGE_KEY,
+        ) === 'true';
+    });
     const colunaFormularioRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (flash?.success) {
             toast.success(flash.success);
         }
+
         if (flash?.error) {
             toast.error(flash.error);
         }
     }, [flash?.success, flash?.error]);
+
+    useEffect(() => {
+        window.localStorage.setItem(
+            TRANSFERENCIAS_FILTROS_EXPANDIDOS_STORAGE_KEY,
+            String(filtrosExpandidos),
+        );
+    }, [filtrosExpandidos]);
 
     const materiaisDaOrigem = useMemo(
         () => materiaisPorEstoque[estoqueOrigemId] ?? [],
@@ -134,6 +175,7 @@ export default function TransferenciasEstoquePage({
 
     const mapaMateriais = useMemo(() => {
         const map = new Map<string, MaterialOption>();
+
         for (const material of materiaisDaOrigem) {
             map.set(String(material.material_id), material);
         }
@@ -177,6 +219,63 @@ export default function TransferenciasEstoquePage({
             totalQuantidade,
         };
     }, [transferenciasRecentes]);
+
+    const opcoesFiltro = useMemo(() => {
+        const origens = Array.from(
+            new Set(transferenciasRecentes.map((t) => t.estoque_origem).filter(Boolean)),
+        ).sort((a, b) => a.localeCompare(b));
+        const destinos = Array.from(
+            new Set(transferenciasRecentes.map((t) => t.estoque_destino).filter(Boolean)),
+        ).sort((a, b) => a.localeCompare(b));
+        const usuarios = Array.from(
+            new Set(transferenciasRecentes.map((t) => t.usuario).filter(Boolean)),
+        ).sort((a, b) => a.localeCompare(b));
+
+        return { origens, destinos, usuarios };
+    }, [transferenciasRecentes]);
+
+    const transferenciasFiltradas = useMemo(() => {
+        const buscaNormalizada = filtroBusca.trim().toLowerCase();
+
+        return transferenciasRecentes.filter((transferencia) => {
+            if (filtroOrigem !== '' && transferencia.estoque_origem !== filtroOrigem) {
+                return false;
+            }
+
+            if (filtroDestino !== '' && transferencia.estoque_destino !== filtroDestino) {
+                return false;
+            }
+
+            if (filtroUsuario !== '' && transferencia.usuario !== filtroUsuario) {
+                return false;
+            }
+
+            if (filtroTermo === 'com_termo' && !transferencia.termo_url) {
+                return false;
+            }
+
+            if (filtroTermo === 'sem_termo' && transferencia.termo_url) {
+                return false;
+            }
+
+            if (buscaNormalizada === '') {
+                return true;
+            }
+
+            const camposBusca = [
+                `TRF-${String(transferencia.id).padStart(5, '0')}`,
+                transferencia.estoque_origem,
+                transferencia.estoque_destino,
+                transferencia.usuario,
+                transferencia.observacao ?? '',
+                ...transferencia.itens.map((item) => item.material),
+            ];
+
+            return camposBusca.some((campo) =>
+                campo.toLowerCase().includes(buscaNormalizada),
+            );
+        });
+    }, [filtroBusca, filtroDestino, filtroOrigem, filtroTermo, filtroUsuario, transferenciasRecentes]);
 
     const atualizarItem = (index: number, patch: Partial<ItemTransferencia>) => {
         setItens((current) =>
@@ -378,6 +477,11 @@ export default function TransferenciasEstoquePage({
         });
     };
 
+    const abrirModalDetalhes = (transferencia: Props['transferenciasRecentes'][number]) => {
+        setTransferenciaSelecionada(transferencia);
+        setModalDetalhesAberto(true);
+    };
+
     return (
         <>
             <Head title="Transferências de estoque" />
@@ -399,7 +503,7 @@ export default function TransferenciasEstoquePage({
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-3">
-                    <Card className="border-primary/20">
+                    <Card className="border-primary/20 bg-linear-to-r from-primary/15 via-background to-primary/5">
                         <CardContent className="flex items-center justify-between p-4">
                             <div>
                                 <p className="text-xs text-muted-foreground">Transferências recentes</p>
@@ -408,7 +512,7 @@ export default function TransferenciasEstoquePage({
                             <Clock3 className="h-5 w-5 text-primary" />
                         </CardContent>
                     </Card>
-                    <Card className="border-primary/20">
+                    <Card className="border-primary/20 bg-linear-to-r from-primary/15 via-background to-primary/5">
                         <CardContent className="flex items-center justify-between p-4">
                             <div>
                                 <p className="text-xs text-muted-foreground">Quantidade movimentada</p>
@@ -421,7 +525,7 @@ export default function TransferenciasEstoquePage({
                             <ArrowRightLeft className="h-5 w-5 text-primary" />
                         </CardContent>
                     </Card>
-                    <Card className="border-primary/20">
+                    <Card className="border-primary/20 bg-linear-to-r from-primary/15 via-background to-primary/5">
                         <CardContent className="flex items-center justify-between p-4">
                             <div>
                                 <p className="text-xs text-muted-foreground">Estoques disponíveis</p>
@@ -440,21 +544,156 @@ export default function TransferenciasEstoquePage({
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
+                        <div className="mb-4 rounded-xl border border-primary/20 bg-linear-to-r from-primary/15 via-background to-primary/5 p-3">
+                            <div className="mb-3 flex items-center justify-between gap-2">
+                                <p className="text-sm font-medium">Filtros</p>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                            setFiltroBusca('');
+                                            setFiltroOrigem('');
+                                            setFiltroDestino('');
+                                            setFiltroUsuario('');
+                                            setFiltroTermo('');
+                                        }}
+                                    >
+                                        Limpar filtros
+                                    </Button>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 rounded-full border border-border/70"
+                                                    onClick={() => setFiltrosExpandidos((current) => !current)}
+                                                    aria-expanded={filtrosExpandidos}
+                                                    aria-controls="painel-filtros-transferencias"
+                                                    aria-label={filtrosExpandidos ? 'Minimizar filtros' : 'Expandir filtros'}
+                                                >
+                                                    {filtrosExpandidos ? (
+                                                        <ChevronUp className="h-4 w-4" />
+                                                    ) : (
+                                                        <ChevronDown className="h-4 w-4" />
+                                                    )}
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>{filtrosExpandidos ? 'Minimizar filtros' : 'Expandir filtros'}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </div>
+                            </div>
+                            <div
+                                id="painel-filtros-transferencias"
+                                className={cn(
+                                    'grid overflow-hidden transition-all duration-300 ease-in-out',
+                                    filtrosExpandidos
+                                        ? 'mb-3 max-h-[500px] opacity-100'
+                                        : 'max-h-0 opacity-0',
+                                )}
+                            >
+                                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                                    <div className="space-y-1">
+                                        <Label>Busca</Label>
+                                        <Input
+                                            value={filtroBusca}
+                                            onChange={(event) => setFiltroBusca(event.target.value)}
+                                            placeholder="TRF, observação, material..."
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label>Origem</Label>
+                                        <Select value={selectVal(filtroOrigem)} onValueChange={(value) => setFiltroOrigem(value === SELECT_VAZIO ? '' : value)}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Todas" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value={SELECT_VAZIO}>Todas</SelectItem>
+                                                {opcoesFiltro.origens.map((origem) => (
+                                                    <SelectItem key={origem} value={origem}>
+                                                        {origem}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label>Destino</Label>
+                                        <Select value={selectVal(filtroDestino)} onValueChange={(value) => setFiltroDestino(value === SELECT_VAZIO ? '' : value)}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Todos" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value={SELECT_VAZIO}>Todos</SelectItem>
+                                                {opcoesFiltro.destinos.map((destino) => (
+                                                    <SelectItem key={destino} value={destino}>
+                                                        {destino}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label>Usuário</Label>
+                                        <Select value={selectVal(filtroUsuario)} onValueChange={(value) => setFiltroUsuario(value === SELECT_VAZIO ? '' : value)}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Todos" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value={SELECT_VAZIO}>Todos</SelectItem>
+                                                {opcoesFiltro.usuarios.map((usuario) => (
+                                                    <SelectItem key={usuario} value={usuario}>
+                                                        {usuario}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label>Termo</Label>
+                                        <Select value={selectVal(filtroTermo)} onValueChange={(value) => setFiltroTermo(value === SELECT_VAZIO ? '' : value)}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Todos" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value={SELECT_VAZIO}>Todos</SelectItem>
+                                                <SelectItem value="com_termo">Com termo</SelectItem>
+                                                <SelectItem value="sem_termo">Sem termo</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </div>
+                            <p className="mt-3 text-xs text-muted-foreground">
+                                Mostrando {transferenciasFiltradas.length} de {transferenciasRecentes.length} transferência(s).
+                            </p>
+                        </div>
+
                         {transferenciasRecentes.length === 0 ? (
                             <div className="rounded-xl border border-dashed border-border/70 p-10 text-center text-sm text-muted-foreground">
                                 Nenhuma transferência registrada.
                             </div>
+                        ) : transferenciasFiltradas.length === 0 ? (
+                            <div className="rounded-xl border border-dashed border-border/70 p-10 text-center text-sm text-muted-foreground">
+                                Nenhuma transferência encontrada com os filtros aplicados.
+                            </div>
                         ) : (
                             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                                {transferenciasRecentes.map((transferencia) => (
+                                {transferenciasFiltradas.map((transferencia) => (
                                     <Card
                                         key={transferencia.id}
-                                        className="group relative overflow-hidden border-primary/45 bg-linear-to-br from-primary/30 via-card to-primary/15 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-primary/35 dark:from-primary/25 dark:to-primary/10"
+                                        className="group relative overflow-hidden border-primary/45 bg-linear-to-r from-primary/15 via-background to-primary/5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-primary/35 dark:bg-[#1f2b44]/90 dark:from-primary/25 dark:to-primary/10"
                                     >
                                         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.35),transparent_48%)] dark:bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.28),transparent_48%)]" />
                                         <CardHeader className="space-y-3 pb-3">
                                             <div className="flex items-start justify-between gap-2">
-                                                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                                                <p className="text-xs font-semibold tracking-wide text-primary uppercase">
                                                     TRF-{String(transferencia.id).padStart(5, '0')}
                                                 </p>
                                                 <div className="flex items-center gap-1">
@@ -470,13 +709,17 @@ export default function TransferenciasEstoquePage({
                                                                 type="button"
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                className="h-7 w-7 rounded-full"
+                                                                className="h-7 w-7 rounded-full text-primary"
                                                                 aria-label="Abrir ações da transferência"
                                                             >
-                                                                <EllipsisVertical className="h-4 w-4" />
+                                                                <EllipsisVertical className="h-4 w-4 text-primary" />
                                                             </Button>
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem onClick={() => abrirModalDetalhes(transferencia)}>
+                                                                <Eye className="mr-2 h-4 w-4" />
+                                                                Ver transferência
+                                                            </DropdownMenuItem>
                                                             {transferencia.termo_url ? (
                                                                 <DropdownMenuItem asChild>
                                                                     <a
@@ -498,30 +741,30 @@ export default function TransferenciasEstoquePage({
                                                     </DropdownMenu>
                                                 </div>
                                             </div>
-                                            <div className="rounded-lg border border-zinc-300/80 bg-zinc-100/85 p-3 text-zinc-900 dark:border-accent/60 dark:bg-accent/20 dark:text-foreground">
-                                                <p className="text-xs text-zinc-600 dark:text-muted-foreground">Rota</p>
-                                                <p className="mt-1 text-sm font-medium text-zinc-900 dark:text-foreground">
+                                            <div className="rounded-lg border border-primary/30 bg-white/15 p-3 text-primary backdrop-blur-[1px] dark:bg-white/10">
+                                                <p className="text-xs text-[#1f2b44]">Rota</p>
+                                                <p className="mt-1 text-sm font-medium text-primary">
                                                     {transferencia.estoque_origem}
                                                 </p>
-                                                <p className="-mb-0.5 text-[11px] leading-none text-zinc-600 dark:text-muted-foreground">
+                                                <p className="-mb-0.5 text-[11px] leading-none text-[#1f2b44]">
                                                     para
                                                 </p>
-                                                <p className="text-sm font-medium text-zinc-900 dark:text-foreground">
+                                                <p className="text-sm font-medium text-primary">
                                                     {transferencia.estoque_destino}
                                                 </p>
                                             </div>
                                         </CardHeader>
                                         <CardContent className="space-y-3 pt-0">
                                             <div className="grid grid-cols-2 gap-2 text-xs">
-                                                <div className="rounded-lg border border-zinc-300/80 bg-zinc-100/80 p-2 text-zinc-900 dark:border-accent/60 dark:bg-accent/15 dark:text-foreground">
-                                                    <p className="text-zinc-600 dark:text-muted-foreground">Usuário</p>
-                                                    <p className="mt-0.5 text-sm font-medium text-zinc-900 dark:text-foreground">
+                                                <div className="rounded-lg border border-primary/30 bg-white/12 p-2 text-primary backdrop-blur-[1px] dark:bg-white/10">
+                                                    <p className="text-[#1f2b44]">Usuário</p>
+                                                    <p className="mt-0.5 text-sm font-medium text-primary">
                                                         {transferencia.usuario}
                                                     </p>
                                                 </div>
-                                                <div className="rounded-lg border border-zinc-300/80 bg-zinc-100/80 p-2 text-zinc-900 dark:border-accent/60 dark:bg-accent/15 dark:text-foreground">
-                                                    <p className="text-zinc-600 dark:text-muted-foreground">Data</p>
-                                                    <p className="mt-0.5 text-sm font-medium text-zinc-900 dark:text-foreground">
+                                                <div className="rounded-lg border border-primary/30 bg-white/12 p-2 text-primary backdrop-blur-[1px] dark:bg-white/10">
+                                                    <p className="text-[#1f2b44]">Data</p>
+                                                    <p className="mt-0.5 text-sm font-medium text-primary">
                                                         {transferencia.created_at
                                                             ? new Date(
                                                                   transferencia.created_at,
@@ -530,15 +773,48 @@ export default function TransferenciasEstoquePage({
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="rounded-lg border border-zinc-300/80 bg-zinc-100/80 p-2 text-zinc-900 dark:border-accent/60 dark:bg-accent/15 dark:text-foreground">
-                                                <p className="text-xs text-zinc-600 dark:text-muted-foreground">Observação</p>
+                                            <div className="rounded-lg border border-primary/30 bg-white/12 p-2 text-primary backdrop-blur-[1px] dark:bg-white/10">
+                                                <p className="text-xs text-[#1f2b44]">Observação</p>
                                                 <p
-                                                    className="line-clamp-2 text-sm text-zinc-900 wrap-break-word dark:text-foreground"
+                                                    className="line-clamp-2 text-sm text-primary wrap-break-word"
                                                     title={transferencia.observacao ?? ''}
                                                 >
                                                     {transferencia.observacao ?? '-'}
                                                 </p>
                                             </div>
+                                            {transferencia.itens.length > 0 && (
+                                                <div className="space-y-2 rounded-lg border border-primary/30 bg-white/12 p-2 backdrop-blur-[1px] dark:bg-white/10">
+                                                    <p className="text-xs text-[#1f2b44]">
+                                                        Itens (prévia)
+                                                    </p>
+                                                    {transferencia.itens.slice(0, 2).map((item) => (
+                                                        <div key={item.id} className="rounded-md border border-primary/25 bg-white/10 p-2 text-xs backdrop-blur-[1px] dark:bg-white/8">
+                                                            <p className="font-medium text-primary">
+                                                                {item.material}
+                                                            </p>
+                                                            <div className="mt-1 grid gap-1 sm:grid-cols-2">
+                                                                <p className="text-primary/90">
+                                                                    Série: <span className="font-medium text-primary">{item.numero_serie || '-'}</span>
+                                                                </p>
+                                                                <p className="text-primary/90">
+                                                                    Empresa: <span className="font-medium text-primary">{item.empresa || '-'}</span>
+                                                                </p>
+                                                                <p className="text-primary/90">
+                                                                    Local: <span className="font-medium text-primary">{item.local || '-'}</span>
+                                                                </p>
+                                                                <p className="text-primary/90">
+                                                                    Condição: <span className="font-medium text-primary">{item.condicao || '-'}</span>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {transferencia.itens.length > 2 && (
+                                                        <p className="text-[11px] text-primary/80">
+                                                            +{transferencia.itens.length - 2} item(ns) adicionais. Use "Ver transferência" para detalhes completos.
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
                                             <div className="border-t border-border/60 pt-2" />
                                         </CardContent>
                                     </Card>
@@ -785,8 +1061,7 @@ export default function TransferenciasEstoquePage({
                                                             <Label>Empresa</Label>
                                                             <Select
                                                                 value={selectVal(item.empresa)}
-                                                                onValueChange={(value) =>
-                                                                    {
+                                                                onValueChange={(value) => {
                                                                         const nextEmpresa =
                                                                             value === SELECT_VAZIO
                                                                                 ? ''
@@ -809,8 +1084,7 @@ export default function TransferenciasEstoquePage({
                                                                                 ? String(vinculo.empresa_id)
                                                                                 : '',
                                                                         });
-                                                                    }
-                                                                }
+                                                                    }}
                                                                 disabled={item.material_id === ''}
                                                             >
                                                                 <SelectTrigger className="w-full">
@@ -835,8 +1109,7 @@ export default function TransferenciasEstoquePage({
                                                             <Label>Local</Label>
                                                             <Select
                                                                 value={selectVal(item.local)}
-                                                                onValueChange={(value) =>
-                                                                    {
+                                                                onValueChange={(value) => {
                                                                         const nextLocal =
                                                                             value === SELECT_VAZIO
                                                                                 ? ''
@@ -859,8 +1132,7 @@ export default function TransferenciasEstoquePage({
                                                                                 ? String(vinculo.local_id)
                                                                                 : '',
                                                                         });
-                                                                    }
-                                                                }
+                                                                    }}
                                                                 disabled={item.material_id === ''}
                                                             >
                                                                 <SelectTrigger className="w-full">
@@ -1096,6 +1368,103 @@ export default function TransferenciasEstoquePage({
                             </Button>
                         </div>
                     </form>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={modalDetalhesAberto} onOpenChange={setModalDetalhesAberto}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {transferenciaSelecionada
+                                ? `Transferência TRF-${String(transferenciaSelecionada.id).padStart(5, '0')}`
+                                : 'Detalhes da transferência'}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Visualize os dados completos da transferência selecionada.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {transferenciaSelecionada && (
+                        <div className="space-y-4">
+                            <div className="grid gap-3 md:grid-cols-2">
+                                <div className="rounded-lg border p-3 text-sm">
+                                    <p className="text-xs text-muted-foreground">Origem</p>
+                                    <p className="font-medium">{transferenciaSelecionada.estoque_origem}</p>
+                                </div>
+                                <div className="rounded-lg border p-3 text-sm">
+                                    <p className="text-xs text-muted-foreground">Destino</p>
+                                    <p className="font-medium">{transferenciaSelecionada.estoque_destino}</p>
+                                </div>
+                                <div className="rounded-lg border p-3 text-sm">
+                                    <p className="text-xs text-muted-foreground">Usuário</p>
+                                    <p className="font-medium">{transferenciaSelecionada.usuario}</p>
+                                </div>
+                                <div className="rounded-lg border p-3 text-sm">
+                                    <p className="text-xs text-muted-foreground">Data</p>
+                                    <p className="font-medium">
+                                        {transferenciaSelecionada.created_at
+                                            ? new Date(transferenciaSelecionada.created_at).toLocaleString('pt-BR')
+                                            : '-'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="rounded-lg border p-3 text-sm">
+                                <p className="text-xs text-muted-foreground">Observação</p>
+                                <p className="mt-1 whitespace-pre-wrap wrap-break-word">
+                                    {transferenciaSelecionada.observacao ?? '-'}
+                                </p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <p className="text-sm font-medium">Itens da transferência</p>
+                                {transferenciaSelecionada.itens.length === 0 ? (
+                                    <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                                        Nenhum item encontrado nesta transferência.
+                                    </div>
+                                ) : (
+                                    <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+                                        {transferenciaSelecionada.itens.map((item) => (
+                                            <div key={item.id} className="rounded-lg border p-3 text-sm">
+                                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                                    <p className="font-medium">{item.material}</p>
+                                                    <span className="rounded-full border bg-muted px-2 py-0.5 text-xs">
+                                                        Qtd: {item.quantidade.toLocaleString('pt-BR', { maximumFractionDigits: 4 })}
+                                                    </span>
+                                                </div>
+                                                <div className="mt-2 grid gap-2 text-xs sm:grid-cols-2">
+                                                    <div className="rounded-md border bg-muted/40 px-2 py-1">
+                                                        <span className="text-muted-foreground">Série:</span>{' '}
+                                                        <span className="font-medium text-foreground">
+                                                            {item.numero_serie || '-'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="rounded-md border bg-muted/40 px-2 py-1">
+                                                        <span className="text-muted-foreground">Empresa:</span>{' '}
+                                                        <span className="font-medium text-foreground">
+                                                            {item.empresa || '-'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="rounded-md border bg-muted/40 px-2 py-1">
+                                                        <span className="text-muted-foreground">Local:</span>{' '}
+                                                        <span className="font-medium text-foreground">
+                                                            {item.local || '-'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="rounded-md border bg-muted/40 px-2 py-1">
+                                                        <span className="text-muted-foreground">Condição:</span>{' '}
+                                                        <span className="font-medium text-foreground">
+                                                            {item.condicao || '-'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </DialogContent>
             </Dialog>
         </>
