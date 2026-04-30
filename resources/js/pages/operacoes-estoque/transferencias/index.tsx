@@ -1,5 +1,18 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { ArrowRightLeft, ChevronDown, ChevronUp, ClipboardList, Clock3, EllipsisVertical, Eye, FileText, Plus, Repeat, Trash2, Warehouse } from 'lucide-react';
+import {
+    ArrowRightLeft,
+    ChevronDown,
+    ChevronUp,
+    ClipboardList,
+    Clock3,
+    EllipsisVertical,
+    Eye,
+    FileText,
+    Plus,
+    Repeat,
+    Trash2,
+    Warehouse,
+} from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -134,7 +147,9 @@ export default function TransferenciasEstoquePage({
     const [termoRecebimento, setTermoRecebimento] = useState<File | null>(null);
     const [observacoes, setObservacoes] = useState('');
     const [modalDetalhesAberto, setModalDetalhesAberto] = useState(false);
-    const [transferenciaSelecionada, setTransferenciaSelecionada] = useState<Props['transferenciasRecentes'][number] | null>(null);
+    const [transferenciaSelecionada, setTransferenciaSelecionada] = useState<
+        Props['transferenciasRecentes'][number] | null
+    >(null);
     const [filtroBusca, setFiltroBusca] = useState('');
     const [filtroOrigem, setFiltroOrigem] = useState('');
     const [filtroDestino, setFiltroDestino] = useState('');
@@ -145,9 +160,11 @@ export default function TransferenciasEstoquePage({
             return false;
         }
 
-        return window.localStorage.getItem(
-            TRANSFERENCIAS_FILTROS_EXPANDIDOS_STORAGE_KEY,
-        ) === 'true';
+        return (
+            window.localStorage.getItem(
+                TRANSFERENCIAS_FILTROS_EXPANDIDOS_STORAGE_KEY,
+            ) === 'true'
+        );
     });
     const colunaFormularioRef = useRef<HTMLDivElement>(null);
 
@@ -184,17 +201,25 @@ export default function TransferenciasEstoquePage({
     }, [materiaisDaOrigem]);
 
     const estoqueOrigem = useMemo(
-        () => estoques.find((estoque) => String(estoque.id) === estoqueOrigemId) ?? null,
+        () =>
+            estoques.find(
+                (estoque) => String(estoque.id) === estoqueOrigemId,
+            ) ?? null,
         [estoques, estoqueOrigemId],
     );
 
     const estoqueDestino = useMemo(
-        () => estoques.find((estoque) => String(estoque.id) === estoqueDestinoId) ?? null,
+        () =>
+            estoques.find(
+                (estoque) => String(estoque.id) === estoqueDestinoId,
+            ) ?? null,
         [estoques, estoqueDestinoId],
     );
 
     const resumo = useMemo(() => {
-        const itensPreenchidos = itens.filter((item) => item.material_id !== '');
+        const itensPreenchidos = itens.filter(
+            (item) => item.material_id !== '',
+        );
         const totalQuantidade = itensPreenchidos.reduce((acc, item) => {
             const valor = Number(item.quantidade.replace(',', '.')) || 0;
 
@@ -222,13 +247,23 @@ export default function TransferenciasEstoquePage({
 
     const opcoesFiltro = useMemo(() => {
         const origens = Array.from(
-            new Set(transferenciasRecentes.map((t) => t.estoque_origem).filter(Boolean)),
+            new Set(
+                transferenciasRecentes
+                    .map((t) => t.estoque_origem)
+                    .filter(Boolean),
+            ),
         ).sort((a, b) => a.localeCompare(b));
         const destinos = Array.from(
-            new Set(transferenciasRecentes.map((t) => t.estoque_destino).filter(Boolean)),
+            new Set(
+                transferenciasRecentes
+                    .map((t) => t.estoque_destino)
+                    .filter(Boolean),
+            ),
         ).sort((a, b) => a.localeCompare(b));
         const usuarios = Array.from(
-            new Set(transferenciasRecentes.map((t) => t.usuario).filter(Boolean)),
+            new Set(
+                transferenciasRecentes.map((t) => t.usuario).filter(Boolean),
+            ),
         ).sort((a, b) => a.localeCompare(b));
 
         return { origens, destinos, usuarios };
@@ -238,15 +273,24 @@ export default function TransferenciasEstoquePage({
         const buscaNormalizada = filtroBusca.trim().toLowerCase();
 
         return transferenciasRecentes.filter((transferencia) => {
-            if (filtroOrigem !== '' && transferencia.estoque_origem !== filtroOrigem) {
+            if (
+                filtroOrigem !== '' &&
+                transferencia.estoque_origem !== filtroOrigem
+            ) {
                 return false;
             }
 
-            if (filtroDestino !== '' && transferencia.estoque_destino !== filtroDestino) {
+            if (
+                filtroDestino !== '' &&
+                transferencia.estoque_destino !== filtroDestino
+            ) {
                 return false;
             }
 
-            if (filtroUsuario !== '' && transferencia.usuario !== filtroUsuario) {
+            if (
+                filtroUsuario !== '' &&
+                transferencia.usuario !== filtroUsuario
+            ) {
                 return false;
             }
 
@@ -275,9 +319,19 @@ export default function TransferenciasEstoquePage({
                 campo.toLowerCase().includes(buscaNormalizada),
             );
         });
-    }, [filtroBusca, filtroDestino, filtroOrigem, filtroTermo, filtroUsuario, transferenciasRecentes]);
+    }, [
+        filtroBusca,
+        filtroDestino,
+        filtroOrigem,
+        filtroTermo,
+        filtroUsuario,
+        transferenciasRecentes,
+    ]);
 
-    const atualizarItem = (index: number, patch: Partial<ItemTransferencia>) => {
+    const atualizarItem = (
+        index: number,
+        patch: Partial<ItemTransferencia>,
+    ) => {
         setItens((current) =>
             current.map((item, itemIndex) =>
                 itemIndex === index ? { ...item, ...patch } : item,
@@ -304,7 +358,9 @@ export default function TransferenciasEstoquePage({
                 const containerRect = container.getBoundingClientRect();
                 const targetRect = target.getBoundingClientRect();
                 const nextTop =
-                    container.scrollTop + (targetRect.top - containerRect.top) - 8;
+                    container.scrollTop +
+                    (targetRect.top - containerRect.top) -
+                    8;
 
                 container.scrollTo({
                     top: Math.max(0, nextTop),
@@ -329,7 +385,10 @@ export default function TransferenciasEstoquePage({
 
     const opcoesCampo = (
         item: ItemTransferencia,
-        key: keyof Pick<VinculoOption, 'numero_serie' | 'local_nome' | 'empresa_nome' | 'condicao'>,
+        key: keyof Pick<
+            VinculoOption,
+            'numero_serie' | 'local_nome' | 'empresa_nome' | 'condicao'
+        >,
     ) => {
         const material = mapaMateriais.get(item.material_id);
 
@@ -368,11 +427,17 @@ export default function TransferenciasEstoquePage({
 
         atualizarItem(index, {
             material_id: materialId,
-            movimentacao_item_origem_id: primeiroVinculo?.id ? String(primeiroVinculo.id) : '',
+            movimentacao_item_origem_id: primeiroVinculo?.id
+                ? String(primeiroVinculo.id)
+                : '',
             numero_serie: primeiroVinculo?.numero_serie ?? '',
-            local_id: primeiroVinculo?.local_id ? String(primeiroVinculo.local_id) : '',
+            local_id: primeiroVinculo?.local_id
+                ? String(primeiroVinculo.local_id)
+                : '',
             local: primeiroVinculo?.local_nome ?? '',
-            empresa_id: primeiroVinculo?.empresa_id ? String(primeiroVinculo.empresa_id) : '',
+            empresa_id: primeiroVinculo?.empresa_id
+                ? String(primeiroVinculo.empresa_id)
+                : '',
             empresa: primeiroVinculo?.empresa_nome ?? '',
             condicao: primeiroVinculo?.condicao ?? '',
             quantidade: '1',
@@ -455,7 +520,8 @@ export default function TransferenciasEstoquePage({
             .filter((item) => item.material_id !== '')
             .map((item) => ({
                 material_id: item.material_id,
-                movimentacao_item_origem_id: item.movimentacao_item_origem_id || '',
+                movimentacao_item_origem_id:
+                    item.movimentacao_item_origem_id || '',
                 empresa_id: item.empresa_id || '',
                 local_id: item.local_id || '',
                 numero_serie: item.numero_serie || '',
@@ -463,21 +529,28 @@ export default function TransferenciasEstoquePage({
                 quantidade: item.quantidade || '0',
             }));
 
-        router.post('/operacoes-estoque/transferencias', {
-            estoque_origem_id: estoqueOrigemId,
-            estoque_destino_id: estoqueDestinoId,
-            observacao: observacoes,
-            termo_recebimento: termoRecebimento,
-            itens: itensPayload,
-        }, {
-            forceFormData: true,
-            preserveScroll: true,
-            onSuccess: () => aoMudarModal(false),
-            onError: () => toast.error('Não foi possível salvar a transferência.'),
-        });
+        router.post(
+            '/operacoes-estoque/transferencias',
+            {
+                estoque_origem_id: estoqueOrigemId,
+                estoque_destino_id: estoqueDestinoId,
+                observacao: observacoes,
+                termo_recebimento: termoRecebimento,
+                itens: itensPayload,
+            },
+            {
+                forceFormData: true,
+                preserveScroll: true,
+                onSuccess: () => aoMudarModal(false),
+                onError: () =>
+                    toast.error('Não foi possível salvar a transferência.'),
+            },
+        );
     };
 
-    const abrirModalDetalhes = (transferencia: Props['transferenciasRecentes'][number]) => {
+    const abrirModalDetalhes = (
+        transferencia: Props['transferenciasRecentes'][number],
+    ) => {
         setTransferenciaSelecionada(transferencia);
         setModalDetalhesAberto(true);
     };
@@ -490,12 +563,18 @@ export default function TransferenciasEstoquePage({
                 <div className="rounded-2xl border border-primary/20 bg-linear-to-r from-primary/15 via-background to-primary/5 p-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="space-y-1">
-                            <h1 className="text-xl font-semibold">Transferências de estoque</h1>
+                            <h1 className="text-xl font-semibold">
+                                Transferências de estoque
+                            </h1>
                             <p className="text-sm text-muted-foreground">
-                                Selecione origem e destino, adicione itens e confirme com resumo em tempo real.
+                                Selecione origem e destino, adicione itens e
+                                confirme com resumo em tempo real.
                             </p>
                         </div>
-                        <Button type="button" onClick={() => aoMudarModal(true)}>
+                        <Button
+                            type="button"
+                            onClick={() => aoMudarModal(true)}
+                        >
                             <ArrowRightLeft className="mr-2 h-4 w-4" />
                             Nova transferência
                         </Button>
@@ -506,8 +585,12 @@ export default function TransferenciasEstoquePage({
                     <Card className="border-primary/20 bg-linear-to-r from-primary/15 via-background to-primary/5">
                         <CardContent className="flex items-center justify-between p-4">
                             <div>
-                                <p className="text-xs text-muted-foreground">Transferências recentes</p>
-                                <p className="text-2xl font-semibold">{indicadores.totalTransferencias}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Transferências recentes
+                                </p>
+                                <p className="text-2xl font-semibold">
+                                    {indicadores.totalTransferencias}
+                                </p>
                             </div>
                             <Clock3 className="h-5 w-5 text-primary" />
                         </CardContent>
@@ -515,11 +598,16 @@ export default function TransferenciasEstoquePage({
                     <Card className="border-primary/20 bg-linear-to-r from-primary/15 via-background to-primary/5">
                         <CardContent className="flex items-center justify-between p-4">
                             <div>
-                                <p className="text-xs text-muted-foreground">Quantidade movimentada</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Quantidade movimentada
+                                </p>
                                 <p className="text-2xl font-semibold">
-                                    {indicadores.totalQuantidade.toLocaleString('pt-BR', {
-                                        maximumFractionDigits: 4,
-                                    })}
+                                    {indicadores.totalQuantidade.toLocaleString(
+                                        'pt-BR',
+                                        {
+                                            maximumFractionDigits: 4,
+                                        },
+                                    )}
                                 </p>
                             </div>
                             <ArrowRightLeft className="h-5 w-5 text-primary" />
@@ -528,8 +616,12 @@ export default function TransferenciasEstoquePage({
                     <Card className="border-primary/20 bg-linear-to-r from-primary/15 via-background to-primary/5">
                         <CardContent className="flex items-center justify-between p-4">
                             <div>
-                                <p className="text-xs text-muted-foreground">Estoques disponíveis</p>
-                                <p className="text-2xl font-semibold">{estoques.length}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Estoques disponíveis
+                                </p>
+                                <p className="text-2xl font-semibold">
+                                    {estoques.length}
+                                </p>
                             </div>
                             <Warehouse className="h-5 w-5 text-primary" />
                         </CardContent>
@@ -570,10 +662,21 @@ export default function TransferenciasEstoquePage({
                                                     variant="ghost"
                                                     size="icon"
                                                     className="h-8 w-8 rounded-full border border-border/70"
-                                                    onClick={() => setFiltrosExpandidos((current) => !current)}
-                                                    aria-expanded={filtrosExpandidos}
+                                                    onClick={() =>
+                                                        setFiltrosExpandidos(
+                                                            (current) =>
+                                                                !current,
+                                                        )
+                                                    }
+                                                    aria-expanded={
+                                                        filtrosExpandidos
+                                                    }
                                                     aria-controls="painel-filtros-transferencias"
-                                                    aria-label={filtrosExpandidos ? 'Minimizar filtros' : 'Expandir filtros'}
+                                                    aria-label={
+                                                        filtrosExpandidos
+                                                            ? 'Minimizar filtros'
+                                                            : 'Expandir filtros'
+                                                    }
                                                 >
                                                     {filtrosExpandidos ? (
                                                         <ChevronUp className="h-4 w-4" />
@@ -583,7 +686,11 @@ export default function TransferenciasEstoquePage({
                                                 </Button>
                                             </TooltipTrigger>
                                             <TooltipContent>
-                                                <p>{filtrosExpandidos ? 'Minimizar filtros' : 'Expandir filtros'}</p>
+                                                <p>
+                                                    {filtrosExpandidos
+                                                        ? 'Minimizar filtros'
+                                                        : 'Expandir filtros'}
+                                                </p>
                                             </TooltipContent>
                                         </Tooltip>
                                     </TooltipProvider>
@@ -603,75 +710,152 @@ export default function TransferenciasEstoquePage({
                                         <Label>Busca</Label>
                                         <Input
                                             value={filtroBusca}
-                                            onChange={(event) => setFiltroBusca(event.target.value)}
+                                            onChange={(event) =>
+                                                setFiltroBusca(
+                                                    event.target.value,
+                                                )
+                                            }
                                             placeholder="TRF, observação, material..."
                                         />
                                     </div>
                                     <div className="space-y-1">
                                         <Label>Origem</Label>
-                                        <Select value={selectVal(filtroOrigem)} onValueChange={(value) => setFiltroOrigem(value === SELECT_VAZIO ? '' : value)}>
+                                        <Select
+                                            value={selectVal(filtroOrigem)}
+                                            onValueChange={(value) =>
+                                                setFiltroOrigem(
+                                                    value === SELECT_VAZIO
+                                                        ? ''
+                                                        : value,
+                                                )
+                                            }
+                                        >
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Todas" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value={SELECT_VAZIO}>Todas</SelectItem>
-                                                {opcoesFiltro.origens.map((origem) => (
-                                                    <SelectItem key={origem} value={origem}>
-                                                        {origem}
-                                                    </SelectItem>
-                                                ))}
+                                                <SelectItem
+                                                    value={SELECT_VAZIO}
+                                                >
+                                                    Todas
+                                                </SelectItem>
+                                                {opcoesFiltro.origens.map(
+                                                    (origem) => (
+                                                        <SelectItem
+                                                            key={origem}
+                                                            value={origem}
+                                                        >
+                                                            {origem}
+                                                        </SelectItem>
+                                                    ),
+                                                )}
                                             </SelectContent>
                                         </Select>
                                     </div>
                                     <div className="space-y-1">
                                         <Label>Destino</Label>
-                                        <Select value={selectVal(filtroDestino)} onValueChange={(value) => setFiltroDestino(value === SELECT_VAZIO ? '' : value)}>
+                                        <Select
+                                            value={selectVal(filtroDestino)}
+                                            onValueChange={(value) =>
+                                                setFiltroDestino(
+                                                    value === SELECT_VAZIO
+                                                        ? ''
+                                                        : value,
+                                                )
+                                            }
+                                        >
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Todos" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value={SELECT_VAZIO}>Todos</SelectItem>
-                                                {opcoesFiltro.destinos.map((destino) => (
-                                                    <SelectItem key={destino} value={destino}>
-                                                        {destino}
-                                                    </SelectItem>
-                                                ))}
+                                                <SelectItem
+                                                    value={SELECT_VAZIO}
+                                                >
+                                                    Todos
+                                                </SelectItem>
+                                                {opcoesFiltro.destinos.map(
+                                                    (destino) => (
+                                                        <SelectItem
+                                                            key={destino}
+                                                            value={destino}
+                                                        >
+                                                            {destino}
+                                                        </SelectItem>
+                                                    ),
+                                                )}
                                             </SelectContent>
                                         </Select>
                                     </div>
                                     <div className="space-y-1">
                                         <Label>Usuário</Label>
-                                        <Select value={selectVal(filtroUsuario)} onValueChange={(value) => setFiltroUsuario(value === SELECT_VAZIO ? '' : value)}>
+                                        <Select
+                                            value={selectVal(filtroUsuario)}
+                                            onValueChange={(value) =>
+                                                setFiltroUsuario(
+                                                    value === SELECT_VAZIO
+                                                        ? ''
+                                                        : value,
+                                                )
+                                            }
+                                        >
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Todos" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value={SELECT_VAZIO}>Todos</SelectItem>
-                                                {opcoesFiltro.usuarios.map((usuario) => (
-                                                    <SelectItem key={usuario} value={usuario}>
-                                                        {usuario}
-                                                    </SelectItem>
-                                                ))}
+                                                <SelectItem
+                                                    value={SELECT_VAZIO}
+                                                >
+                                                    Todos
+                                                </SelectItem>
+                                                {opcoesFiltro.usuarios.map(
+                                                    (usuario) => (
+                                                        <SelectItem
+                                                            key={usuario}
+                                                            value={usuario}
+                                                        >
+                                                            {usuario}
+                                                        </SelectItem>
+                                                    ),
+                                                )}
                                             </SelectContent>
                                         </Select>
                                     </div>
                                     <div className="space-y-1">
                                         <Label>Termo</Label>
-                                        <Select value={selectVal(filtroTermo)} onValueChange={(value) => setFiltroTermo(value === SELECT_VAZIO ? '' : value)}>
+                                        <Select
+                                            value={selectVal(filtroTermo)}
+                                            onValueChange={(value) =>
+                                                setFiltroTermo(
+                                                    value === SELECT_VAZIO
+                                                        ? ''
+                                                        : value,
+                                                )
+                                            }
+                                        >
                                             <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Todos" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value={SELECT_VAZIO}>Todos</SelectItem>
-                                                <SelectItem value="com_termo">Com termo</SelectItem>
-                                                <SelectItem value="sem_termo">Sem termo</SelectItem>
+                                                <SelectItem
+                                                    value={SELECT_VAZIO}
+                                                >
+                                                    Todos
+                                                </SelectItem>
+                                                <SelectItem value="com_termo">
+                                                    Com termo
+                                                </SelectItem>
+                                                <SelectItem value="sem_termo">
+                                                    Sem termo
+                                                </SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
                                 </div>
                             </div>
                             <p className="mt-3 text-xs text-muted-foreground">
-                                Mostrando {transferenciasFiltradas.length} de {transferenciasRecentes.length} transferência(s).
+                                Mostrando {transferenciasFiltradas.length} de{' '}
+                                {transferenciasRecentes.length}{' '}
+                                transferência(s).
                             </p>
                         </div>
 
@@ -681,144 +865,230 @@ export default function TransferenciasEstoquePage({
                             </div>
                         ) : transferenciasFiltradas.length === 0 ? (
                             <div className="rounded-xl border border-dashed border-border/70 p-10 text-center text-sm text-muted-foreground">
-                                Nenhuma transferência encontrada com os filtros aplicados.
+                                Nenhuma transferência encontrada com os filtros
+                                aplicados.
                             </div>
                         ) : (
                             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                                {transferenciasFiltradas.map((transferencia) => (
-                                    <Card
-                                        key={transferencia.id}
-                                        className="group relative overflow-hidden border-primary/45 bg-linear-to-r from-primary/15 via-background to-primary/5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-primary/35 dark:bg-[#1f2b44]/90 dark:from-primary/25 dark:to-primary/10"
-                                    >
-                                        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.35),transparent_48%)] dark:bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.28),transparent_48%)]" />
-                                        <CardHeader className="space-y-3 pb-3">
-                                            <div className="flex items-start justify-between gap-2">
-                                                <p className="text-xs font-semibold tracking-wide text-primary uppercase">
-                                                    TRF-{String(transferencia.id).padStart(5, '0')}
-                                                </p>
-                                                <div className="flex items-center gap-1">
-                                                    <span className="rounded-full border border-primary/40 bg-primary/20 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                                                        {transferencia.total_itens.toLocaleString('pt-BR', {
-                                                            maximumFractionDigits: 4,
-                                                        })}{' '}
-                                                        itens
-                                                    </span>
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="h-7 w-7 rounded-full text-primary"
-                                                                aria-label="Abrir ações da transferência"
+                                {transferenciasFiltradas.map(
+                                    (transferencia) => (
+                                        <Card
+                                            key={transferencia.id}
+                                            className="group relative overflow-hidden border-primary/45 bg-linear-to-r from-primary/15 via-background to-primary/5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-primary/35 dark:bg-[#1f2b44]/90 dark:from-primary/25 dark:to-primary/10"
+                                        >
+                                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.35),transparent_48%)] dark:bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.28),transparent_48%)]" />
+                                            <CardHeader className="space-y-3 pb-3">
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <p className="text-xs font-semibold tracking-wide text-primary uppercase">
+                                                        TRF-
+                                                        {String(
+                                                            transferencia.id,
+                                                        ).padStart(5, '0')}
+                                                    </p>
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="rounded-full border border-primary/40 bg-primary/20 px-2 py-0.5 text-[11px] font-semibold text-primary">
+                                                            {transferencia.total_itens.toLocaleString(
+                                                                'pt-BR',
+                                                                {
+                                                                    maximumFractionDigits: 4,
+                                                                },
+                                                            )}{' '}
+                                                            itens
+                                                        </span>
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger
+                                                                asChild
                                                             >
-                                                                <EllipsisVertical className="h-4 w-4 text-primary" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                            <DropdownMenuItem onClick={() => abrirModalDetalhes(transferencia)}>
-                                                                <Eye className="mr-2 h-4 w-4" />
-                                                                Ver transferência
-                                                            </DropdownMenuItem>
-                                                            {transferencia.termo_url ? (
-                                                                <DropdownMenuItem asChild>
-                                                                    <a
-                                                                        href={transferencia.termo_url}
-                                                                        target="_blank"
-                                                                        rel="noreferrer"
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-7 w-7 rounded-full text-primary"
+                                                                    aria-label="Abrir ações da transferência"
+                                                                >
+                                                                    <EllipsisVertical className="h-4 w-4 text-primary" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuItem
+                                                                    onClick={() =>
+                                                                        abrirModalDetalhes(
+                                                                            transferencia,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <Eye className="mr-2 h-4 w-4" />
+                                                                    Ver
+                                                                    transferência
+                                                                </DropdownMenuItem>
+                                                                {transferencia.termo_url ? (
+                                                                    <DropdownMenuItem
+                                                                        asChild
+                                                                    >
+                                                                        <a
+                                                                            href={
+                                                                                transferencia.termo_url
+                                                                            }
+                                                                            target="_blank"
+                                                                            rel="noreferrer"
+                                                                        >
+                                                                            <FileText className="mr-2 h-4 w-4" />
+                                                                            Ver
+                                                                            termo
+                                                                            de
+                                                                            recebimento
+                                                                        </a>
+                                                                    </DropdownMenuItem>
+                                                                ) : (
+                                                                    <DropdownMenuItem
+                                                                        disabled
                                                                     >
                                                                         <FileText className="mr-2 h-4 w-4" />
-                                                                        Ver termo de recebimento
-                                                                    </a>
-                                                                </DropdownMenuItem>
-                                                            ) : (
-                                                                <DropdownMenuItem disabled>
-                                                                    <FileText className="mr-2 h-4 w-4" />
-                                                                    Termo não anexado
-                                                                </DropdownMenuItem>
-                                                            )}
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
+                                                                        Termo
+                                                                        não
+                                                                        anexado
+                                                                    </DropdownMenuItem>
+                                                                )}
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="rounded-lg border border-primary/30 bg-white/15 p-3 text-primary backdrop-blur-[1px] dark:bg-white/10">
-                                                <p className="text-xs text-[#1f2b44]">Rota</p>
-                                                <p className="mt-1 text-sm font-medium text-primary">
-                                                    {transferencia.estoque_origem}
-                                                </p>
-                                                <p className="-mb-0.5 text-[11px] leading-none text-[#1f2b44]">
-                                                    para
-                                                </p>
-                                                <p className="text-sm font-medium text-primary">
-                                                    {transferencia.estoque_destino}
-                                                </p>
-                                            </div>
-                                        </CardHeader>
-                                        <CardContent className="space-y-3 pt-0">
-                                            <div className="grid grid-cols-2 gap-2 text-xs">
-                                                <div className="rounded-lg border border-primary/30 bg-white/12 p-2 text-primary backdrop-blur-[1px] dark:bg-white/10">
-                                                    <p className="text-[#1f2b44]">Usuário</p>
-                                                    <p className="mt-0.5 text-sm font-medium text-primary">
-                                                        {transferencia.usuario}
-                                                    </p>
-                                                </div>
-                                                <div className="rounded-lg border border-primary/30 bg-white/12 p-2 text-primary backdrop-blur-[1px] dark:bg-white/10">
-                                                    <p className="text-[#1f2b44]">Data</p>
-                                                    <p className="mt-0.5 text-sm font-medium text-primary">
-                                                        {transferencia.created_at
-                                                            ? new Date(
-                                                                  transferencia.created_at,
-                                                              ).toLocaleString('pt-BR')
-                                                            : '-'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="rounded-lg border border-primary/30 bg-white/12 p-2 text-primary backdrop-blur-[1px] dark:bg-white/10">
-                                                <p className="text-xs text-[#1f2b44]">Observação</p>
-                                                <p
-                                                    className="line-clamp-2 text-sm text-primary wrap-break-word"
-                                                    title={transferencia.observacao ?? ''}
-                                                >
-                                                    {transferencia.observacao ?? '-'}
-                                                </p>
-                                            </div>
-                                            {transferencia.itens.length > 0 && (
-                                                <div className="space-y-2 rounded-lg border border-primary/30 bg-white/12 p-2 backdrop-blur-[1px] dark:bg-white/10">
+                                                <div className="rounded-lg border border-primary/30 bg-white/15 p-3 text-primary backdrop-blur-[1px] dark:bg-white/10">
                                                     <p className="text-xs text-[#1f2b44]">
-                                                        Itens (prévia)
+                                                        Rota
                                                     </p>
-                                                    {transferencia.itens.slice(0, 2).map((item) => (
-                                                        <div key={item.id} className="rounded-md border border-primary/25 bg-white/10 p-2 text-xs backdrop-blur-[1px] dark:bg-white/8">
-                                                            <p className="font-medium text-primary">
-                                                                {item.material}
-                                                            </p>
-                                                            <div className="mt-1 grid gap-1 sm:grid-cols-2">
-                                                                <p className="text-primary/90">
-                                                                    Série: <span className="font-medium text-primary">{item.numero_serie || '-'}</span>
-                                                                </p>
-                                                                <p className="text-primary/90">
-                                                                    Empresa: <span className="font-medium text-primary">{item.empresa || '-'}</span>
-                                                                </p>
-                                                                <p className="text-primary/90">
-                                                                    Local: <span className="font-medium text-primary">{item.local || '-'}</span>
-                                                                </p>
-                                                                <p className="text-primary/90">
-                                                                    Condição: <span className="font-medium text-primary">{item.condicao || '-'}</span>
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    {transferencia.itens.length > 2 && (
-                                                        <p className="text-[11px] text-primary/80">
-                                                            +{transferencia.itens.length - 2} item(ns) adicionais. Use "Ver transferência" para detalhes completos.
-                                                        </p>
-                                                    )}
+                                                    <p className="mt-1 text-sm font-medium text-primary">
+                                                        {
+                                                            transferencia.estoque_origem
+                                                        }
+                                                    </p>
+                                                    <p className="-mb-0.5 text-[11px] leading-none text-[#1f2b44]">
+                                                        para
+                                                    </p>
+                                                    <p className="text-sm font-medium text-primary">
+                                                        {
+                                                            transferencia.estoque_destino
+                                                        }
+                                                    </p>
                                                 </div>
-                                            )}
-                                            <div className="border-t border-border/60 pt-2" />
-                                        </CardContent>
-                                    </Card>
-                                ))}
+                                            </CardHeader>
+                                            <CardContent className="space-y-3 pt-0">
+                                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                                    <div className="rounded-lg border border-primary/30 bg-white/12 p-2 text-primary backdrop-blur-[1px] dark:bg-white/10">
+                                                        <p className="text-[#1f2b44]">
+                                                            Usuário
+                                                        </p>
+                                                        <p className="mt-0.5 text-sm font-medium text-primary">
+                                                            {
+                                                                transferencia.usuario
+                                                            }
+                                                        </p>
+                                                    </div>
+                                                    <div className="rounded-lg border border-primary/30 bg-white/12 p-2 text-primary backdrop-blur-[1px] dark:bg-white/10">
+                                                        <p className="text-[#1f2b44]">
+                                                            Data
+                                                        </p>
+                                                        <p className="mt-0.5 text-sm font-medium text-primary">
+                                                            {transferencia.created_at
+                                                                ? new Date(
+                                                                      transferencia.created_at,
+                                                                  ).toLocaleString(
+                                                                      'pt-BR',
+                                                                  )
+                                                                : '-'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="rounded-lg border border-primary/30 bg-white/12 p-2 text-primary backdrop-blur-[1px] dark:bg-white/10">
+                                                    <p className="text-xs text-[#1f2b44]">
+                                                        Observação
+                                                    </p>
+                                                    <p
+                                                        className="line-clamp-2 text-sm wrap-break-word text-primary"
+                                                        title={
+                                                            transferencia.observacao ??
+                                                            ''
+                                                        }
+                                                    >
+                                                        {transferencia.observacao ??
+                                                            '-'}
+                                                    </p>
+                                                </div>
+                                                {transferencia.itens.length >
+                                                    0 && (
+                                                    <div className="space-y-2 rounded-lg border border-primary/30 bg-white/12 p-2 backdrop-blur-[1px] dark:bg-white/10">
+                                                        <p className="text-xs text-[#1f2b44]">
+                                                            Itens (prévia)
+                                                        </p>
+                                                        {transferencia.itens
+                                                            .slice(0, 2)
+                                                            .map((item) => (
+                                                                <div
+                                                                    key={
+                                                                        item.id
+                                                                    }
+                                                                    className="rounded-md border border-primary/25 bg-white/10 p-2 text-xs backdrop-blur-[1px] dark:bg-white/8"
+                                                                >
+                                                                    <p className="font-medium text-primary">
+                                                                        {
+                                                                            item.material
+                                                                        }
+                                                                    </p>
+                                                                    <div className="mt-1 grid gap-1 sm:grid-cols-2">
+                                                                        <p className="text-primary/90">
+                                                                            Série:{' '}
+                                                                            <span className="font-medium text-primary">
+                                                                                {item.numero_serie ||
+                                                                                    '-'}
+                                                                            </span>
+                                                                        </p>
+                                                                        <p className="text-primary/90">
+                                                                            Empresa:{' '}
+                                                                            <span className="font-medium text-primary">
+                                                                                {item.empresa ||
+                                                                                    '-'}
+                                                                            </span>
+                                                                        </p>
+                                                                        <p className="text-primary/90">
+                                                                            Local:{' '}
+                                                                            <span className="font-medium text-primary">
+                                                                                {item.local ||
+                                                                                    '-'}
+                                                                            </span>
+                                                                        </p>
+                                                                        <p className="text-primary/90">
+                                                                            Condição:{' '}
+                                                                            <span className="font-medium text-primary">
+                                                                                {item.condicao ||
+                                                                                    '-'}
+                                                                            </span>
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        {transferencia.itens
+                                                            .length > 2 && (
+                                                            <p className="text-[11px] text-primary/80">
+                                                                +
+                                                                {transferencia
+                                                                    .itens
+                                                                    .length -
+                                                                    2}{' '}
+                                                                item(ns)
+                                                                adicionais. Use
+                                                                "Ver
+                                                                transferência"
+                                                                para detalhes
+                                                                completos.
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                <div className="border-t border-border/60 pt-2" />
+                                            </CardContent>
+                                        </Card>
+                                    ),
+                                )}
                             </div>
                         )}
                     </CardContent>
@@ -833,11 +1103,15 @@ export default function TransferenciasEstoquePage({
                             Nova transferência
                         </DialogTitle>
                         <DialogDescription className="relative text-foreground/80">
-                            Informe origem, destino e itens para montar a transferência.
+                            Informe origem, destino e itens para montar a
+                            transferência.
                         </DialogDescription>
                     </DialogHeader>
 
-                    <form onSubmit={onSubmit} className="flex min-h-0 flex-col overflow-hidden">
+                    <form
+                        onSubmit={onSubmit}
+                        className="flex min-h-0 flex-col overflow-hidden"
+                    >
                         <div className="mb-3 flex flex-wrap items-center gap-2">
                             <span className="rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
                                 1. Defina origem e destino
@@ -856,29 +1130,40 @@ export default function TransferenciasEstoquePage({
                             >
                                 <Card className="border-primary/20">
                                     <CardHeader>
-                                        <CardTitle className="text-base">Origem e destino</CardTitle>
+                                        <CardTitle className="text-base">
+                                            Origem e destino
+                                        </CardTitle>
                                         <CardDescription>
-                                            Escolha os estoques para movimentação. Origem e destino devem ser diferentes.
+                                            Escolha os estoques para
+                                            movimentação. Origem e destino devem
+                                            ser diferentes.
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="grid gap-3 md:grid-cols-2">
                                         <div className="space-y-2">
                                             <Label>Estoque de origem *</Label>
                                             <Select
-                                                value={selectVal(estoqueOrigemId)}
+                                                value={selectVal(
+                                                    estoqueOrigemId,
+                                                )}
                                                 onValueChange={trocarOrigem}
                                             >
                                                 <SelectTrigger className="w-full">
                                                     <SelectValue placeholder="Selecione a origem" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value={SELECT_VAZIO} disabled>
+                                                    <SelectItem
+                                                        value={SELECT_VAZIO}
+                                                        disabled
+                                                    >
                                                         Selecione
                                                     </SelectItem>
                                                     {estoques.map((estoque) => (
                                                         <SelectItem
                                                             key={estoque.id}
-                                                            value={String(estoque.id)}
+                                                            value={String(
+                                                                estoque.id,
+                                                            )}
                                                         >
                                                             {estoque.nome}
                                                         </SelectItem>
@@ -889,26 +1174,35 @@ export default function TransferenciasEstoquePage({
                                         <div className="space-y-2">
                                             <Label>Estoque de destino *</Label>
                                             <Select
-                                                value={selectVal(estoqueDestinoId)}
+                                                value={selectVal(
+                                                    estoqueDestinoId,
+                                                )}
                                                 onValueChange={trocarDestino}
                                             >
                                                 <SelectTrigger className="w-full">
                                                     <SelectValue placeholder="Selecione o destino" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value={SELECT_VAZIO} disabled>
+                                                    <SelectItem
+                                                        value={SELECT_VAZIO}
+                                                        disabled
+                                                    >
                                                         Selecione
                                                     </SelectItem>
                                                     {estoques
                                                         .filter(
                                                             (estoque) =>
-                                                                String(estoque.id) !==
+                                                                String(
+                                                                    estoque.id,
+                                                                ) !==
                                                                 estoqueOrigemId,
                                                         )
                                                         .map((estoque) => (
                                                             <SelectItem
                                                                 key={estoque.id}
-                                                                value={String(estoque.id)}
+                                                                value={String(
+                                                                    estoque.id,
+                                                                )}
                                                             >
                                                                 {estoque.nome}
                                                             </SelectItem>
@@ -921,7 +1215,9 @@ export default function TransferenciasEstoquePage({
 
                                 <Card>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                                        <CardTitle className="text-base">Itens da transferência</CardTitle>
+                                        <CardTitle className="text-base">
+                                            Itens da transferência
+                                        </CardTitle>
                                         <Button
                                             type="button"
                                             variant="secondary"
@@ -934,13 +1230,26 @@ export default function TransferenciasEstoquePage({
                                     </CardHeader>
                                     <CardContent className="space-y-4">
                                         {itens.map((item, index) => {
-                                            const materialSelecionado = mapaMateriais.get(
-                                                item.material_id,
+                                            const materialSelecionado =
+                                                mapaMateriais.get(
+                                                    item.material_id,
+                                                );
+                                            const opcoesSerie = opcoesCampo(
+                                                item,
+                                                'numero_serie',
                                             );
-                                            const opcoesSerie = opcoesCampo(item, 'numero_serie');
-                                            const opcoesLocal = opcoesCampo(item, 'local_nome');
-                                            const opcoesEmpresa = opcoesCampo(item, 'empresa_nome');
-                                            const opcoesCondicao = opcoesCampo(item, 'condicao');
+                                            const opcoesLocal = opcoesCampo(
+                                                item,
+                                                'local_nome',
+                                            );
+                                            const opcoesEmpresa = opcoesCampo(
+                                                item,
+                                                'empresa_nome',
+                                            );
+                                            const opcoesCondicao = opcoesCampo(
+                                                item,
+                                                'condicao',
+                                            );
 
                                             return (
                                                 <div
@@ -959,11 +1268,18 @@ export default function TransferenciasEstoquePage({
                                                                 size="icon"
                                                                 className="h-8 w-8 text-destructive"
                                                                 onClick={() =>
-                                                                    setItens((current) =>
-                                                                        current.filter(
-                                                                            (_, itemIndex) =>
-                                                                                itemIndex !== index,
-                                                                        ),
+                                                                    setItens(
+                                                                        (
+                                                                            current,
+                                                                        ) =>
+                                                                            current.filter(
+                                                                                (
+                                                                                    _,
+                                                                                    itemIndex,
+                                                                                ) =>
+                                                                                    itemIndex !==
+                                                                                    index,
+                                                                            ),
                                                                     )
                                                                 }
                                                             >
@@ -974,17 +1290,24 @@ export default function TransferenciasEstoquePage({
 
                                                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                                                         <div className="space-y-2 xl:col-span-2">
-                                                            <Label>Material *</Label>
+                                                            <Label>
+                                                                Material *
+                                                            </Label>
                                                             <Select
-                                                                value={selectVal(item.material_id)}
-                                                                onValueChange={(value) =>
+                                                                value={selectVal(
+                                                                    item.material_id,
+                                                                )}
+                                                                onValueChange={(
+                                                                    value,
+                                                                ) =>
                                                                     trocarMaterialItem(
                                                                         index,
                                                                         value,
                                                                     )
                                                                 }
                                                                 disabled={
-                                                                    estoqueOrigemId === ''
+                                                                    estoqueOrigemId ===
+                                                                    ''
                                                                 }
                                                             >
                                                                 <SelectTrigger className="w-full">
@@ -992,13 +1315,17 @@ export default function TransferenciasEstoquePage({
                                                                 </SelectTrigger>
                                                                 <SelectContent>
                                                                     <SelectItem
-                                                                        value={SELECT_VAZIO}
+                                                                        value={
+                                                                            SELECT_VAZIO
+                                                                        }
                                                                         disabled
                                                                     >
                                                                         Selecione
                                                                     </SelectItem>
                                                                     {materiaisDaOrigem.map(
-                                                                        (material) => (
+                                                                        (
+                                                                            material,
+                                                                        ) => (
                                                                             <SelectItem
                                                                                 key={
                                                                                     material.material_id
@@ -1007,8 +1334,13 @@ export default function TransferenciasEstoquePage({
                                                                                     material.material_id,
                                                                                 )}
                                                                             >
-                                                                                {material.codigo} -{' '}
-                                                                                {material.descricao}
+                                                                                {
+                                                                                    material.codigo
+                                                                                }{' '}
+                                                                                -{' '}
+                                                                                {
+                                                                                    material.descricao
+                                                                                }
                                                                             </SelectItem>
                                                                         ),
                                                                     )}
@@ -1016,14 +1348,25 @@ export default function TransferenciasEstoquePage({
                                                             </Select>
                                                         </div>
                                                         <div className="space-y-2">
-                                                            <Label>Quantidade *</Label>
+                                                            <Label>
+                                                                Quantidade *
+                                                            </Label>
                                                             <Input
-                                                                value={item.quantidade}
-                                                                onChange={(event) =>
-                                                                    atualizarItem(index, {
-                                                                        quantidade:
-                                                                            event.target.value,
-                                                                    })
+                                                                value={
+                                                                    item.quantidade
+                                                                }
+                                                                onChange={(
+                                                                    event,
+                                                                ) =>
+                                                                    atualizarItem(
+                                                                        index,
+                                                                        {
+                                                                            quantidade:
+                                                                                event
+                                                                                    .target
+                                                                                    .value,
+                                                                        },
+                                                                    )
                                                                 }
                                                                 placeholder="0"
                                                                 inputMode="decimal"
@@ -1033,155 +1376,277 @@ export default function TransferenciasEstoquePage({
 
                                                     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                                                         <div className="space-y-2">
-                                                            <Label>Número de série</Label>
+                                                            <Label>
+                                                                Número de série
+                                                            </Label>
                                                             <Select
-                                                                value={selectVal(item.numero_serie)}
-                                                                onValueChange={(value) => trocarNumeroSerieItem(index, value)}
-                                                                disabled={item.material_id === ''}
+                                                                value={selectVal(
+                                                                    item.numero_serie,
+                                                                )}
+                                                                onValueChange={(
+                                                                    value,
+                                                                ) =>
+                                                                    trocarNumeroSerieItem(
+                                                                        index,
+                                                                        value,
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    item.material_id ===
+                                                                    ''
+                                                                }
                                                             >
                                                                 <SelectTrigger className="w-full">
                                                                     <SelectValue placeholder="Selecione" />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
-                                                                    <SelectItem value={SELECT_VAZIO}>
-                                                                        Não informado
+                                                                    <SelectItem
+                                                                        value={
+                                                                            SELECT_VAZIO
+                                                                        }
+                                                                    >
+                                                                        Não
+                                                                        informado
                                                                     </SelectItem>
-                                                                    {opcoesSerie.map((option) => (
-                                                                        <SelectItem
-                                                                            key={option}
-                                                                            value={option}
-                                                                        >
-                                                                            {option}
-                                                                        </SelectItem>
-                                                                    ))}
+                                                                    {opcoesSerie.map(
+                                                                        (
+                                                                            option,
+                                                                        ) => (
+                                                                            <SelectItem
+                                                                                key={
+                                                                                    option
+                                                                                }
+                                                                                value={
+                                                                                    option
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    option
+                                                                                }
+                                                                            </SelectItem>
+                                                                        ),
+                                                                    )}
                                                                 </SelectContent>
                                                             </Select>
                                                         </div>
                                                         <div className="space-y-2">
-                                                            <Label>Empresa</Label>
+                                                            <Label>
+                                                                Empresa
+                                                            </Label>
                                                             <Select
-                                                                value={selectVal(item.empresa)}
-                                                                onValueChange={(value) => {
-                                                                        const nextEmpresa =
-                                                                            value === SELECT_VAZIO
-                                                                                ? ''
-                                                                                : value;
-                                                                        const material =
-                                                                            mapaMateriais.get(
-                                                                                item.material_id,
-                                                                            );
-                                                                        const vinculo =
-                                                                            material?.vinculos.find(
-                                                                                (v) =>
-                                                                                    (v.empresa_nome ??
-                                                                                        '') ===
-                                                                                    nextEmpresa,
-                                                                            );
+                                                                value={selectVal(
+                                                                    item.empresa,
+                                                                )}
+                                                                onValueChange={(
+                                                                    value,
+                                                                ) => {
+                                                                    const nextEmpresa =
+                                                                        value ===
+                                                                        SELECT_VAZIO
+                                                                            ? ''
+                                                                            : value;
+                                                                    const material =
+                                                                        mapaMateriais.get(
+                                                                            item.material_id,
+                                                                        );
+                                                                    const vinculo =
+                                                                        material?.vinculos.find(
+                                                                            (
+                                                                                v,
+                                                                            ) =>
+                                                                                (v.empresa_nome ??
+                                                                                    '') ===
+                                                                                nextEmpresa,
+                                                                        );
 
-                                                                        atualizarItem(index, {
-                                                                            empresa: nextEmpresa,
-                                                                            empresa_id: vinculo?.empresa_id
-                                                                                ? String(vinculo.empresa_id)
-                                                                                : '',
-                                                                        });
-                                                                    }}
-                                                                disabled={item.material_id === ''}
+                                                                    atualizarItem(
+                                                                        index,
+                                                                        {
+                                                                            empresa:
+                                                                                nextEmpresa,
+                                                                            empresa_id:
+                                                                                vinculo?.empresa_id
+                                                                                    ? String(
+                                                                                          vinculo.empresa_id,
+                                                                                      )
+                                                                                    : '',
+                                                                        },
+                                                                    );
+                                                                }}
+                                                                disabled={
+                                                                    item.material_id ===
+                                                                    ''
+                                                                }
                                                             >
                                                                 <SelectTrigger className="w-full">
                                                                     <SelectValue placeholder="Selecione" />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
-                                                                    <SelectItem value={SELECT_VAZIO}>
-                                                                        Não informado
+                                                                    <SelectItem
+                                                                        value={
+                                                                            SELECT_VAZIO
+                                                                        }
+                                                                    >
+                                                                        Não
+                                                                        informado
                                                                     </SelectItem>
-                                                                    {opcoesEmpresa.map((option) => (
-                                                                        <SelectItem
-                                                                            key={option}
-                                                                            value={option}
-                                                                        >
-                                                                            {option}
-                                                                        </SelectItem>
-                                                                    ))}
+                                                                    {opcoesEmpresa.map(
+                                                                        (
+                                                                            option,
+                                                                        ) => (
+                                                                            <SelectItem
+                                                                                key={
+                                                                                    option
+                                                                                }
+                                                                                value={
+                                                                                    option
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    option
+                                                                                }
+                                                                            </SelectItem>
+                                                                        ),
+                                                                    )}
                                                                 </SelectContent>
                                                             </Select>
                                                         </div>
                                                         <div className="space-y-2">
                                                             <Label>Local</Label>
                                                             <Select
-                                                                value={selectVal(item.local)}
-                                                                onValueChange={(value) => {
-                                                                        const nextLocal =
-                                                                            value === SELECT_VAZIO
-                                                                                ? ''
-                                                                                : value;
-                                                                        const material =
-                                                                            mapaMateriais.get(
-                                                                                item.material_id,
-                                                                            );
-                                                                        const vinculo =
-                                                                            material?.vinculos.find(
-                                                                                (v) =>
-                                                                                    (v.local_nome ??
-                                                                                        '') ===
-                                                                                    nextLocal,
-                                                                            );
+                                                                value={selectVal(
+                                                                    item.local,
+                                                                )}
+                                                                onValueChange={(
+                                                                    value,
+                                                                ) => {
+                                                                    const nextLocal =
+                                                                        value ===
+                                                                        SELECT_VAZIO
+                                                                            ? ''
+                                                                            : value;
+                                                                    const material =
+                                                                        mapaMateriais.get(
+                                                                            item.material_id,
+                                                                        );
+                                                                    const vinculo =
+                                                                        material?.vinculos.find(
+                                                                            (
+                                                                                v,
+                                                                            ) =>
+                                                                                (v.local_nome ??
+                                                                                    '') ===
+                                                                                nextLocal,
+                                                                        );
 
-                                                                        atualizarItem(index, {
+                                                                    atualizarItem(
+                                                                        index,
+                                                                        {
                                                                             local: nextLocal,
-                                                                            local_id: vinculo?.local_id
-                                                                                ? String(vinculo.local_id)
-                                                                                : '',
-                                                                        });
-                                                                    }}
-                                                                disabled={item.material_id === ''}
+                                                                            local_id:
+                                                                                vinculo?.local_id
+                                                                                    ? String(
+                                                                                          vinculo.local_id,
+                                                                                      )
+                                                                                    : '',
+                                                                        },
+                                                                    );
+                                                                }}
+                                                                disabled={
+                                                                    item.material_id ===
+                                                                    ''
+                                                                }
                                                             >
                                                                 <SelectTrigger className="w-full">
                                                                     <SelectValue placeholder="Selecione" />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
-                                                                    <SelectItem value={SELECT_VAZIO}>
-                                                                        Não informado
+                                                                    <SelectItem
+                                                                        value={
+                                                                            SELECT_VAZIO
+                                                                        }
+                                                                    >
+                                                                        Não
+                                                                        informado
                                                                     </SelectItem>
-                                                                    {opcoesLocal.map((option) => (
-                                                                        <SelectItem
-                                                                            key={option}
-                                                                            value={option}
-                                                                        >
-                                                                            {option}
-                                                                        </SelectItem>
-                                                                    ))}
+                                                                    {opcoesLocal.map(
+                                                                        (
+                                                                            option,
+                                                                        ) => (
+                                                                            <SelectItem
+                                                                                key={
+                                                                                    option
+                                                                                }
+                                                                                value={
+                                                                                    option
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    option
+                                                                                }
+                                                                            </SelectItem>
+                                                                        ),
+                                                                    )}
                                                                 </SelectContent>
                                                             </Select>
                                                         </div>
                                                         <div className="space-y-2">
-                                                            <Label>Condição</Label>
+                                                            <Label>
+                                                                Condição
+                                                            </Label>
                                                             <Select
-                                                                value={selectVal(item.condicao)}
-                                                                onValueChange={(value) =>
-                                                                    atualizarItem(index, {
-                                                                        condicao:
-                                                                            value === SELECT_VAZIO
-                                                                                ? ''
-                                                                                : value,
-                                                                    })
+                                                                value={selectVal(
+                                                                    item.condicao,
+                                                                )}
+                                                                onValueChange={(
+                                                                    value,
+                                                                ) =>
+                                                                    atualizarItem(
+                                                                        index,
+                                                                        {
+                                                                            condicao:
+                                                                                value ===
+                                                                                SELECT_VAZIO
+                                                                                    ? ''
+                                                                                    : value,
+                                                                        },
+                                                                    )
                                                                 }
-                                                                disabled={item.material_id === ''}
+                                                                disabled={
+                                                                    item.material_id ===
+                                                                    ''
+                                                                }
                                                             >
                                                                 <SelectTrigger className="w-full">
                                                                     <SelectValue placeholder="Selecione" />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
-                                                                    <SelectItem value={SELECT_VAZIO}>
-                                                                        Não informado
+                                                                    <SelectItem
+                                                                        value={
+                                                                            SELECT_VAZIO
+                                                                        }
+                                                                    >
+                                                                        Não
+                                                                        informado
                                                                     </SelectItem>
-                                                                    {opcoesCondicao.map((option) => (
-                                                                        <SelectItem
-                                                                            key={option}
-                                                                            value={option}
-                                                                        >
-                                                                            {option}
-                                                                        </SelectItem>
-                                                                    ))}
+                                                                    {opcoesCondicao.map(
+                                                                        (
+                                                                            option,
+                                                                        ) => (
+                                                                            <SelectItem
+                                                                                key={
+                                                                                    option
+                                                                                }
+                                                                                value={
+                                                                                    option
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    option
+                                                                                }
+                                                                            </SelectItem>
+                                                                        ),
+                                                                    )}
                                                                 </SelectContent>
                                                             </Select>
                                                         </div>
@@ -1189,7 +1654,8 @@ export default function TransferenciasEstoquePage({
 
                                                     {materialSelecionado && (
                                                         <p className="text-xs text-muted-foreground">
-                                                            Disponível na origem:{' '}
+                                                            Disponível na
+                                                            origem:{' '}
                                                             {materialSelecionado.quantidade_disponivel.toLocaleString(
                                                                 'pt-BR',
                                                                 {
@@ -1211,8 +1677,9 @@ export default function TransferenciasEstoquePage({
                                             Termo e observações
                                         </CardTitle>
                                         <CardDescription>
-                                            Opcional: anexe o termo de recebimento e registre
-                                            observações sobre esta transferência.
+                                            Opcional: anexe o termo de
+                                            recebimento e registre observações
+                                            sobre esta transferência.
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
@@ -1225,13 +1692,15 @@ export default function TransferenciasEstoquePage({
                                                 type="file"
                                                 onChange={(event) =>
                                                     setTermoRecebimento(
-                                                        event.target.files?.[0] ?? null,
+                                                        event.target
+                                                            .files?.[0] ?? null,
                                                     )
                                                 }
                                             />
                                             {termoRecebimento && (
                                                 <p className="text-xs text-muted-foreground">
-                                                    Arquivo selecionado: {termoRecebimento.name}
+                                                    Arquivo selecionado:{' '}
+                                                    {termoRecebimento.name}
                                                 </p>
                                             )}
                                         </div>
@@ -1244,7 +1713,9 @@ export default function TransferenciasEstoquePage({
                                                 rows={4}
                                                 value={observacoes}
                                                 onChange={(event) =>
-                                                    setObservacoes(event.target.value)
+                                                    setObservacoes(
+                                                        event.target.value,
+                                                    )
                                                 }
                                                 placeholder="Observações gerais da transferência"
                                                 className={cn(
@@ -1266,92 +1737,118 @@ export default function TransferenciasEstoquePage({
                                             Resumo geral
                                         </CardTitle>
                                         <CardDescription>
-                                            Confira os dados antes de concluir a transferência.
+                                            Confira os dados antes de concluir a
+                                            transferência.
                                         </CardDescription>
                                     </CardHeader>
-                                <CardContent className="flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto overscroll-y-contain">
-                                    <div className="rounded-lg border border-border/70 p-3 text-sm">
-                                        <p className="font-medium text-muted-foreground">Origem</p>
-                                        <p>{estoqueOrigem?.nome ?? 'Não selecionado'}</p>
-                                    </div>
-                                    <div className="rounded-lg border border-border/70 p-3 text-sm">
-                                        <p className="font-medium text-muted-foreground">Destino</p>
-                                        <p>{estoqueDestino?.nome ?? 'Não selecionado'}</p>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
+                                    <CardContent className="flex min-h-0 flex-1 flex-col space-y-4 overflow-y-auto overscroll-y-contain">
                                         <div className="rounded-lg border border-border/70 p-3 text-sm">
                                             <p className="font-medium text-muted-foreground">
-                                                Itens
+                                                Origem
                                             </p>
-                                            <p className="text-lg font-semibold">
-                                                {resumo.totalItens}
+                                            <p>
+                                                {estoqueOrigem?.nome ??
+                                                    'Não selecionado'}
                                             </p>
                                         </div>
                                         <div className="rounded-lg border border-border/70 p-3 text-sm">
                                             <p className="font-medium text-muted-foreground">
-                                                Quantidade
+                                                Destino
                                             </p>
-                                            <p className="text-lg font-semibold">
-                                                {resumo.totalQuantidade.toLocaleString('pt-BR', {
-                                                    minimumFractionDigits: 0,
-                                                    maximumFractionDigits: 4,
-                                                })}
+                                            <p>
+                                                {estoqueDestino?.nome ??
+                                                    'Não selecionado'}
                                             </p>
                                         </div>
-                                    </div>
-                                    <div className="rounded-lg border border-border/70 p-3 text-sm">
-                                        <p className="font-medium text-muted-foreground">
-                                            Termo de recebimento
-                                        </p>
-                                        <p>
-                                            {termoRecebimento
-                                                ? termoRecebimento.name
-                                                : 'Nenhum arquivo anexado'}
-                                        </p>
-                                    </div>
-                                    <div className="rounded-lg border border-border/70 p-3 text-sm">
-                                        <p className="font-medium text-muted-foreground">
-                                            Observações
-                                        </p>
-                                        <p className="line-clamp-4 whitespace-pre-wrap wrap-break-word">
-                                            {observacoes.trim() !== ''
-                                                ? observacoes
-                                                : '—'}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-2 rounded-lg border border-border/70 p-3">
-                                        {itens.filter((item) => item.material_id !== '').length ===
-                                        0 ? (
-                                            <p className="text-sm text-muted-foreground">
-                                                Nenhum item selecionado.
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div className="rounded-lg border border-border/70 p-3 text-sm">
+                                                <p className="font-medium text-muted-foreground">
+                                                    Itens
+                                                </p>
+                                                <p className="text-lg font-semibold">
+                                                    {resumo.totalItens}
+                                                </p>
+                                            </div>
+                                            <div className="rounded-lg border border-border/70 p-3 text-sm">
+                                                <p className="font-medium text-muted-foreground">
+                                                    Quantidade
+                                                </p>
+                                                <p className="text-lg font-semibold">
+                                                    {resumo.totalQuantidade.toLocaleString(
+                                                        'pt-BR',
+                                                        {
+                                                            minimumFractionDigits: 0,
+                                                            maximumFractionDigits: 4,
+                                                        },
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="rounded-lg border border-border/70 p-3 text-sm">
+                                            <p className="font-medium text-muted-foreground">
+                                                Termo de recebimento
                                             </p>
-                                        ) : (
-                                            itens
-                                                .filter((item) => item.material_id !== '')
-                                                .map((item, index) => {
-                                                    const material = mapaMateriais.get(
-                                                        item.material_id,
-                                                    );
+                                            <p>
+                                                {termoRecebimento
+                                                    ? termoRecebimento.name
+                                                    : 'Nenhum arquivo anexado'}
+                                            </p>
+                                        </div>
+                                        <div className="rounded-lg border border-border/70 p-3 text-sm">
+                                            <p className="font-medium text-muted-foreground">
+                                                Observações
+                                            </p>
+                                            <p className="line-clamp-4 wrap-break-word whitespace-pre-wrap">
+                                                {observacoes.trim() !== ''
+                                                    ? observacoes
+                                                    : '—'}
+                                            </p>
+                                        </div>
+                                        <div className="space-y-2 rounded-lg border border-border/70 p-3">
+                                            {itens.filter(
+                                                (item) =>
+                                                    item.material_id !== '',
+                                            ).length === 0 ? (
+                                                <p className="text-sm text-muted-foreground">
+                                                    Nenhum item selecionado.
+                                                </p>
+                                            ) : (
+                                                itens
+                                                    .filter(
+                                                        (item) =>
+                                                            item.material_id !==
+                                                            '',
+                                                    )
+                                                    .map((item, index) => {
+                                                        const material =
+                                                            mapaMateriais.get(
+                                                                item.material_id,
+                                                            );
 
-                                                    return (
-                                                        <div
-                                                            key={`resumo-item-${index}`}
-                                                            className="rounded-md border border-border/60 p-2 text-xs"
-                                                        >
-                                                            <p className="font-medium">
-                                                                {material?.codigo ?? 'MAT'} -{' '}
-                                                                {material?.descricao ?? 'Material'}
-                                                            </p>
-                                                            <p className="text-muted-foreground">
-                                                                Qtd: {item.quantidade || '0'}
-                                                            </p>
-                                                        </div>
-                                                    );
-                                                })
-                                        )}
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                                        return (
+                                                            <div
+                                                                key={`resumo-item-${index}`}
+                                                                className="rounded-md border border-border/60 p-2 text-xs"
+                                                            >
+                                                                <p className="font-medium">
+                                                                    {material?.codigo ??
+                                                                        'MAT'}{' '}
+                                                                    -{' '}
+                                                                    {material?.descricao ??
+                                                                        'Material'}
+                                                                </p>
+                                                                <p className="text-muted-foreground">
+                                                                    Qtd:{' '}
+                                                                    {item.quantidade ||
+                                                                        '0'}
+                                                                </p>
+                                                            </div>
+                                                        );
+                                                    })
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
                             </div>
                         </div>
                         <div className="mt-4 flex items-center justify-end gap-2 border-t pt-4">
@@ -1371,7 +1868,10 @@ export default function TransferenciasEstoquePage({
                 </DialogContent>
             </Dialog>
 
-            <Dialog open={modalDetalhesAberto} onOpenChange={setModalDetalhesAberto}>
+            <Dialog
+                open={modalDetalhesAberto}
+                onOpenChange={setModalDetalhesAberto}
+            >
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
                         <DialogTitle>
@@ -1380,7 +1880,8 @@ export default function TransferenciasEstoquePage({
                                 : 'Detalhes da transferência'}
                         </DialogTitle>
                         <DialogDescription>
-                            Visualize os dados completos da transferência selecionada.
+                            Visualize os dados completos da transferência
+                            selecionada.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -1388,78 +1889,128 @@ export default function TransferenciasEstoquePage({
                         <div className="space-y-4">
                             <div className="grid gap-3 md:grid-cols-2">
                                 <div className="rounded-lg border p-3 text-sm">
-                                    <p className="text-xs text-muted-foreground">Origem</p>
-                                    <p className="font-medium">{transferenciaSelecionada.estoque_origem}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Origem
+                                    </p>
+                                    <p className="font-medium">
+                                        {
+                                            transferenciaSelecionada.estoque_origem
+                                        }
+                                    </p>
                                 </div>
                                 <div className="rounded-lg border p-3 text-sm">
-                                    <p className="text-xs text-muted-foreground">Destino</p>
-                                    <p className="font-medium">{transferenciaSelecionada.estoque_destino}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Destino
+                                    </p>
+                                    <p className="font-medium">
+                                        {
+                                            transferenciaSelecionada.estoque_destino
+                                        }
+                                    </p>
                                 </div>
                                 <div className="rounded-lg border p-3 text-sm">
-                                    <p className="text-xs text-muted-foreground">Usuário</p>
-                                    <p className="font-medium">{transferenciaSelecionada.usuario}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Usuário
+                                    </p>
+                                    <p className="font-medium">
+                                        {transferenciaSelecionada.usuario}
+                                    </p>
                                 </div>
                                 <div className="rounded-lg border p-3 text-sm">
-                                    <p className="text-xs text-muted-foreground">Data</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Data
+                                    </p>
                                     <p className="font-medium">
                                         {transferenciaSelecionada.created_at
-                                            ? new Date(transferenciaSelecionada.created_at).toLocaleString('pt-BR')
+                                            ? new Date(
+                                                  transferenciaSelecionada.created_at,
+                                              ).toLocaleString('pt-BR')
                                             : '-'}
                                     </p>
                                 </div>
                             </div>
 
                             <div className="rounded-lg border p-3 text-sm">
-                                <p className="text-xs text-muted-foreground">Observação</p>
-                                <p className="mt-1 whitespace-pre-wrap wrap-break-word">
+                                <p className="text-xs text-muted-foreground">
+                                    Observação
+                                </p>
+                                <p className="mt-1 wrap-break-word whitespace-pre-wrap">
                                     {transferenciaSelecionada.observacao ?? '-'}
                                 </p>
                             </div>
 
                             <div className="space-y-2">
-                                <p className="text-sm font-medium">Itens da transferência</p>
+                                <p className="text-sm font-medium">
+                                    Itens da transferência
+                                </p>
                                 {transferenciaSelecionada.itens.length === 0 ? (
                                     <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                                        Nenhum item encontrado nesta transferência.
+                                        Nenhum item encontrado nesta
+                                        transferência.
                                     </div>
                                 ) : (
                                     <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
-                                        {transferenciaSelecionada.itens.map((item) => (
-                                            <div key={item.id} className="rounded-lg border p-3 text-sm">
-                                                <div className="flex flex-wrap items-center justify-between gap-2">
-                                                    <p className="font-medium">{item.material}</p>
-                                                    <span className="rounded-full border bg-muted px-2 py-0.5 text-xs">
-                                                        Qtd: {item.quantidade.toLocaleString('pt-BR', { maximumFractionDigits: 4 })}
-                                                    </span>
+                                        {transferenciaSelecionada.itens.map(
+                                            (item) => (
+                                                <div
+                                                    key={item.id}
+                                                    className="rounded-lg border p-3 text-sm"
+                                                >
+                                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                                        <p className="font-medium">
+                                                            {item.material}
+                                                        </p>
+                                                        <span className="rounded-full border bg-muted px-2 py-0.5 text-xs">
+                                                            Qtd:{' '}
+                                                            {item.quantidade.toLocaleString(
+                                                                'pt-BR',
+                                                                {
+                                                                    maximumFractionDigits: 4,
+                                                                },
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                    <div className="mt-2 grid gap-2 text-xs sm:grid-cols-2">
+                                                        <div className="rounded-md border bg-muted/40 px-2 py-1">
+                                                            <span className="text-muted-foreground">
+                                                                Série:
+                                                            </span>{' '}
+                                                            <span className="font-medium text-foreground">
+                                                                {item.numero_serie ||
+                                                                    '-'}
+                                                            </span>
+                                                        </div>
+                                                        <div className="rounded-md border bg-muted/40 px-2 py-1">
+                                                            <span className="text-muted-foreground">
+                                                                Empresa:
+                                                            </span>{' '}
+                                                            <span className="font-medium text-foreground">
+                                                                {item.empresa ||
+                                                                    '-'}
+                                                            </span>
+                                                        </div>
+                                                        <div className="rounded-md border bg-muted/40 px-2 py-1">
+                                                            <span className="text-muted-foreground">
+                                                                Local:
+                                                            </span>{' '}
+                                                            <span className="font-medium text-foreground">
+                                                                {item.local ||
+                                                                    '-'}
+                                                            </span>
+                                                        </div>
+                                                        <div className="rounded-md border bg-muted/40 px-2 py-1">
+                                                            <span className="text-muted-foreground">
+                                                                Condição:
+                                                            </span>{' '}
+                                                            <span className="font-medium text-foreground">
+                                                                {item.condicao ||
+                                                                    '-'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div className="mt-2 grid gap-2 text-xs sm:grid-cols-2">
-                                                    <div className="rounded-md border bg-muted/40 px-2 py-1">
-                                                        <span className="text-muted-foreground">Série:</span>{' '}
-                                                        <span className="font-medium text-foreground">
-                                                            {item.numero_serie || '-'}
-                                                        </span>
-                                                    </div>
-                                                    <div className="rounded-md border bg-muted/40 px-2 py-1">
-                                                        <span className="text-muted-foreground">Empresa:</span>{' '}
-                                                        <span className="font-medium text-foreground">
-                                                            {item.empresa || '-'}
-                                                        </span>
-                                                    </div>
-                                                    <div className="rounded-md border bg-muted/40 px-2 py-1">
-                                                        <span className="text-muted-foreground">Local:</span>{' '}
-                                                        <span className="font-medium text-foreground">
-                                                            {item.local || '-'}
-                                                        </span>
-                                                    </div>
-                                                    <div className="rounded-md border bg-muted/40 px-2 py-1">
-                                                        <span className="text-muted-foreground">Condição:</span>{' '}
-                                                        <span className="font-medium text-foreground">
-                                                            {item.condicao || '-'}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
+                                            ),
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -1470,4 +2021,3 @@ export default function TransferenciasEstoquePage({
         </>
     );
 }
-

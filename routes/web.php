@@ -92,4 +92,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('operacoes-estoque/transferencias', [TransferenciaEstoqueController::class, 'store'])->name('transferencias.store');
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
